@@ -79,6 +79,11 @@ function TypeStudiesLab() {
     return "Black 900";
   };
 
+  const handlePointer = (clientX: number, rect: DOMRect) => {
+    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    setWeight(Math.round(100 + p * 800));
+  };
+
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
       {/* Top Style Selector Pills */}
@@ -90,7 +95,7 @@ function TypeStudiesLab() {
               e.stopPropagation();
               setActiveStyle(s);
             }}
-            className={`rounded-full px-2.5 py-0.5 text-[0.6rem] font-mono uppercase tracking-wider transition-all ${
+            className={`rounded-full px-2.5 py-1 text-[0.6rem] font-mono uppercase tracking-wider transition-all ${
               activeStyle === s
                 ? "bg-[var(--accent)] text-white shadow-[0_0_12px_rgba(91,143,255,0.5)] font-semibold"
                 : "text-muted hover:text-white"
@@ -103,11 +108,14 @@ function TypeStudiesLab() {
 
       {/* Interactive Kinetic Letterform Canvas */}
       <div
-        className="my-auto flex w-full flex-col items-center justify-center cursor-ew-resize py-2"
+        className="my-auto flex w-full flex-col items-center justify-center cursor-ew-resize py-1 touch-none"
         onPointerMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const p = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-          setWeight(Math.round(100 + p * 800));
+          if (e.buttons > 0 || e.pointerType === "mouse") {
+            handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
+          }
+        }}
+        onPointerDown={(e) => {
+          handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
         }}
       >
         <motion.p
@@ -126,11 +134,22 @@ function TypeStudiesLab() {
         </motion.p>
       </div>
 
-      {/* Scrubber indicator */}
-      <div className="flex items-center gap-2 text-[0.6rem] font-mono text-muted/70">
-        <span className="text-[var(--accent)] font-semibold">{getWeightLabel(weight)}</span>
-        <span>·</span>
-        <span className="text-[0.55rem] tracking-wider uppercase">Scrub width to morph</span>
+      {/* Touch-Friendly Slider Track & Metrics */}
+      <div className="flex w-full max-w-[220px] flex-col items-center gap-1.5">
+        <input
+          type="range"
+          min={100}
+          max={900}
+          step={10}
+          value={weight}
+          onChange={(e) => setWeight(Number(e.target.value))}
+          className="w-full accent-[var(--accent)] cursor-pointer h-1.5 bg-white/10 rounded-full appearance-none"
+        />
+        <div className="flex items-center gap-2 text-[0.6rem] font-mono text-muted/70">
+          <span className="text-[var(--accent)] font-semibold">{getWeightLabel(weight)}</span>
+          <span>·</span>
+          <span className="text-[0.55rem] tracking-wider uppercase">Slide or drag to morph</span>
+        </div>
       </div>
     </div>
   );
@@ -141,26 +160,37 @@ function WaveFrequencyLab() {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const baseHeights = [20, 38, 60, 32, 75, 48, 92, 65, 88, 52, 78, 36, 62, 28, 45, 22];
 
+  const handlePointer = (clientX: number, rect: DOMRect) => {
+    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const idx = Math.floor(p * baseHeights.length);
+    setHoverIndex(Math.max(0, Math.min(baseHeights.length - 1, idx)));
+  };
+
   return (
     <div
-      className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none"
+      className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none touch-none"
       onPointerLeave={() => setHoverIndex(null)}
+      onPointerMove={(e) => {
+        handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
+      }}
+      onPointerDown={(e) => {
+        handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
+      }}
     >
       {/* Status hint */}
       <span className="text-[0.6rem] font-mono text-muted/70 tracking-wider uppercase">
-        Hover to modulate acoustic spectrum
+        Sweep finger or mouse across spectrum
       </span>
 
       {/* Frequency Equalizer Bars */}
-      <div className="my-auto flex items-center justify-center gap-1.5 h-24 w-full px-2">
+      <div className="my-auto flex items-center justify-center gap-1.5 h-24 w-full px-2 cursor-pointer">
         {baseHeights.map((h, i) => {
           const isNear = hoverIndex !== null && Math.abs(hoverIndex - i) <= 2;
           const boost = isNear ? (3 - Math.abs(hoverIndex! - i)) * 18 : 0;
           return (
             <motion.div
               key={i}
-              onPointerEnter={() => setHoverIndex(i)}
-              className="flex-1 max-w-[8px] rounded-full cursor-pointer"
+              className="flex-1 max-w-[8px] rounded-full"
               animate={{
                 height: `${Math.min(100, h + boost)}%`,
                 backgroundColor: isNear ? "#5b8fff" : "rgba(232, 230, 225, 0.2)",
@@ -209,7 +239,7 @@ function SpringPhysicsLab() {
   });
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
+    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none touch-none">
       {/* Instruction */}
       <span className="text-[0.6rem] font-mono text-muted/70 tracking-wider uppercase">
         {isDragging ? "Release to fling" : "Grab & pull the spring puck"}
@@ -239,7 +269,7 @@ function SpringPhysicsLab() {
 
         {/* Real Physics Puck */}
         <motion.div
-          style={{ x, y }}
+          style={{ x, y, touchAction: "none" }}
           drag
           dragConstraints={{ left: -110, right: 110, top: -50, bottom: 50 }}
           dragElastic={0.45}
@@ -248,7 +278,7 @@ function SpringPhysicsLab() {
           onDragEnd={() => setIsDragging(false)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="relative z-20 size-12 rounded-full bg-gradient-to-br from-[#1c2c63] to-[#0c132b] border border-[var(--accent)]/80 shadow-[0_0_24px_rgba(91,143,255,0.45)] flex flex-col items-center justify-center cursor-grab active:cursor-grabbing backdrop-blur-md"
+          className="relative z-20 size-12 rounded-full bg-gradient-to-br from-[#1c2c63] to-[#0c132b] border border-[var(--accent)]/80 shadow-[0_0_24px_rgba(91,143,255,0.45)] flex flex-col items-center justify-center cursor-grab active:cursor-grabbing backdrop-blur-md touch-none"
         >
           <span className="size-1.5 rounded-full bg-white drop-shadow-[0_0_4px_#5b8fff]" />
           <span className="mt-0.5 text-[0.45rem] font-mono text-[var(--accent)] font-semibold tracking-tighter">
@@ -295,9 +325,9 @@ function DesignTokensLab() {
       </motion.div>
 
       {/* Switchboard Toggles */}
-      <div className="flex flex-wrap gap-1.5 items-center justify-center">
+      <div className="flex flex-wrap gap-2 items-center justify-center">
         {/* Radius controls */}
-        <div className="flex bg-white/5 p-0.5 rounded-md border border-white/10 text-[0.55rem] font-mono">
+        <div className="flex bg-white/5 p-0.5 rounded-md border border-white/10 text-[0.6rem] font-mono">
           {(["sm", "md", "full"] as const).map((r) => (
             <button
               key={r}
@@ -305,7 +335,7 @@ function DesignTokensLab() {
                 e.stopPropagation();
                 setRadius(r);
               }}
-              className={`px-1.5 py-0.5 rounded uppercase font-semibold ${
+              className={`px-2 py-1 rounded uppercase font-semibold ${
                 radius === r ? "bg-[var(--accent)] text-white" : "text-muted hover:text-white"
               }`}
             >
@@ -320,7 +350,7 @@ function DesignTokensLab() {
             e.stopPropagation();
             setGlow(!glow);
           }}
-          className={`px-2 py-1 rounded-md border text-[0.55rem] font-mono font-semibold transition-all ${
+          className={`px-2.5 py-1.5 rounded-md border text-[0.6rem] font-mono font-semibold transition-all ${
             glow
               ? "border-[var(--accent)] bg-[var(--accent)]/20 text-white shadow-[0_0_8px_rgba(91,143,255,0.3)]"
               : "border-white/10 bg-white/5 text-muted"
@@ -335,7 +365,7 @@ function DesignTokensLab() {
             e.stopPropagation();
             setGlass(!glass);
           }}
-          className={`px-2 py-1 rounded-md border text-[0.55rem] font-mono font-semibold transition-all ${
+          className={`px-2.5 py-1.5 rounded-md border text-[0.6rem] font-mono font-semibold transition-all ${
             glass
               ? "border-white/30 bg-white/15 text-white"
               : "border-white/10 bg-white/5 text-muted"
@@ -365,16 +395,16 @@ function GestureSliderLab() {
 
       {/* Interactive Drag Track */}
       <div className="my-auto flex flex-col items-center justify-center w-full max-w-[240px] gap-2">
-        <div className="relative h-11 w-full rounded-full bg-white/5 border border-white/15 p-1 flex items-center overflow-hidden backdrop-blur-md">
+        <div className="relative h-11 w-full rounded-full bg-white/5 border border-white/15 p-1 flex items-center overflow-hidden backdrop-blur-md touch-none">
           {/* Progress fill */}
           <motion.div
-            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[var(--accent)]/30 to-[var(--accent)]/60 rounded-full"
+            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[var(--accent)]/30 to-[var(--accent)]/60 rounded-full pointer-events-none"
             style={{ width: `${Math.max(12, dragProgress * 100)}%` }}
           />
 
           {/* Hint text */}
           <span
-            className={`w-full text-center text-[0.65rem] font-mono tracking-wider transition-opacity duration-300 ${
+            className={`w-full text-center text-[0.65rem] font-mono tracking-wider transition-opacity duration-300 pointer-events-none ${
               complete ? "text-[var(--accent)] font-semibold" : "text-muted/60"
             }`}
           >
@@ -386,6 +416,7 @@ function GestureSliderLab() {
             drag="x"
             dragConstraints={{ left: 0, right: 180 }}
             dragElastic={0.1}
+            style={{ touchAction: "none" }}
             onDrag={(_, info) => {
               const p = Math.min(1, Math.max(0, info.offset.x / 170));
               setDragProgress(p);
@@ -398,7 +429,7 @@ function GestureSliderLab() {
               }
             }}
             animate={complete ? { x: 180 } : undefined}
-            className="absolute left-1 size-9 rounded-full bg-white text-black font-bold flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing z-20 text-xs"
+            className="absolute left-1 size-9 rounded-full bg-white text-black font-bold flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing z-20 text-xs touch-none"
           >
             {complete ? "✓" : "➔"}
           </motion.div>
@@ -411,7 +442,7 @@ function GestureSliderLab() {
               setComplete(false);
               setDragProgress(0);
             }}
-            className="text-[0.55rem] font-mono text-muted hover:text-white underline uppercase tracking-wider"
+            className="text-[0.55rem] font-mono text-muted hover:text-white underline uppercase tracking-wider py-1"
           >
             Reset Gesture
           </button>
