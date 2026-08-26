@@ -1,26 +1,173 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0e0e0c;
+  --bg-soft: #13131a;
+  --ink: #e8e6e1;
+  --muted: rgba(232, 230, 225, 0.55);
+  --faint: rgba(232, 230, 225, 0.28);
+  --hairline: rgba(232, 230, 225, 0.12);
+  --accent: #5b8fff;
+  --accent-glow: rgba(91, 143, 255, 0.15);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  background: var(--bg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #1e1e2a;
+  border-radius: 8px;
+}
+
+.display {
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-weight: 350;
+  letter-spacing: -0.01em;
+}
+
+.display-black {
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+.ghost-numeral {
+  position: absolute;
+  top: -3rem;
+  right: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 250;
+  font-size: clamp(8rem, 16vw, 13rem);
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.045;
+  pointer-events: none;
+  user-select: none;
+}
+
+.edge-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.label-caps {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.hairline-t {
+  border-top: 1px solid var(--hairline);
+}
+
+.hairline-b {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.text-faint {
+  color: var(--faint);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+/* ── Marquee ── */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-x-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes floatCue {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 0.45;
+  }
+}
+
+.marquee-track {
+  animation: marquee-x 30s linear infinite;
+}
+
+.marquee-track-reverse {
+  animation: marquee-x-reverse 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .marquee-track-reverse {
+    animation: none;
+  }
+}
+
+/* ── Cursor ── */
+@media (pointer: fine) {
+  .cursor-none-fine,
+  .cursor-none-fine a,
+  .cursor-none-fine button {
+    cursor: none;
+  }
+}
+
+/* ── Card hover glow ── */
+.card-glow {
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.card-glow:hover {
+  box-shadow: 0 0 40px var(--accent-glow), 0 0 0 1px var(--accent);
+  border-color: var(--accent) !important;
 }
