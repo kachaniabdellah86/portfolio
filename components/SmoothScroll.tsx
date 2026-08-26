@@ -6,8 +6,20 @@ import { scrollBus, setLenis } from "./lenis-bridge";
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
+    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+
+    // On touch devices (iPhone, iPad, Android), rely on native iOS momentum scrolling
+    if (isReduced || isTouch) {
+      const onNativeScroll = () => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        const current = window.scrollY;
+        scrollBus.y = current;
+        scrollBus.progress = total > 0 ? current / total : 0;
+      };
+      window.addEventListener("scroll", onNativeScroll, { passive: true });
+      onNativeScroll();
+      return () => window.removeEventListener("scroll", onNativeScroll);
     }
 
     const lenis = new Lenis({ lerp: 0.09 });

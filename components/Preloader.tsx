@@ -31,7 +31,10 @@ export default function Preloader() {
       if (p < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        holdTimer = setTimeout(() => setDone(true), PRELOAD_HOLD_MS);
+        holdTimer = setTimeout(() => {
+          setDone(true);
+          document.body.style.overflow = "";
+        }, PRELOAD_HOLD_MS);
       }
     };
     raf = requestAnimationFrame(tick);
@@ -42,6 +45,12 @@ export default function Preloader() {
       document.body.style.overflow = "";
     };
   }, [reduce]);
+
+  useEffect(() => {
+    if (done) {
+      document.body.style.overflow = "";
+    }
+  }, [done]);
 
   return (
     <AnimatePresence>
