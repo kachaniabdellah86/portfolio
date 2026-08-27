@@ -70,12 +70,13 @@ const PROJECTS: Project[] = [
     index: "02",
     title: "Kachanios",
     subtitle:
-      "Designing the interface for a self-evolving AI agent — cognition, memory and control.",
-    tags: ["Product UX", "AI Interfaces", "Concept"],
+      "Designing the interface for a self-evolving AI agent — neural graph architecture, AST inspection and autonomous cognition.",
+    tags: ["Product UX", "AI Interfaces", "Desktop OS"],
     year: "2026",
-    tone: "from-[#0e1428] via-[#111830] to-[#080a14]",
-    cursorBg: "linear-gradient(135deg, #0e1428 0%, #232c5c 65%, #7c6fff 140%)",
+    tone: "from-[#0a1128] via-[#0e1738] to-[#060b18]",
+    cursorBg: "linear-gradient(135deg, #0a1128 0%, #1c2b5e 65%, #5b8fff 140%)",
     live: false,
+    image: "/media/kachanios-preview.webp",
   },
   {
     index: "03",
@@ -87,355 +88,17 @@ const PROJECTS: Project[] = [
     tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
     cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
     live: false,
+    image: "/media/aurapay-preview.webp",
   },
 ];
 
-/* ── Interactive Kachani.OS AI Cockpit Component ── */
-function KachaniosCockpit() {
-  const [activeTab, setActiveTab] = useState<"autonomous" | "neural" | "evolve">("autonomous");
-  const [activeNode, setActiveNode] = useState<string | null>(null);
-
-  const logs = {
-    autonomous: [
-      { tag: "COGNITION", text: "Goal parsed: Autonomous pipeline iteration #14", color: "text-[var(--accent)]" },
-      { tag: "DELEGATE", text: "Spawned subagent @code-architect with sandboxed AST context", color: "text-emerald-400" },
-      { tag: "MEMORY", text: "Cosine similarity: 0.942 · 1,420 vault vectors referenced", color: "text-indigo-300" },
-      { tag: "VERIFIER", text: "Convergence loop passed: 0 defects · 120 FPS latency", color: "text-amber-300" },
-    ],
-    neural: [
-      { tag: "CLUSTER", text: "Global memory graph active: 24 shared subagent vaults", color: "text-indigo-400" },
-      { tag: "EMBED", text: "Dimension: 1536-dim · Dynamic context window 24.8k / 200k", color: "text-[var(--accent)]" },
-      { tag: "RETRIEVE", text: "Semantic query: 'anti-lag hardware layer composition'", color: "text-emerald-400" },
-      { tag: "HANDOFF", text: "Direct memory handoff to synthesis worker complete", color: "text-cyan-300" },
-    ],
-    evolve: [
-      { tag: "INSTINCT", text: "Distilled pattern: Zero-DOM obstruction cursor rules", color: "text-amber-400" },
-      { tag: "SCORING", text: "Quality rubric: 5/5 Accuracy · 5/5 Actionability", color: "text-emerald-400" },
-      { tag: "MUTATION", text: "Promoted temporary tactic to durable project rule", color: "text-[var(--accent)]" },
-      { tag: "CHECKPOINT", text: "Model weights context snapshot secured · Hash #a8f09c", color: "text-purple-300" },
-    ],
-  };
-
-  const nodes = [
-    { id: "core", label: "Kernel", x: "50%", y: "45%", ring: true },
-    { id: "planner", label: "Planner", x: "20%", y: "24%" },
-    { id: "memory", label: "Vault", x: "80%", y: "24%" },
-    { id: "tools", label: "Harness", x: "20%", y: "76%" },
-    { id: "eval", label: "Evals", x: "80%", y: "76%" },
-  ];
-
-  return (
-    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden p-4 sm:p-5 font-mono select-none pointer-events-auto">
-      {/* ── 1. Top HUD Ribbon ── */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-2.5 z-10">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-[var(--accent)] shadow-[0_0_8px_#5b8fff] animate-pulse" />
-          <span className="text-[0.65rem] sm:text-xs font-bold tracking-wider text-white">
-            KACHANI.OS <span className="text-white/40 font-normal hidden sm:inline">v2.4 // KERNEL</span>
-          </span>
-        </div>
-
-        {/* Mode Selector Tabs */}
-        <div className="flex gap-1 rounded-full border border-white/10 bg-black/50 p-0.5 backdrop-blur-md">
-          {(["autonomous", "neural", "evolve"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveTab(tab);
-              }}
-              className={`rounded-full px-2 sm:px-2.5 py-0.5 text-[0.55rem] uppercase tracking-wider transition-all cursor-pointer ${
-                activeTab === tab
-                  ? "bg-[var(--accent)] text-white shadow-[0_0_12px_rgba(91,143,255,0.5)] font-semibold"
-                  : "text-muted hover:text-white"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 2. Middle Cockpit Arena (Two-column HUD) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 my-auto items-center py-2 z-10">
-        {/* Left: Terminal Telemetry Stream */}
-        <div className="md:col-span-7 flex flex-col justify-center space-y-1.5 bg-black/40 rounded-xl border border-white/10 p-3 backdrop-blur-md">
-          <div className="flex items-center justify-between text-[0.55rem] text-muted/60 border-b border-white/5 pb-1">
-            <span>LIVE AGENT TELEMETRY</span>
-            <span className="text-emerald-400/90 font-semibold">120 FPS · 8ms</span>
-          </div>
-
-          <div className="space-y-1">
-            {logs[activeTab].map((log, i) => (
-              <motion.div
-                key={`${activeTab}-${i}`}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.25, delay: i * 0.05 }}
-                className="flex items-start gap-1.5 text-[0.6rem] leading-tight"
-              >
-                <span className={`font-semibold ${log.color}`}>[{log.tag}]</span>
-                <span className="text-white/80 line-clamp-1">{log.text}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right: Neural Node Orbitals */}
-        <div className="hidden md:flex md:col-span-5 relative h-28 w-full items-center justify-center">
-          {/* Laser Vectors SVG */}
-          <svg className="absolute inset-0 h-full w-full overflow-visible pointer-events-none opacity-40">
-            <line x1="50%" y1="45%" x2="20%" y2="24%" stroke="#5b8fff" strokeWidth="1" strokeDasharray="2 2" />
-            <line x1="50%" y1="45%" x2="80%" y2="24%" stroke="#5b8fff" strokeWidth="1" strokeDasharray="2 2" />
-            <line x1="50%" y1="45%" x2="20%" y2="76%" stroke="#5b8fff" strokeWidth="1" strokeDasharray="2 2" />
-            <line x1="50%" y1="45%" x2="80%" y2="76%" stroke="#5b8fff" strokeWidth="1" strokeDasharray="2 2" />
-          </svg>
-
-          {nodes.map((node) => {
-            const isHovered = activeNode === node.id;
-            return (
-              <motion.div
-                key={node.id}
-                onMouseEnter={() => setActiveNode(node.id)}
-                onMouseLeave={() => setActiveNode(null)}
-                style={{ left: node.x, top: node.y }}
-                whileHover={{ scale: 1.15 }}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-lg border px-2 py-0.5 backdrop-blur-md transition-all ${
-                  node.ring
-                    ? "bg-[var(--accent)]/20 border-[var(--accent)] text-white shadow-[0_0_15px_rgba(91,143,255,0.4)]"
-                    : isHovered
-                    ? "bg-white/20 border-white text-white shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                    : "bg-white/5 border-white/10 text-white/70"
-                }`}
-              >
-                <div className="flex items-center gap-1">
-                  <span
-                    className={`size-1 rounded-full ${
-                      node.ring ? "bg-[var(--accent)]" : "bg-white/50"
-                    }`}
-                  />
-                  <span className="text-[0.55rem] font-bold">{node.label}</span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── 3. Bottom Metrics Footer ── */}
-      <div className="flex items-center justify-between border-t border-white/10 pt-2 text-[0.55rem] text-muted z-10">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <span className="text-white/40">STATUS:</span>
-            <span className="text-emerald-400 font-semibold">AUTONOMOUS</span>
-          </span>
-          <span>·</span>
-          <span>SUBAGENTS: 4 ACTIVE</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-white/40">SELF-EVAL:</span>
-          <span className="text-[var(--accent)] font-semibold">99.8% PRECISION</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Interactive Aura Pay / FinTech Mobile OS (Project 03) ── */
-function AuraMobileCockpit() {
-  const [currency, setCurrency] = useState<"USD" | "EUR" | "ETH">("USD");
-  const [isFrozen, setIsFrozen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"activity" | "yield" | "cards">("activity");
-
-  const balances = {
-    USD: "$142,850.00",
-    EUR: "€131,420.00",
-    ETH: "42.85 ETH",
-  };
-
-  const transactions = {
-    activity: [
-      { merchant: "Apple Vision Pro Studio", category: "Spatial Computing", amount: "-$3,499.00", status: "Instant" },
-      { merchant: "Stripe Payout · AI Engine", category: "Consulting", amount: "+$18,500.00", status: "Cleared" },
-      { merchant: "Supabase Enterprise", category: "Infrastructure", amount: "-$250.00", status: "Settled" },
-    ],
-    yield: [
-      { merchant: "USDC Liquid Treasury", category: "5.2% APY Auto-Compound", amount: "+$618.40/mo", status: "Active" },
-      { merchant: "Staking Pool Validator #8", category: "Ethereum PoS", amount: "+0.18 ETH/mo", status: "Active" },
-      { merchant: "High-Yield Overnight Repo", category: "Sovereign Debt", amount: "+$340.10/mo", status: "Active" },
-    ],
-    cards: [
-      { merchant: "Titanium Virtual Card", category: "Apple Pay · Active", amount: "Limit $50k", status: "Verified" },
-      { merchant: "Physical Metal Debit", category: "Global Zero-FX ATM", amount: "Limit $100k", status: "Verified" },
-      { merchant: "Single-Use Stealth Burner", category: "Ephemeral Crypto Card", amount: "Auto-destruct", status: "Ready" },
-    ],
-  };
-
-  return (
-    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden p-4 sm:p-5 font-mono select-none pointer-events-auto">
-      {/* ── 1. Top HUD Ribbon ── */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-2.5 z-10">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-violet-400 shadow-[0_0_8px_#a855f7] animate-pulse" />
-          <span className="text-[0.65rem] sm:text-xs font-bold tracking-wider text-white">
-            AURA <span className="text-white/40 font-normal hidden sm:inline">v3.1 // SPATIAL FINTECH</span>
-          </span>
-        </div>
-
-        {/* Currency Switcher Tabs */}
-        <div className="flex gap-1 rounded-full border border-white/10 bg-black/50 p-0.5 backdrop-blur-md">
-          {(["USD", "EUR", "ETH"] as const).map((curr) => (
-            <button
-              key={curr}
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrency(curr);
-              }}
-              className={`rounded-full px-2 sm:px-2.5 py-0.5 text-[0.55rem] uppercase tracking-wider transition-all cursor-pointer ${
-                currency === curr
-                  ? "bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.6)] font-semibold"
-                  : "text-muted hover:text-white"
-              }`}
-            >
-              {curr}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── 2. Middle Stage: Interactive Titanium Card + Live Activity ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 my-auto items-center py-2 z-10">
-        {/* Left: Interactive Titanium Card */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className={`md:col-span-5 relative flex flex-col justify-between p-3.5 rounded-2xl border transition-all duration-300 shadow-xl overflow-hidden ${
-            isFrozen
-              ? "bg-[#0b1329]/80 border-cyan-500/40 text-cyan-200"
-              : "bg-gradient-to-br from-[#231545] via-[#160d2e] to-[#0d071a] border-violet-500/40 text-white shadow-[0_0_25px_rgba(168,85,247,0.15)]"
-          }`}
-        >
-          {/* Card Holographic Sheen */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
-
-          <div className="flex items-center justify-between z-10">
-            <span className="text-[0.6rem] uppercase tracking-widest font-bold text-violet-300">
-              {isFrozen ? "❄️ CARD FROZEN" : "✦ TITANIUM"}
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFrozen(!isFrozen);
-              }}
-              className="text-[0.5rem] px-2 py-0.5 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 transition-all text-white/80 cursor-pointer"
-            >
-              {isFrozen ? "UNFREEZE" : "FREEZE"}
-            </button>
-          </div>
-
-          <div className="my-2 z-10">
-            <span className="text-[0.55rem] text-white/50 uppercase tracking-wider">Total Liquidity</span>
-            <motion.p
-              key={currency}
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-lg sm:text-xl font-bold tracking-tight text-white"
-            >
-              {balances[currency]}
-            </motion.p>
-          </div>
-
-          <div className="flex items-center justify-between text-[0.55rem] text-white/60 z-10">
-            <span>•••• 8824</span>
-            <span className="font-semibold text-violet-400">EXP 09/29</span>
-          </div>
-        </motion.div>
-
-        {/* Right: Live Stream & Tab Switcher */}
-        <div className="md:col-span-7 flex flex-col justify-center space-y-1.5 bg-black/40 rounded-xl border border-white/10 p-3 backdrop-blur-md">
-          <div className="flex items-center justify-between border-b border-white/5 pb-1">
-            <div className="flex gap-2 text-[0.55rem]">
-              {(["activity", "yield", "cards"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveTab(tab);
-                  }}
-                  className={`uppercase tracking-wider transition-colors cursor-pointer ${
-                    activeTab === tab ? "text-violet-400 font-bold underline underline-offset-4" : "text-muted/60 hover:text-white"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <span className="text-[0.5rem] text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="size-1 rounded-full bg-emerald-400 animate-ping" />
-              SETTLED
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            {transactions[activeTab].map((tx, i) => (
-              <motion.div
-                key={`${activeTab}-${i}`}
-                initial={{ opacity: 0, x: 6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: i * 0.04 }}
-                className="flex items-center justify-between text-[0.58rem] py-0.5"
-              >
-                <div>
-                  <p className="text-white/90 font-medium line-clamp-1">{tx.merchant}</p>
-                  <p className="text-[0.5rem] text-muted/60">{tx.category}</p>
-                </div>
-                <div className="text-right">
-                  <p className={`font-bold ${tx.amount.startsWith("+") ? "text-emerald-400" : "text-white/90"}`}>
-                    {tx.amount}
-                  </p>
-                  <p className="text-[0.5rem] text-violet-400">{tx.status}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── 3. Bottom Metrics Footer ── */}
-      <div className="flex items-center justify-between border-t border-white/10 pt-2 text-[0.55rem] text-muted z-10">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <span className="text-white/40">SECURITY:</span>
-            <span className="text-emerald-400 font-semibold">FaceID (0.08s)</span>
-          </span>
-          <span>·</span>
-          <span>ZERO-KNOWLEDGE ENCRYPTED</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-white/40">SETTLEMENT:</span>
-          <span className="text-violet-400 font-semibold">4ms LATENCY</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Gradient preview panel ── */
+/* ── High-res 2K Visual Preview Panel ── */
 function ProjectPreview({ project }: { project: Project }) {
   return (
     <div
-      className={`relative h-[240px] sm:h-[300px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${project.tone}`}
+      className={`relative h-[240px] sm:h-[320px] md:h-[360px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${project.tone}`}
     >
-      {/* Interactive Kachani.OS AI Cockpit (Card 02) */}
-      {project.index === "02" && <KachaniosCockpit />}
-
-      {/* Interactive Aura Pay Spatial FinTech (Card 03) */}
-      {project.index === "03" && <AuraMobileCockpit />}
-
-      {/* High-res Crisp Visual Preview (Card 01) */}
+      {/* High-res Crisp Visual Preview */}
       {project.image && (
         <div className="absolute inset-0 overflow-hidden">
           <Image
@@ -444,11 +107,11 @@ function ProjectPreview({ project }: { project: Project }) {
             fill
             quality={95}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1400px"
-            className="object-cover object-top opacity-90 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
+            className="object-cover object-top opacity-95 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
             priority={project.index === "01"}
           />
           {/* Subtle bottom vignette for depth without blurring detail */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080b18]/60 via-transparent to-transparent opacity-50 transition-opacity duration-700 group-hover:opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080b18]/60 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-10" />
         </div>
       )}
 
@@ -480,21 +143,16 @@ function ProjectPreview({ project }: { project: Project }) {
         }}
       />
 
-      {/* Index number watermark for cards without live UI */}
-      {!project.image && project.index !== "02" && project.index !== "03" && (
-        <span
-          className="pointer-events-none absolute bottom-4 right-6 text-[5rem] font-bold leading-none opacity-[0.06]"
-          style={{ fontFamily: "var(--font-sans)" }}
-        >
-          {project.index}
-        </span>
-      )}
-
-      {/* Live badge */}
-      {project.live && (
+      {/* Live badge or Concept Pill */}
+      {project.live ? (
         <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-[var(--accent)] bg-[rgba(91,143,255,0.18)] px-3 py-1 backdrop-blur-md">
           <span className="size-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
-          <span className="label-caps accent">Live</span>
+          <span className="label-caps accent">Live ↗</span>
+        </div>
+      ) : (
+        <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-white/15 bg-black/40 px-3 py-1 backdrop-blur-md">
+          <span className="size-1.5 rounded-full bg-white/60" />
+          <span className="label-caps text-white/80">Concept</span>
         </div>
       )}
     </div>
