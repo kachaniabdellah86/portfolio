@@ -130,6 +130,23 @@ function KachaniosLiveEngine() {
     },
   };
 
+  const nodes = [
+    { id: "kernel", label: "Kernel", x: 50, y: 50, color: "#5b8fff" },
+    { id: "planner", label: "Planner", x: 18, y: 22, color: "#818cf8" },
+    { id: "vault", label: "Vault", x: 82, y: 22, color: "#22d3ee" },
+    { id: "harness", label: "Harness", x: 18, y: 78, color: "#c084fc" },
+    { id: "judge", label: "Judge", x: 82, y: 78, color: "#34d399" },
+  ];
+
+  const edges = [
+    { from: "planner", to: "kernel" },
+    { from: "vault", to: "kernel" },
+    { from: "kernel", to: "harness" },
+    { from: "kernel", to: "judge" },
+    { from: "planner", to: "vault" },
+    { from: "harness", to: "judge" },
+  ];
+
   const nodeDetails: Record<string, { role: string; latency: string; status: string; desc: string }> = {
     kernel: { role: "Orchestration Kernel", latency: "1.2ms", status: "ONLINE", desc: "Autonomous loop controller & task graph dispatcher" },
     planner: { role: "Planner & Decomposer", latency: "3.4ms", status: "ACTIVE", desc: "Decomposes goals into verifiable machine-decidable steps" },
@@ -142,12 +159,12 @@ function KachaniosLiveEngine() {
     setActiveTask(t);
     setIsExecuting(true);
     setStreamIndex(1);
-    setTimeout(() => setStreamIndex(2), 200);
-    setTimeout(() => setStreamIndex(3), 450);
+    setTimeout(() => setStreamIndex(2), 180);
+    setTimeout(() => setStreamIndex(3), 420);
     setTimeout(() => {
       setStreamIndex(4);
       setIsExecuting(false);
-    }, 750);
+    }, 720);
   };
 
   return (
@@ -196,10 +213,10 @@ function KachaniosLiveEngine() {
         ))}
       </div>
 
-      {/* ── 3. Main Split Stage: Telemetry Stream + Inspectable DAG Graph ── */}
+      {/* ── 3. Main Split Stage: Telemetry Stream + Real 2D Laser Node Graph ── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 my-auto items-center py-2 z-10">
         {/* Left: Real-time Terminal Stream */}
-        <div className="md:col-span-7 flex flex-col justify-between bg-black/60 rounded-xl border border-white/10 p-3 backdrop-blur-md min-h-[140px]">
+        <div className="md:col-span-7 flex flex-col justify-between bg-black/60 rounded-xl border border-white/10 p-3 backdrop-blur-md min-h-[145px]">
           <div className="flex items-center justify-between text-[0.55rem] text-muted/60 border-b border-white/5 pb-1">
             <span className="flex items-center gap-1.5">
               <span className="text-[var(--accent)] font-bold">EXECUTION LOG:</span>
@@ -232,43 +249,69 @@ function KachaniosLiveEngine() {
           </div>
         </div>
 
-        {/* Right: Interactive Inspectable DAG Node Graph */}
-        <div className="md:col-span-5 relative flex flex-col justify-between bg-[#0b1022]/80 rounded-xl border border-white/10 p-2.5 backdrop-blur-md min-h-[140px]">
-          <div className="flex items-center justify-between text-[0.52rem] text-white/50 border-b border-white/5 pb-1">
-            <span>NEURAL GRAPH (CLICK NODE)</span>
+        {/* Right: Interactive 2D Neural DAG Canvas with Laser Connections */}
+        <div className="md:col-span-5 relative flex flex-col justify-between bg-[#0b1022]/80 rounded-xl border border-white/10 p-2.5 backdrop-blur-md min-h-[145px]">
+          <div className="flex items-center justify-between text-[0.52rem] text-white/50 border-b border-white/5 pb-1 z-10">
+            <span>NEURAL TOPOLOGY (CLICK NODE)</span>
             <span className="text-[var(--accent)]">{nodeDetails[selectedNode].latency}</span>
           </div>
 
-          {/* Laser Vectors SVG + Interactive Node Buttons */}
-          <div className="relative my-2 flex items-center justify-around">
-            {[
-              { id: "kernel", label: "Kernel", color: "bg-[var(--accent)]" },
-              { id: "planner", label: "Planner", color: "bg-indigo-400" },
-              { id: "vault", label: "Vault", color: "bg-cyan-400" },
-              { id: "harness", label: "Harness", color: "bg-purple-400" },
-              { id: "judge", label: "Judge", color: "bg-emerald-400" },
-            ].map((n) => (
-              <button
-                key={n.id}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedNode(n.id);
-                }}
-                className={`relative flex flex-col items-center gap-1 p-1 rounded-lg transition-all cursor-pointer ${
-                  selectedNode === n.id
-                    ? "scale-110 bg-white/15 border border-white/40 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                    : "opacity-60 hover:opacity-100"
-                }`}
-              >
-                <span className={`size-2 rounded-full ${n.color} ${selectedNode === n.id ? "animate-ping" : ""}`} />
-                <span className="text-[0.5rem] font-bold text-white">{n.label}</span>
-              </button>
-            ))}
+          {/* 2D Laser Graph Canvas */}
+          <div className="relative h-20 w-full my-auto flex items-center justify-center">
+            {/* SVG Laser Topology Edges */}
+            <svg className="absolute inset-0 h-full w-full overflow-visible pointer-events-none">
+              {edges.map((edge, idx) => {
+                const src = nodes.find((n) => n.id === edge.from)!;
+                const dst = nodes.find((n) => n.id === edge.to)!;
+                const isIncident = selectedNode === edge.from || selectedNode === edge.to;
+                return (
+                  <line
+                    key={idx}
+                    x1={`${src.x}%`}
+                    y1={`${src.y}%`}
+                    x2={`${dst.x}%`}
+                    y2={`${dst.y}%`}
+                    stroke={isIncident ? "#5b8fff" : "rgba(255,255,255,0.18)"}
+                    strokeWidth={isIncident ? "2" : "1"}
+                    strokeDasharray={isExecuting ? "3 3" : undefined}
+                    className={isExecuting ? "animate-pulse" : ""}
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Interactive 2D Floating Nodes */}
+            {nodes.map((node) => {
+              const isSelected = selectedNode === node.id;
+              return (
+                <motion.button
+                  key={node.id}
+                  type="button"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedNode(node.id);
+                  }}
+                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full border transition-all cursor-pointer z-10 backdrop-blur-md ${
+                    isSelected
+                      ? "bg-[var(--accent)]/30 border-[var(--accent)] text-white shadow-[0_0_15px_rgba(91,143,255,0.6)] scale-110"
+                      : "bg-black/70 border-white/15 text-white/70 hover:border-white/40 hover:text-white"
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${isSelected ? "animate-ping" : ""}`}
+                    style={{ backgroundColor: node.color }}
+                  />
+                  <span className="text-[0.5rem] font-bold">{node.label}</span>
+                </motion.button>
+              );
+            })}
           </div>
 
           {/* Node Inspector Bottom Drawer */}
-          <div className="rounded bg-black/40 border border-white/5 p-1.5 text-[0.5rem]">
+          <div className="rounded bg-black/50 border border-white/5 p-1.5 text-[0.5rem] z-10">
             <p className="text-white/90 font-semibold">{nodeDetails[selectedNode].role}</p>
             <p className="text-muted/70 text-[0.48rem] line-clamp-1 mt-0.5">{nodeDetails[selectedNode].desc}</p>
           </div>
@@ -298,13 +341,34 @@ function AuraPayLiveSimulator() {
   const [faceIdState, setFaceIdState] = useState<"idle" | "scanning" | "verified">("idle");
   const [activeDayIndex, setActiveDayIndex] = useState(2); // Wednesday
 
-  const balances = {
-    USD: { total: "$142,850.75", daySpending: ["$320", "$450", "$1,245", "$680", "$890", "$210", "$140"] },
-    EUR: { total: "€131,422.60", daySpending: ["€295", "€410", "€1,145", "€620", "€820", "€190", "€130"] },
-    ETH: { total: "42.85 ETH", daySpending: ["0.09 ETH", "0.14 ETH", "0.38 ETH", "0.21 ETH", "0.28 ETH", "0.06 ETH", "0.04 ETH"] },
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const xCoords = [20, 65, 110, 155, 200, 245, 290];
+
+  const currencyData = {
+    USD: {
+      total: "$142,850.75",
+      spending: ["$320", "$450", "$1,245", "$680", "$890", "$210", "$140"],
+      yCoords: [38, 28, 12, 26, 18, 44, 48],
+    },
+    EUR: {
+      total: "€131,422.60",
+      spending: ["€295", "€410", "€1,145", "€620", "€820", "€190", "€130"],
+      yCoords: [36, 26, 14, 28, 20, 42, 46],
+    },
+    ETH: {
+      total: "42.85 ETH",
+      spending: ["0.09 ETH", "0.14 ETH", "0.38 ETH", "0.21 ETH", "0.28 ETH", "0.06 ETH", "0.04 ETH"],
+      yCoords: [40, 30, 10, 24, 16, 46, 50],
+    },
   };
 
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const currentData = currencyData[currency];
+  const activeY = currentData.yCoords[activeDayIndex];
+  const activeX = xCoords[activeDayIndex];
+
+  // Dynamic SVG Cubic Bezier Path calculation
+  const pathD = `M 20 ${currentData.yCoords[0]} C 42 ${currentData.yCoords[0]}, 43 ${currentData.yCoords[1]}, 65 ${currentData.yCoords[1]} C 87 ${currentData.yCoords[1]}, 88 ${currentData.yCoords[2]}, 110 ${currentData.yCoords[2]} C 132 ${currentData.yCoords[2]}, 133 ${currentData.yCoords[3]}, 155 ${currentData.yCoords[3]} C 177 ${currentData.yCoords[3]}, 178 ${currentData.yCoords[4]}, 200 ${currentData.yCoords[4]} C 222 ${currentData.yCoords[4]}, 223 ${currentData.yCoords[5]}, 245 ${currentData.yCoords[5]} C 267 ${currentData.yCoords[5]}, 268 ${currentData.yCoords[6]}, 290 ${currentData.yCoords[6]}`;
+  const areaD = `${pathD} L 290 58 L 20 58 Z`;
 
   const handleFaceIdAuth = () => {
     setFaceIdState("scanning");
@@ -353,12 +417,12 @@ function AuraPayLiveSimulator() {
         </div>
       </div>
 
-      {/* ── 2. Middle Split: Interactive Titanium Card + Spline Spending Graph ── */}
+      {/* ── 2. Middle Split: Interactive Titanium Card + Live Animated Spline Graph ── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 my-auto items-center py-2 z-10">
         {/* Left: Interactive Holographic Titanium Card */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`md:col-span-5 relative flex flex-col justify-between p-3 rounded-2xl border transition-all duration-300 shadow-xl overflow-hidden min-h-[135px] ${
+          className={`md:col-span-5 relative flex flex-col justify-between p-3 rounded-2xl border transition-all duration-300 shadow-xl overflow-hidden min-h-[140px] ${
             isFrozen
               ? "bg-[#0b1329]/90 border-cyan-500/50 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.2)]"
               : "bg-gradient-to-br from-[#2a1752] via-[#1a0e36] to-[#0d071d] border-violet-500/40 text-white shadow-[0_0_25px_rgba(168,85,247,0.2)]"
@@ -383,7 +447,7 @@ function AuraPayLiveSimulator() {
           <div className="my-1.5 z-10">
             <span className="text-[0.5rem] text-white/50 uppercase tracking-wider">Total Liquidity</span>
             <p className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              {balances[currency].total}
+              {currentData.total}
             </p>
           </div>
 
@@ -393,31 +457,74 @@ function AuraPayLiveSimulator() {
           </div>
         </motion.div>
 
-        {/* Right: Interactive Draggable Day Scrubber & Spending Curve */}
-        <div className="md:col-span-7 flex flex-col justify-between bg-black/60 rounded-xl border border-white/10 p-3 backdrop-blur-md min-h-[135px]">
+        {/* Right: Live Interactive Spline Graph with Scrubber Beacon */}
+        <div className="md:col-span-7 flex flex-col justify-between bg-black/60 rounded-xl border border-white/10 p-3 backdrop-blur-md min-h-[140px]">
           <div className="flex items-center justify-between text-[0.52rem] border-b border-white/5 pb-1">
             <span className="text-white/60">SPENDING ACTIVITY</span>
-            <span className="text-violet-400 font-semibold">
-              {days[activeDayIndex]}: {balances[currency].daySpending[activeDayIndex]}
+            <span className="text-violet-300 font-semibold bg-violet-500/20 px-2 py-0.5 rounded-full border border-violet-500/30">
+              {days[activeDayIndex]}: {currentData.spending[activeDayIndex]}
             </span>
           </div>
 
-          {/* Interactive SVG Spline Curve */}
-          <div className="relative h-12 w-full my-1 flex items-center">
-            <svg className="w-full h-full overflow-visible">
-              <path
-                d="M 0 35 C 40 45, 80 10, 120 15 C 160 20, 200 5, 240 25 C 280 40, 320 15, 360 20"
-                fill="none"
-                stroke="url(#violet-gradient)"
-                strokeWidth="2"
-              />
+          {/* Interactive SVG Spline Curve + Animated Scrubber Point */}
+          <div className="relative h-14 w-full my-1 flex items-center">
+            <svg viewBox="0 0 310 60" className="w-full h-full overflow-visible">
               <defs>
                 <linearGradient id="violet-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#a855f7" />
                   <stop offset="50%" stopColor="#ec4899" />
                   <stop offset="100%" stopColor="#3b82f6" />
                 </linearGradient>
+                <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(168,85,247,0.25)" />
+                  <stop offset="100%" stopColor="rgba(168,85,247,0.0)" />
+                </linearGradient>
               </defs>
+
+              {/* Area fill */}
+              <path d={areaD} fill="url(#area-gradient)" />
+
+              {/* Spline curve line */}
+              <path
+                d={pathD}
+                fill="none"
+                stroke="url(#violet-gradient)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+
+              {/* Vertical Laser Guideline */}
+              <line
+                x1={activeX}
+                y1={activeY}
+                x2={activeX}
+                y2={58}
+                stroke="#a855f7"
+                strokeDasharray="2 2"
+                strokeWidth="1.5"
+                opacity={0.8}
+              />
+
+              {/* Animated Scrubber Outer Pulse Ring */}
+              <circle
+                cx={activeX}
+                cy={activeY}
+                r="7"
+                stroke="#a855f7"
+                strokeWidth="1.5"
+                fill="none"
+                className="animate-ping"
+              />
+
+              {/* Active Scrubber Center Dot */}
+              <circle
+                cx={activeX}
+                cy={activeY}
+                r="4.5"
+                fill="#ffffff"
+                stroke="#a855f7"
+                strokeWidth="2"
+              />
             </svg>
           </div>
 
@@ -433,7 +540,7 @@ function AuraPayLiveSimulator() {
                 }}
                 className={`text-[0.5rem] px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                   activeDayIndex === i
-                    ? "bg-violet-500/30 text-violet-300 font-bold border border-violet-500/40"
+                    ? "bg-violet-500/30 text-violet-200 font-bold border border-violet-500/50 shadow-[0_0_8px_rgba(168,85,247,0.4)]"
                     : "text-white/40 hover:text-white"
                 }`}
               >
@@ -599,9 +706,27 @@ function Card({ project }: { project: Project }) {
 
         {/* Footer row */}
         <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
-          <p className="max-w-xl text-sm leading-relaxed text-muted">
-            {project.subtitle}
-          </p>
+          <div className="max-w-xl">
+            <p className="text-sm leading-relaxed text-muted">
+              {project.subtitle}
+            </p>
+            {project.href ? (
+              <a
+                href={project.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-[var(--accent)] hover:underline"
+              >
+                <span>Visit Live Production Platform</span>
+                <span>↗</span>
+              </a>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 mt-2 text-xs text-white/50">
+                <span className="size-1 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Interactive sandbox · Test live controls directly in card above</span>
+              </div>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {project.tags.map((tag) => (
               <span
