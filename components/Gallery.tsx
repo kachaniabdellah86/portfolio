@@ -572,7 +572,7 @@ export default function Gallery() {
   const pinned = desktop && !reduce;
 
   return (
-    <section aria-label="Visual lab" className="relative py-24 sm:py-36">
+    <section id="lab" aria-label="Visual lab" className="relative py-24 sm:py-36">
       <span aria-hidden="true" className="ghost-numeral">
         02
       </span>

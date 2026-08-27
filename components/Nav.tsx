@@ -12,6 +12,7 @@ import { EASE_OUT } from "./tokens";
 
 const LINKS = [
   { label: "Work", href: "#work" },
+  { label: "Lab", href: "#lab" },
   { label: "Services", href: "#services" },
   { label: "Contact", href: "#contact" },
 ];
@@ -32,7 +33,7 @@ export default function Nav() {
         1
       );
       setTicks(
-        ["#work", "#services", "#contact"].map((sel) => {
+        ["#work", "#lab", "#services", "#contact"].map((sel) => {
           const el = document.querySelector<HTMLElement>(sel);
           if (!el) return 0;
           return (

@@ -67,7 +67,7 @@ function SplitHoverLink() {
   return (
     <motion.a
       ref={ref}
-      href="abdellah.kachani@e-polytechnique.ma"
+      href="mailto:abdellah.kachani@e-polytechnique.ma"
       data-cursor="view"
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
