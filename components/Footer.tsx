@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useSpring } from "motion/react";
 import { Reveal } from "./Marquee";
 
@@ -82,6 +82,37 @@ function SplitHoverLink() {
   );
 }
 
+function CopyEmailButton() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText("abdellah.kachani@e-polytechnique.ma");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2400);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="group mt-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 backdrop-blur-md transition-all hover:border-[var(--accent)]/60 hover:bg-white/10 cursor-pointer"
+    >
+      <span className="font-mono text-xs text-white/80 transition-colors group-hover:text-white">
+        abdellah.kachani@e-polytechnique.ma
+      </span>
+      <span
+        className={`rounded-full px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider transition-all ${
+          copied
+            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+            : "bg-white/10 text-muted group-hover:text-white"
+        }`}
+      >
+        {copied ? "COPIED ✓" : "COPY"}
+      </span>
+    </button>
+  );
+}
+
 export default function Footer() {
   return (
     <footer id="contact" className="hairline-t px-6 pb-12 pt-24 sm:px-12 sm:pt-36">
@@ -91,6 +122,10 @@ export default function Footer() {
 
       <Reveal delay={0.08}>
         <SplitHoverLink />
+      </Reveal>
+
+      <Reveal delay={0.16}>
+        <CopyEmailButton />
       </Reveal>
 
       <div className="hairline-t mt-20 flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
