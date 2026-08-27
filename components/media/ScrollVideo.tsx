@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { scrollBus } from "../lenis-bridge";
 
 interface ScrollVideoProps {
   src: string;
+  fallbackSrc?: string;
   poster?: string;
   overlayOpacity?: number;
 }
 
 export default function ScrollVideo({
   src,
+  fallbackSrc,
   poster,
   overlayOpacity = 0.55,
 }: ScrollVideoProps) {
@@ -18,11 +21,14 @@ export default function ScrollVideo({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [ready, setReady] = useState(false);
   const rafRef = useRef<number>(0);
-  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
 
   /* Pause rendering when tab is hidden */
   useEffect(() => {
-    const onVisibility = () => setPaused(document.hidden);
+    const onVisibility = () => {
+      pausedRef.current = document.hidden;
+    };
+    onVisibility();
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
@@ -34,35 +40,53 @@ export default function ScrollVideo({
 
     let active = true;
     let objectUrl = "";
+    const controller = new AbortController();
     
     const video = document.createElement("video");
     video.muted = true;
     video.playsInline = true;
     videoRef.current = video;
 
+    const selectedSrc =
+      src.endsWith(".webm") && !video.canPlayType("video/webm")
+        ? (fallbackSrc ?? src)
+        : src;
+
     // 1. Fetch video completely into memory (Blob) so it never buffers while scrubbing
-    fetch(src)
-      .then((res) => res.blob())
+    fetch(selectedSrc, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Video request failed with ${res.status}`);
+        return res.blob();
+      })
       .then((blob) => {
         if (!active) return;
         objectUrl = URL.createObjectURL(blob);
         video.src = objectUrl;
         video.load();
       })
-      .catch((err) => console.error("Video fetch failed", err));
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error("Video fetch failed", error);
+      });
 
+    let frameDirty = true;
     const onLoaded = () => {
       if (video.duration > 0 && Number.isFinite(video.duration)) {
+        frameDirty = true;
         setReady(true);
       }
     };
+    const onSeeked = () => {
+      frameDirty = true;
+    };
     video.addEventListener("loadeddata", onLoaded);
+    video.addEventListener("seeked", onSeeked);
 
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", { alpha: false });
 
     const draw = () => {
-      if (paused) {
+      if (pausedRef.current) {
         rafRef.current = requestAnimationFrame(draw);
         return;
       }
@@ -75,8 +99,8 @@ export default function ScrollVideo({
       // 2. 1:1 Scroll Sync
       const time = Math.max(0, Math.min(scrollBus.progress, 0.999)) * video.duration;
 
-      // Update time instantly if it changed
-      if (Math.abs(video.currentTime - time) > 0.01) {
+      // Seek only when the scroll target changes. The decoded frame marks itself dirty.
+      if (!video.seeking && Math.abs(video.currentTime - time) > 0.01) {
         video.currentTime = time;
       }
 
@@ -84,11 +108,17 @@ export default function ScrollVideo({
       const dpr = Math.min(window.devicePixelRatio, 2);
       const w = window.innerWidth;
       const h = window.innerHeight;
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      const resized = canvas.width !== w * dpr || canvas.height !== h * dpr;
+      if (resized) {
         canvas.width = w * dpr;
         canvas.height = h * dpr;
         canvas.style.width = `${w}px`;
         canvas.style.height = `${h}px`;
+      }
+
+      if (!frameDirty && !resized) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
       }
 
       // 4. Object-fit: cover math
@@ -116,6 +146,7 @@ export default function ScrollVideo({
       sy = sy + (sh - cropH); // Shift max down
 
       ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, w * dpr, h * dpr);
+      frameDirty = false;
       rafRef.current = requestAnimationFrame(draw);
     };
 
@@ -123,21 +154,25 @@ export default function ScrollVideo({
 
     return () => {
       active = false;
+      controller.abort();
       cancelAnimationFrame(rafRef.current);
       video.removeEventListener("loadeddata", onLoaded);
+      video.removeEventListener("seeked", onSeeked);
       video.src = "";
       videoRef.current = null;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [src, paused]);
+  }, [fallbackSrc, src]);
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
       {/* Poster fallback for instant paint while Blob fetches */}
       {poster && (
-        <img
+        <Image
           src={poster}
           alt=""
+          fill
+          sizes="100vw"
           className="absolute inset-0 h-full w-full object-cover"
           style={{ opacity: ready ? 0 : 1, transition: "opacity 0.8s ease" }}
         />

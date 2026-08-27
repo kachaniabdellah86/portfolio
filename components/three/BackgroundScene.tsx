@@ -12,16 +12,20 @@ const ScrollVideoFallback = dynamic(
 );
 
 export default function BackgroundScene() {
-  const [mode, setMode] = useState<"loading" | "mobile" | "desktop">(
-    "loading"
-  );
+  const [mode, setMode] = useState<
+    "loading" | "static" | "mobile" | "desktop"
+  >("loading");
 
   useEffect(() => {
     const reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobileMq = window.matchMedia("(max-width: 767px)");
 
     const sync = () => {
-      setMode(reduceMq.matches || mobileMq.matches ? "mobile" : "desktop");
+      if (reduceMq.matches) {
+        setMode("static");
+      } else {
+        setMode(mobileMq.matches ? "mobile" : "desktop");
+      }
     };
 
     const raf = requestAnimationFrame(sync);
@@ -37,13 +41,29 @@ export default function BackgroundScene() {
 
   if (mode === "loading") return null;
 
+  if (mode === "static") {
+    return (
+      <ScrollVideoFallback
+        poster="/media/universe-poster.jpg"
+        staticOnly
+      />
+    );
+  }
+
   if (mode === "mobile") {
-    return <ScrollVideoFallback poster="/media/universe-poster.jpg" />;
+    return (
+      <ScrollVideoFallback
+        src="/media/universe.webm"
+        fallbackSrc="/media/universe.mp4"
+        poster="/media/universe-poster.jpg"
+      />
+    );
   }
 
   return (
     <ScrollVideo
-      src="/media/universe.mp4"
+      src="/media/universe.webm"
+      fallbackSrc="/media/universe.mp4"
       poster="/media/universe-poster.jpg"
       overlayOpacity={0.55}
     />

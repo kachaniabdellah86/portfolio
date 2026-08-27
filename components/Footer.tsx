@@ -26,8 +26,12 @@ function SplitHoverLink() {
     if (!el) return;
 
     let instance: InstanceType<typeof import("split-type").default> | null = null;
+    let cancelled = false;
+    let removeListeners = () => {};
 
     import("split-type").then(({ default: ST }) => {
+      if (cancelled) return;
+
       instance = new ST(el, { types: "chars" });
 
       const chars = el.querySelectorAll<HTMLElement>(".char");
@@ -53,13 +57,15 @@ function SplitHoverLink() {
       el.addEventListener("mouseenter", onEnter);
       el.addEventListener("mouseleave", onLeave);
 
-      return () => {
+      removeListeners = () => {
         el.removeEventListener("mouseenter", onEnter);
         el.removeEventListener("mouseleave", onLeave);
       };
     });
 
     return () => {
+      cancelled = true;
+      removeListeners();
       instance?.revert();
     };
   }, []);
@@ -68,6 +74,7 @@ function SplitHoverLink() {
     <motion.a
       ref={ref}
       href="mailto:abdellah.kachani@e-polytechnique.ma"
+      aria-label="Email Abdellah Kachani"
       data-cursor="view"
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
@@ -83,31 +90,54 @@ function SplitHoverLink() {
 }
 
 function CopyEmailButton() {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const resetTimer = useRef<number | null>(null);
+  const copyAttempt = useRef(0);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText("abdellah.kachani@e-polytechnique.ma");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2400);
+  useEffect(() => () => {
+    copyAttempt.current += 1;
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+  }, []);
+
+  const handleCopy = async () => {
+    const attempt = ++copyAttempt.current;
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+
+    try {
+      await navigator.clipboard.writeText("abdellah.kachani@e-polytechnique.ma");
+      if (attempt !== copyAttempt.current) return;
+      setCopyState("copied");
+    } catch {
+      if (attempt !== copyAttempt.current) return;
+      setCopyState("error");
+    }
+
+    resetTimer.current = window.setTimeout(() => {
+      setCopyState("idle");
+      resetTimer.current = null;
+    }, 2400);
   };
 
   return (
     <button
       type="button"
-      onClick={handleCopy}
+      onClick={() => void handleCopy()}
       className="group mt-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 backdrop-blur-md transition-all hover:border-[var(--accent)]/60 hover:bg-white/10 cursor-pointer"
     >
       <span className="font-mono text-xs text-white/80 transition-colors group-hover:text-white">
         abdellah.kachani@e-polytechnique.ma
       </span>
       <span
+        aria-live="polite"
         className={`rounded-full px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider transition-all ${
-          copied
+          copyState === "copied"
             ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+            : copyState === "error"
+              ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
             : "bg-white/10 text-muted group-hover:text-white"
         }`}
       >
-        {copied ? "COPIED ✓" : "COPY"}
+        {copyState === "copied" ? "COPIED ✓" : copyState === "error" ? "RETRY" : "COPY"}
       </span>
     </button>
   );
@@ -133,13 +163,13 @@ export default function Footer() {
         <div className="flex flex-wrap gap-6 sm:gap-8">
           {[
             { label: "LinkedIn", href: "https://www.linkedin.com/in/abdellah-kachani-8284a5251/" },
-            { label: "Behance", href: "#" },
-            { label: "Dribbble", href: "#" },
             { label: "GitHub", href: "https://github.com/kachaniabdellah86" },
           ].map(({ label, href }) => (
             <a
               key={label}
               href={href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="label-caps text-muted transition-colors hover:text-[var(--ink)]"
             >
               {label}

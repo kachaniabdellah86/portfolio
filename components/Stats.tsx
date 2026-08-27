@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView, useReducedMotion } from "motion/react";
+import { useInView } from "motion/react";
 import { Reveal } from "./Marquee";
+import { useReducedMotionPreference } from "./use-reduced-motion";
 
 type Stat = {
   value: number;
@@ -17,7 +18,7 @@ const STATS: Stat[] = [
 ];
 
 function Counter({ stat }: { stat: Stat }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const [display, setDisplay] = useState(0);

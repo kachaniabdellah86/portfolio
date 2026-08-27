@@ -1,26 +1,43 @@
 "use client";
 
+import Image from "next/image";
+
 export default function ScrollVideoFallback({
   poster = "/media/universe-poster.jpg",
-  src = "/media/universe.mp4",
+  src = "/media/universe.webm",
+  fallbackSrc = "/media/universe.mp4",
+  staticOnly = false,
 }: {
   poster?: string;
   src?: string;
+  fallbackSrc?: string;
+  staticOnly?: boolean;
 }) {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Real ambient looping video for mobile / iOS Safari */}
-      <video
-        src={src}
-        poster={poster}
-        autoPlay
-        muted
-        loop
-        playsInline
-        webkit-playsinline="true"
-        preload="auto"
-        className="absolute inset-0 h-full w-full object-cover opacity-90"
-      />
+      {staticOnly ? (
+        <Image
+          src={poster}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
+        />
+      ) : (
+        <video
+          poster={poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
+        >
+          <source src={src} type="video/webm" />
+          <source src={fallbackSrc} type="video/mp4" />
+        </video>
+      )}
       {/* Dark gradient overlay for typography readability */}
       <div
         className="absolute inset-0"

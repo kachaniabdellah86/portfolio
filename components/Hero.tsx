@@ -4,7 +4,6 @@ import {
   motion,
   useMotionValue,
   useMotionValueEvent,
-  useReducedMotion,
   useScroll,
   useTransform,
   type MotionValue,
@@ -12,6 +11,7 @@ import {
 import { EASE_OUT as EASE, HERO_INTRO_DELAY as INTRO_DELAY } from "./tokens";
 import PinnedScene from "./scroll/PinnedScene";
 import { scrollBus } from "./lenis-bridge";
+import { useReducedMotionPreference } from "./use-reduced-motion";
 
 function LineMask({
   children,
@@ -24,7 +24,7 @@ function LineMask({
   depth?: number;
   mvX: MotionValue<number>;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const x = useTransform(mvX, [-1, 1], [-depth, depth]);
   if (reduce) return <span className="block">{children}</span>;
 
@@ -50,7 +50,7 @@ function HeroStage({
 }: {
   p: MotionValue<number>;
   mvX: MotionValue<number>;
-  reduce: boolean | null;
+  reduce: boolean;
 }) {
   const { scrollY } = useScroll();
   const cueOpacity = useTransform(scrollY, [0, 240], [1, 0]);
@@ -137,7 +137,7 @@ function HeroStage({
           className="flex w-full flex-wrap items-center justify-between gap-4"
         >
           <motion.div
-            style={{ opacity: cueOpacity }}
+            style={{ opacity: reduce ? 1 : cueOpacity }}
             className="flex flex-wrap items-center gap-4 sm:gap-8"
           >
             <span className="label-caps text-muted">3+ years</span>
@@ -163,8 +163,17 @@ function HeroStage({
 }
 
 export default function Hero() {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const mvX = useMotionValue(0);
+  const staticProgress = useMotionValue(0);
+
+  if (reduce) {
+    return (
+      <div className="relative h-screen overflow-hidden">
+        <HeroStage p={staticProgress} mvX={mvX} reduce />
+      </div>
+    );
+  }
 
   return (
     <PinnedScene track="280vh">

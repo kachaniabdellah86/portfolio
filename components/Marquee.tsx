@@ -5,13 +5,13 @@ import {
   motion,
   useAnimationFrame,
   useMotionValue,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
   useVelocity,
 } from "motion/react";
 import { EASE_OUT as EASE } from "./tokens";
+import { useReducedMotionPreference } from "./use-reduced-motion";
 
 const ROW_A = [
   "UI/UX Design",
@@ -43,7 +43,7 @@ function VelocityRow({
   items: string[];
   reverse?: boolean;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
@@ -119,7 +119,7 @@ export function Reveal({
   delay?: number;
   y?: number;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   if (reduce) return <>{children}</>;
 
   return (

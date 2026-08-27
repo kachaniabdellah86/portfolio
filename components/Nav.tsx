@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionValueEvent,
-  useReducedMotion,
   useScroll,
   useSpring,
 } from "motion/react";
 import { EASE_OUT } from "./tokens";
+import { useReducedMotionPreference } from "./use-reduced-motion";
 
 const LINKS = [
   { label: "Work", href: "#work" },
@@ -18,7 +18,7 @@ const LINKS = [
 ];
 
 export default function Nav() {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const [visible, setVisible] = useState(false);
 
   const { scrollY, scrollYProgress } = useScroll();

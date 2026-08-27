@@ -49,6 +49,14 @@ export default function Services() {
         </h2>
       </Reveal>
 
+      <Reveal delay={0.12}>
+        <p className="mt-8 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
+          I work where product design and front-end engineering meet — turning
+          complex ideas into clear, responsive experiences that feel considered
+          in both the interface and the implementation.
+        </p>
+      </Reveal>
+
       <div className="mt-16">
         {SERVICES.map((service, i) => (
           <Reveal key={service.index} delay={i * 0.04}>

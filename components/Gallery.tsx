@@ -5,12 +5,12 @@ import {
   motion,
   useMotionValue,
   useMotionValueEvent,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
 import { Reveal } from "./Marquee";
+import { useReducedMotionPreference } from "./use-reduced-motion";
 
 type Slide = {
   index: string;
@@ -91,6 +91,8 @@ function TypeStudiesLab() {
         {(["serif", "italic", "sans", "mono"] as const).map((s) => (
           <button
             key={s}
+            type="button"
+            aria-pressed={activeStyle === s}
             onClick={(e) => {
               e.stopPropagation();
               setActiveStyle(s);
@@ -138,6 +140,7 @@ function TypeStudiesLab() {
       <div className="flex w-full max-w-[220px] flex-col items-center gap-1.5">
         <input
           type="range"
+          aria-label="Variable font weight"
           min={100}
           max={900}
           step={10}
@@ -157,7 +160,7 @@ function TypeStudiesLab() {
 
 /* ── 02. Interactive Wave Resonance Lab ── */
 function WaveFrequencyLab() {
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [hoverIndex, setHoverIndex] = useState(7);
   const baseHeights = [20, 38, 60, 32, 75, 48, 92, 65, 88, 52, 78, 36, 62, 28, 45, 22];
 
   const handlePointer = (clientX: number, rect: DOMRect) => {
@@ -168,8 +171,29 @@ function WaveFrequencyLab() {
 
   return (
     <div
+      role="slider"
+      tabIndex={0}
+      aria-label="Wave resonance band"
+      aria-valuemin={1}
+      aria-valuemax={baseHeights.length}
+      aria-valuenow={hoverIndex + 1}
+      aria-valuetext={`Band ${hoverIndex + 1} of ${baseHeights.length}`}
       className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none touch-none"
-      onPointerLeave={() => setHoverIndex(null)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+          e.preventDefault();
+          setHoverIndex((current) => Math.max(0, current - 1));
+        } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+          e.preventDefault();
+          setHoverIndex((current) => Math.min(baseHeights.length - 1, current + 1));
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          setHoverIndex(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          setHoverIndex(baseHeights.length - 1);
+        }
+      }}
       onPointerMove={(e) => {
         handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
       }}
@@ -185,8 +209,8 @@ function WaveFrequencyLab() {
       {/* Frequency Equalizer Bars */}
       <div className="my-auto flex items-center justify-center gap-1.5 h-24 w-full px-2 cursor-pointer">
         {baseHeights.map((h, i) => {
-          const isNear = hoverIndex !== null && Math.abs(hoverIndex - i) <= 2;
-          const boost = isNear ? (3 - Math.abs(hoverIndex! - i)) * 18 : 0;
+          const isNear = Math.abs(hoverIndex - i) <= 2;
+          const boost = isNear ? (3 - Math.abs(hoverIndex - i)) * 18 : 0;
           return (
             <motion.div
               key={i}
@@ -216,6 +240,11 @@ function SpringPhysicsLab() {
   const y = useMotionValue(0);
   const [metrics, setMetrics] = useState({ distance: 0, tension: "0.0", stiffness: 350 });
   const [isDragging, setIsDragging] = useState(false);
+
+  const movePuck = (deltaX: number, deltaY: number) => {
+    x.set(Math.max(-110, Math.min(110, x.get() + deltaX)));
+    y.set(Math.max(-50, Math.min(50, y.get() + deltaY)));
+  };
 
   // Sync metrics continuously on every frame
   useMotionValueEvent(x, "change", (latestX) => {
@@ -269,6 +298,13 @@ function SpringPhysicsLab() {
 
         {/* Real Physics Puck */}
         <motion.div
+          role="slider"
+          tabIndex={0}
+          aria-label="Spring puck position"
+          aria-valuemin={0}
+          aria-valuemax={121}
+          aria-valuenow={Math.min(121, metrics.distance)}
+          aria-valuetext={`${Math.round(x.get())} pixels horizontal, ${Math.round(y.get())} pixels vertical`}
           style={{ x, y, touchAction: "none" }}
           drag
           dragConstraints={{ left: -110, right: 110, top: -50, bottom: 50 }}
@@ -276,6 +312,26 @@ function SpringPhysicsLab() {
           dragTransition={{ bounceStiffness: 450, bounceDamping: 18 }}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={() => setIsDragging(false)}
+          onKeyDown={(e) => {
+            const step = e.shiftKey ? 20 : 10;
+            if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              movePuck(-step, 0);
+            } else if (e.key === "ArrowRight") {
+              e.preventDefault();
+              movePuck(step, 0);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              movePuck(0, -step);
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              movePuck(0, step);
+            } else if (e.key === "Home") {
+              e.preventDefault();
+              x.set(0);
+              y.set(0);
+            }
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className="relative z-20 size-12 rounded-full bg-gradient-to-br from-[#1c2c63] to-[#0c132b] border border-[var(--accent)]/80 shadow-[0_0_24px_rgba(91,143,255,0.45)] flex flex-col items-center justify-center cursor-grab active:cursor-grabbing backdrop-blur-md touch-none"
@@ -331,6 +387,8 @@ function DesignTokensLab() {
           {(["sm", "md", "full"] as const).map((r) => (
             <button
               key={r}
+              type="button"
+              aria-pressed={radius === r}
               onClick={(e) => {
                 e.stopPropagation();
                 setRadius(r);
@@ -346,6 +404,8 @@ function DesignTokensLab() {
 
         {/* Glow Toggle */}
         <button
+          type="button"
+          aria-pressed={glow}
           onClick={(e) => {
             e.stopPropagation();
             setGlow(!glow);
@@ -361,6 +421,8 @@ function DesignTokensLab() {
 
         {/* Glass Toggle */}
         <button
+          type="button"
+          aria-pressed={glass}
           onClick={(e) => {
             e.stopPropagation();
             setGlass(!glass);
@@ -385,6 +447,12 @@ function DesignTokensLab() {
 function GestureSliderLab() {
   const [complete, setComplete] = useState(false);
   const [dragProgress, setDragProgress] = useState(0);
+
+  const updateProgress = (nextProgress: number) => {
+    const progress = Math.max(0, Math.min(1, nextProgress));
+    setDragProgress(progress);
+    setComplete(progress >= 0.95);
+  };
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
@@ -413,14 +481,20 @@ function GestureSliderLab() {
 
           {/* Draggable Knob */}
           <motion.div
+            role="slider"
+            tabIndex={0}
+            aria-label="Slide to verify"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(dragProgress * 100)}
+            aria-valuetext={complete ? "Verified" : `${Math.round(dragProgress * 100)} percent`}
             drag="x"
             dragConstraints={{ left: 0, right: 180 }}
             dragElastic={0.1}
             style={{ touchAction: "none" }}
             onDrag={(_, info) => {
               const p = Math.min(1, Math.max(0, info.offset.x / 170));
-              setDragProgress(p);
-              if (p >= 0.95) setComplete(true);
+              updateProgress(p);
             }}
             onDragEnd={() => {
               if (dragProgress < 0.95) {
@@ -428,7 +502,22 @@ function GestureSliderLab() {
                 setComplete(false);
               }
             }}
-            animate={complete ? { x: 180 } : undefined}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+                e.preventDefault();
+                updateProgress(dragProgress - 0.1);
+              } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+                e.preventDefault();
+                updateProgress(dragProgress + 0.1);
+              } else if (e.key === "Home") {
+                e.preventDefault();
+                updateProgress(0);
+              } else if (e.key === "End") {
+                e.preventDefault();
+                updateProgress(1);
+              }
+            }}
+            animate={{ x: dragProgress * 180 }}
             className="absolute left-1 size-9 rounded-full bg-white text-black font-bold flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing z-20 text-xs touch-none"
           >
             {complete ? "✓" : "➔"}
@@ -437,6 +526,7 @@ function GestureSliderLab() {
 
         {complete && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setComplete(false);
@@ -558,7 +648,7 @@ function Native() {
 }
 
 export default function Gallery() {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionPreference();
   const [desktop, setDesktop] = useState(false);
 
   useEffect(() => {

@@ -1,22 +1,18 @@
-# Cinematic scroll-scrub clips
+# Portfolio media
 
-Drop short video clips here that `ScrubVideo` components reference.
+## Background scene
 
-## Slots
+The ambient universe scene uses three coordinated assets:
 
-| File | Used by |
-| --- | --- |
-| `hero.mp4` | Hero pinned scene background |
+- `universe-poster.jpg` for first paint and reduced-motion mode
+- `universe.webm` as the preferred desktop and mobile video
+- `universe.mp4` as the compatibility fallback
 
-## Encode spec (important for smooth scrubbing)
+Keep replacement clips short, silent, and optimized for full-viewport cover.
+For smooth desktop scroll scrubbing, encode frequent keyframes (roughly every
+one to two seconds). The WebM version should remain the smaller primary asset.
 
-- Length: 6–10 seconds max
-- Resolution: 1920×1080 or 1280×720 (keep bitrate ~4–6 Mbps)
-- Codec: H.264 MP4, **no audio track**
-- Keyframe interval: every 1–2 seconds (`-g 30` at 30fps) — scrubbing seeks to keyframes, dense keyframes = smooth scrub
-- Example ffmpeg command:
-  ```
-  ffmpeg -i input.mp4 -an -vcodec libx264 -pix_fmt yuv420p -crf 22 -g 30 -movflags +faststart hero.mp4
-  ```
+## Project preview
 
-Generate clips with Higgsfield / Runway / Kling etc., then export with the settings above.
+`yallachina-preview.webp` is the optimized Yalla China case-study preview.
+`yallachina-preview.jpg` is retained as its high-resolution source asset.

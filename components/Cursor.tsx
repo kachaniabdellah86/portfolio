@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 
 type CursorState = {
@@ -8,8 +8,29 @@ type CursorState = {
   text?: string;
 };
 
+const FINE_POINTER_QUERY =
+  "(pointer: fine) and (prefers-reduced-motion: no-preference)";
+
+function subscribeToFinePointer(onChange: () => void) {
+  const query = window.matchMedia(FINE_POINTER_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+function getFinePointerSnapshot() {
+  return window.matchMedia(FINE_POINTER_QUERY).matches;
+}
+
+function getServerFinePointerSnapshot() {
+  return false;
+}
+
 export default function Cursor() {
-  const [enabled, setEnabled] = useState(false);
+  const enabled = useSyncExternalStore(
+    subscribeToFinePointer,
+    getFinePointerSnapshot,
+    getServerFinePointerSnapshot,
+  );
   const [visible, setVisible] = useState(false);
   const [cursorState, setCursorState] = useState<CursorState>({ type: "default" });
   const [pressed, setPressed] = useState(false);
@@ -23,13 +44,24 @@ export default function Cursor() {
   const ringY = useSpring(-100, { stiffness: 380, damping: 30, mass: 0.5 });
 
   const isInitialized = useRef(false);
+  const visibleRef = useRef(false);
+  const cursorStateRef = useRef<CursorState>({ type: "default" });
 
   useEffect(() => {
-    // Only enable on pointer-fine desktop environments
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    if (!fine) return;
+    if (!enabled) return;
 
-    setEnabled(true);
+    const updateVisibility = (nextVisible: boolean) => {
+      if (visibleRef.current === nextVisible) return;
+      visibleRef.current = nextVisible;
+      setVisible(nextVisible);
+    };
+
+    const updateCursorState = (nextState: CursorState) => {
+      const currentState = cursorStateRef.current;
+      if (currentState.type === nextState.type && currentState.text === nextState.text) return;
+      cursorStateRef.current = nextState;
+      setCursorState(nextState);
+    };
 
     const onMouseMove = (e: MouseEvent) => {
       if (!isInitialized.current) {
@@ -45,7 +77,7 @@ export default function Cursor() {
         ringY.set(e.clientY);
       }
 
-      if (!visible) setVisible(true);
+      updateVisibility(true);
 
       // Detect cursor context based on hovered DOM elements
       const target = e.target as HTMLElement | null;
@@ -57,7 +89,7 @@ export default function Cursor() {
       );
 
       if (isClickable) {
-        setCursorState({ type: "pointer" });
+        updateCursorState({ type: "pointer" });
         return;
       }
 
@@ -66,26 +98,26 @@ export default function Cursor() {
       if (customCursorEl) {
         const cursorAttr = customCursorEl.dataset.cursor;
         if (cursorAttr === "view") {
-          setCursorState({ type: "view", text: "VIEW ↗" });
+          updateCursorState({ type: "view", text: "VIEW ↗" });
           return;
         }
         if (cursorAttr === "explore") {
-          setCursorState({ type: "explore", text: "EXPLORE ✦" });
+          updateCursorState({ type: "explore", text: "EXPLORE ✦" });
           return;
         }
         if (cursorAttr === "drag") {
-          setCursorState({ type: "drag", text: "DRAG ↔" });
+          updateCursorState({ type: "drag", text: "DRAG ↔" });
           return;
         }
       }
 
-      setCursorState({ type: "default" });
+      updateCursorState({ type: "default" });
     };
 
     const onMouseDown = () => setPressed(true);
     const onMouseUp = () => setPressed(false);
-    const onMouseLeave = () => setVisible(false);
-    const onMouseEnter = () => setVisible(true);
+    const onMouseLeave = () => updateVisibility(false);
+    const onMouseEnter = () => updateVisibility(true);
 
     window.addEventListener("mousemove", onMouseMove, { passive: true });
     window.addEventListener("mousedown", onMouseDown);
@@ -100,7 +132,7 @@ export default function Cursor() {
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mouseenter", onMouseEnter);
     };
-  }, [dotX, dotY, ringX, ringY, visible]);
+  }, [dotX, dotY, enabled, ringX, ringY]);
 
   if (!enabled) return null;
 

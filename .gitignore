@@ -42,3 +42,6 @@ next-env.d.ts
 
 # agent session logs
 session-*.md
+
+# accidental nested copy of the project skill library
+/.agents/skills/skills/

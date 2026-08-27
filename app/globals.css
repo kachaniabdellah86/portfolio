@@ -42,6 +42,11 @@ body {
   color: #ffffff;
 }
 
+:where(a, button, input, [role="button"], [role="slider"], [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -151,6 +156,19 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .marquee-track,
   .marquee-track-reverse {
     animation: none;
@@ -158,7 +176,7 @@ body {
 }
 
 /* ── Cursor ── */
-@media (pointer: fine) {
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .cursor-none-fine,
   .cursor-none-fine a,
   .cursor-none-fine button {
