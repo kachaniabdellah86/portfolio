@@ -21,5 +21,5 @@ export const scrollBus = {
   y: 0,
   velocity: 0,
   progress: 0,
-  heroProgress: 0,
+  journeyProgress: 0,
 };

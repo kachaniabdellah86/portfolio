@@ -31,8 +31,12 @@ The project currently has no separate automated unit or end-to-end test suite.
 Interactive flows should also be checked in a real browser at mobile, tablet,
 and desktop widths, including with reduced motion enabled.
 
-## Media behavior
+## Scene behavior
 
-The cinematic background uses `public/media/universe.webm` where supported and
-falls back to MP4. Reduced-motion visitors receive the static poster instead.
-See `public/media/README.md` for the encoding contract.
+The ambient layer is a dynamically loaded, scroll-driven Three.js journey. The
+camera travels through a spline corridor and three project-specific 3D stations
+using the normalized Lenis page progress without rerendering React. Render
+density is capped by device class, and the loop pauses when the tab is hidden.
+Reduced-motion visitors and failed WebGL contexts receive a static CSS corridor
+without initializing the renderer. Third-party source attribution lives in
+`THIRD_PARTY_NOTICES.md`.

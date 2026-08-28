@@ -56,19 +56,6 @@ type Project = {
 const PROJECTS: Project[] = [
   {
     index: "01",
-    title: "Yalla China",
-    subtitle:
-      "Multilingual study-abroad platform — trust-centered journey for Moroccan families (FR/EN/AR).",
-    tags: ["Next.js", "i18n + RTL", "Conversion"],
-    year: "2025",
-    tone: "from-[#0c1433] via-[#0f1a40] to-[#080b18]",
-    cursorBg: "linear-gradient(135deg, #0c1433 0%, #1a2f6b 60%, #5b8fff 135%)",
-    href: "https://go-china-site.vercel.app/fr",
-    live: true,
-    image: "/media/yallachina-preview.webp",
-  },
-  {
-    index: "02",
     title: "KachaniOS",
     subtitle:
       "Designing the interface for a self-evolving AI agent — neural graph architecture, AST inspection and autonomous cognition.",
@@ -79,7 +66,7 @@ const PROJECTS: Project[] = [
     live: false,
   },
   {
-    index: "03",
+    index: "02",
     title: "Aura Pay",
     subtitle:
       "Next-generation spatial finance & wealth OS — titanium cards, automated yield routing and instant biometric settlements.",
@@ -88,6 +75,19 @@ const PROJECTS: Project[] = [
     tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
     cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
     live: false,
+  },
+  {
+    index: "03",
+    title: "Yalla China",
+    subtitle:
+      "Multilingual study-abroad platform — trust-centered journey for Moroccan families (FR/EN/AR).",
+    tags: ["Next.js", "i18n + RTL", "Conversion"],
+    year: "2025",
+    tone: "from-[#0c1433] via-[#0f1a40] to-[#080b18]",
+    cursorBg: "linear-gradient(135deg, #0c1433 0%, #1a2f6b 60%, #5b8fff 135%)",
+    href: "https://go-china-site.vercel.app/fr",
+    live: true,
+    image: "/media/yallachina-preview.webp",
   },
 ];
 
@@ -668,8 +668,8 @@ function ProjectPreview({ project }: { project: Project }) {
       tabIndex={-1}
       className={`relative h-[280px] sm:h-[340px] md:h-[380px] w-full overflow-hidden rounded-xl bg-gradient-to-br outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${project.tone}`}
     >
-      {project.index === "02" && <KachaniosLiveEngine />}
-      {project.index === "03" && <AuraPayLiveSimulator />}
+      {project.title === "KachaniOS" && <KachaniosLiveEngine />}
+      {project.title === "Aura Pay" && <AuraPayLiveSimulator />}
 
       {project.image && (
         <div className="absolute inset-0 overflow-hidden">

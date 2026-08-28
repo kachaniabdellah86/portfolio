@@ -4,7 +4,7 @@ import Preloader from "@/components/Preloader";
 import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import BackgroundScene from "@/components/three/BackgroundScene";
-import Hero from "@/components/Hero";
+import JourneyChapters from "@/components/JourneyChapters";
 import Marquee from "@/components/Marquee";
 import WorkSection from "@/components/WorkSection";
 import Gallery from "@/components/Gallery";
@@ -22,7 +22,7 @@ export default function Home() {
       <Nav />
 
       <main id="top" className="relative z-10">
-        <Hero />
+        <JourneyChapters />
         <Marquee />
         <WorkSection />
         <Gallery />
