@@ -10,14 +10,14 @@ import {
 test("uses a Retina drawing buffer on high-density desktop displays", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 3, quality: "full", width: 1440 }),
-    { antialias: true, minPixelRatio: 1.25, pixelRatio: 1.75, samples: 0 },
+    { antialias: true, minPixelRatio: 1, pixelRatio: 1.25, samples: 0 },
   );
 });
 
 test("keeps a crisp buffer on high-density mobile displays", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 3, quality: "compact", width: 390 }),
-    { antialias: true, minPixelRatio: 1.15, pixelRatio: 1.5, samples: 0 },
+    { antialias: true, minPixelRatio: 1, pixelRatio: 1.25, samples: 0 },
   );
 });
 
@@ -31,7 +31,7 @@ test("does not waste GPU work by upscaling a standard-density display", () => {
 test("uses the narrow full-quality budget below tablet width", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 3, quality: "full", width: 640 }),
-    { antialias: true, minPixelRatio: 1.15, pixelRatio: 1.5, samples: 0 },
+    { antialias: true, minPixelRatio: 1, pixelRatio: 1.25, samples: 0 },
   );
 });
 

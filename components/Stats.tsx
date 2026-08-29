@@ -48,13 +48,19 @@ function Counter({ stat }: { stat: Stat }) {
   }, [inView, reduce, stat.value]);
 
   return (
-    <span
-      ref={ref}
-      className="display text-5xl tabular-nums tracking-tight sm:text-7xl"
-    >
-      {String(display).padStart(2, "0")}
-      <span className="accent">{stat.suffix}</span>
-    </span>
+    <>
+      <span className="sr-only">
+        {String(stat.value).padStart(2, "0")}{stat.suffix}
+      </span>
+      <span
+        ref={ref}
+        aria-hidden="true"
+        className="display text-5xl tabular-nums tracking-tight sm:text-7xl"
+      >
+        {String(display).padStart(2, "0")}
+        <span className="accent">{stat.suffix}</span>
+      </span>
+    </>
   );
 }
 
