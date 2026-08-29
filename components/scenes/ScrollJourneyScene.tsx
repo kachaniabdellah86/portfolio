@@ -92,6 +92,11 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       syncAnimationLoop();
       setStatus("failed");
     };
+    const onContextRestored = () => {
+      contextAvailable = true;
+      syncAnimationLoop();
+      setStatus("active");
+    };
     const resizeObserver = new ResizeObserver(resize);
 
     resizeObserver.observe(host);
@@ -99,6 +104,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     window.addEventListener("journey-visibility-change", syncAnimationLoop);
     document.addEventListener("visibilitychange", syncAnimationLoop);
     canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
     resize();
     setStatus("active");
     syncAnimationLoop();
@@ -110,6 +116,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       window.removeEventListener("journey-visibility-change", syncAnimationLoop);
       document.removeEventListener("visibilitychange", syncAnimationLoop);
       canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
       journey.dispose();
     };
   }, [setStatus]);

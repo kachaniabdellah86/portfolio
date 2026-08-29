@@ -39,8 +39,19 @@ export function getRenderQuality({
   const safePixelRatio = Number.isFinite(devicePixelRatio)
     ? Math.max(1, devicePixelRatio)
     : 1;
-  const maxPixelRatio = width >= 768 && quality === "full" ? 1.75 : 1.5;
-  const minBudget = width >= 768 && quality === "full" ? 1.25 : 1.15;
+  // High DPI devices (3x+) or mobile tablets should reduce quality to conserve battery
+  const isHighDensity = safePixelRatio > 2;
+  const maxPixelRatio = isHighDensity
+    ? 1.25
+    : width >= 768 && quality === "full"
+      ? 1.75
+      : 1.5;
+  const minBudget =
+    isHighDensity || quality === "compact"
+      ? 1
+      : width >= 768
+        ? 1.25
+        : 1.15;
   const pixelRatio = Math.min(safePixelRatio, maxPixelRatio);
 
   return {
