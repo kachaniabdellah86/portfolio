@@ -99,23 +99,6 @@ const PROJECTS: Project[] = [
   },
   {
     index: "03",
-    title: "Aura Pay",
-    subtitle:
-      "Next-generation spatial finance & wealth OS — titanium cards, automated yield routing and instant biometric settlements.",
-    tags: ["FinTech Concept", "Product Design", "Spatial UI"],
-    year: "2026",
-    tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
-    cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
-    live: false,
-    details: {
-      role: "Product Designer",
-      problem: "Digital finance feels weightless. How do you make trust feel tactile? How do you make instantaneous transactions feel intentional?",
-      built: "Interactive prototype of a spatial finance interface. Dynamic currency switching (USD/EUR/ETH). Real-time spending graph with monotone cubic interpolation. Biometric settlement flows.",
-      stack: ["React 19", "TypeScript", "SVG Graphics", "Motion Animations"],
-    },
-  },
-  {
-    index: "04",
     title: "Yalla China",
     subtitle:
       "Multilingual study-abroad platform — trust-centered journey for Moroccan families (FR/EN/AR).",
@@ -131,6 +114,23 @@ const PROJECTS: Project[] = [
       problem: "Moroccan students and families needed clarity and trust around study abroad in China. Language and cultural distance created friction. Testimonials and social proof were missing.",
       built: "Fully internationalized web platform (French, English, Arabic, Darija). Right-to-left support for Arabic. Trust-centered UX with clear program pathways, FAQ, and decision support.",
       stack: ["Next.js", "TypeScript", "i18n-next", "Tailwind CSS"],
+    },
+  },
+  {
+    index: "04",
+    title: "Aura Pay",
+    subtitle:
+      "Next-generation spatial finance & wealth OS — titanium cards, automated yield routing and instant biometric settlements.",
+    tags: ["FinTech Concept", "Product Design", "Spatial UI"],
+    year: "2026",
+    tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
+    cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
+    live: false,
+    details: {
+      role: "Product Designer",
+      problem: "Digital finance feels weightless. How do you make trust feel tactile? How do you make instantaneous transactions feel intentional?",
+      built: "Interactive prototype of a spatial finance interface. Dynamic currency switching (USD/EUR/ETH). Real-time spending graph with monotone cubic interpolation. Biometric settlement flows.",
+      stack: ["React 19", "TypeScript", "SVG Graphics", "Motion Animations"],
     },
   },
 ];
@@ -151,33 +151,33 @@ function KachaniosLiveEngine() {
 
   const tasks = {
     security: {
-      title: "Security & Auth AST Audit",
+      title: "Typed Security Routing",
       target: "@security-auditor",
       telemetry: [
-        { level: "KERNEL", msg: "Decomposed prompt → 'Verify zero Auth token leaks in Server Actions'", color: "text-[var(--accent)]" },
-        { level: "AST", msg: "Parsed 48 TS AST nodes across /app/api — 0 unsafe sinks", color: "text-indigo-300" },
-        { level: "CHECK", msg: "JWT HttpOnly ✓  SameSite=Strict ✓  Secure ✓  no-store ✓", color: "text-emerald-400" },
-        { level: "PASS", msg: "Convergence loop complete · 0 vulnerabilities · 8ms", color: "text-amber-300" },
+        { level: "KERNEL", msg: "Decomposed prompt → 'Verify auth flow and route safety'", color: "text-[var(--accent)]" },
+        { level: "AST", msg: "Parsed route contracts across /app and /components — typed handoff preserved", color: "text-indigo-300" },
+        { level: "CHECK", msg: "Context stays local · secrets never exposed in public UI", color: "text-emerald-400" },
+        { level: "PASS", msg: "Routing validated · typed orchestration · context ready", color: "text-amber-300" },
       ],
     },
     memory: {
-      title: "Vector Memory Synthesis",
+      title: "Context Memory Synthesis",
       target: "@memory-vault",
       telemetry: [
-        { level: "QUERY", msg: "Semantic retrieval → 'GPU compositing & layer isolation'", color: "text-[var(--accent)]" },
-        { level: "EMBED", msg: "Cosine 0.964 across 1,840 project vectors (1536-d)", color: "text-cyan-300" },
-        { level: "MERGE", msg: "Cross-referenced @architect + @eval-judge vaults", color: "text-purple-300" },
-        { level: "DONE", msg: "Durable handoff complete · ctx 14.2k / 200k tokens", color: "text-emerald-400" },
+        { level: "QUERY", msg: "Semantic retrieval → 'project context and multilingual routing'", color: "text-[var(--accent)]" },
+        { level: "EMBED", msg: "Cross-session context merged into structured project memory", color: "text-cyan-300" },
+        { level: "MERGE", msg: "Connected design intent with engineering constraints and handoff states", color: "text-purple-300" },
+        { level: "DONE", msg: "Context ready · structured handoff · agent-ready", color: "text-emerald-400" },
       ],
     },
     optimizer: {
-      title: "Bundle & Tree-Shake Pass",
+      title: "Build & Flow Optimizer",
       target: "@code-architect",
       telemetry: [
-        { level: "TRACE", msg: "Dependency graph → 312 modules, 18 dynamic imports", color: "text-indigo-300" },
-        { level: "SHAKE", msg: "Promoted 24 static icons to SVG sprite sheet (−34 kB)", color: "text-amber-300" },
-        { level: "BENCH", msg: "LCP 0.42 s · CLS 0.000 · GPU −18 MB peak", color: "text-[var(--accent)]" },
-        { level: "PASS", msg: "Production build OK · 0 type errors · 120 FPS", color: "text-emerald-400" },
+        { level: "TRACE", msg: "Dependency graph → nested routes, motion layers, and UI state mapped", color: "text-indigo-300" },
+        { level: "SHAKE", msg: "Reduced visual overhead while preserving motion and clarity", color: "text-amber-300" },
+        { level: "BENCH", msg: "System tuned for readability, flow, and predictable performance", color: "text-[var(--accent)]" },
+        { level: "PASS", msg: "Validated · typed · ready for handoff", color: "text-emerald-400" },
       ],
     },
   };
@@ -203,11 +203,11 @@ function KachaniosLiveEngine() {
   const nodeMap = Object.fromEntries(dagNodes.map((n) => [n.id, n]));
 
   const nodeInfo: Record<string, { role: string; lat: string; desc: string }> = {
-    kernel:  { role: "Orchestration Kernel",   lat: "1.2 ms", desc: "Autonomous loop controller & task-graph dispatcher" },
-    planner: { role: "Planner & Decomposer",   lat: "3.4 ms", desc: "Breaks goals into verifiable machine-decidable steps" },
-    vault:   { role: "1536-d Vector Memory",    lat: "2.1 ms", desc: "Embedding vault for cross-session knowledge" },
-    harness: { role: "Sandboxed AST Runner",    lat: "4.8 ms", desc: "Zero-network sandbox & unit-test verifier" },
-    judge:   { role: "Adversarial Verifier",    lat: "2.6 ms", desc: "Independent quality gate & 5-axis evaluator" },
+    kernel:  { role: "Orchestration Kernel",   lat: "ROUTING", desc: "Autonomous loop controller & task-graph dispatcher" },
+    planner: { role: "Planner & Decomposer",   lat: "TYPED", desc: "Breaks goals into verifiable machine-decidable steps" },
+    vault:   { role: "Context Memory",         lat: "LOCAL", desc: "Structured memory for cross-session knowledge" },
+    harness: { role: "Sandboxed AST Runner",    lat: "VALIDATED", desc: "Zero-network sandbox & public-safe verification" },
+    judge:   { role: "Adversarial Verifier",    lat: "HANDOFF", desc: "Independent quality gate for design-to-engineering handoff" },
   };
 
   useEffect(() => {
@@ -308,8 +308,8 @@ function KachaniosLiveEngine() {
             ))}
           </div>
           <div className="flex items-center justify-between text-[0.45rem] text-white/25 pt-1 border-t border-white/5">
-            <span>ctx 14.2 k / 200 k</span>
-            <span>latency 8 ms</span>
+            <span>ctx ready</span>
+            <span>local context</span>
           </div>
         </div>
 

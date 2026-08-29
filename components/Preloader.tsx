@@ -84,7 +84,7 @@ export default function Preloader() {
               }}
               className="label-caps text-muted mt-4"
             >
-              UI/UX Designer
+              Creative Developer
             </motion.p>
           </div>
 
