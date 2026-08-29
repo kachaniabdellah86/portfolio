@@ -81,7 +81,7 @@ function SplitHoverLink() {
       style={{ x: magX, y: magY }}
       className="display mt-6 block overflow-hidden text-[clamp(2.6rem,8vw,7.5rem)] leading-none tracking-tight transition-colors hover:text-[var(--accent)]"
     >
-      Let&apos;s <span className="text-outline">lets create </span>
+      Let&apos;s <span className="text-outline">create </span>
       <br />
       something{" "}
       <em className="serif accent text-[1.05em] italic">together.</em>
@@ -164,7 +164,6 @@ export default function Footer() {
           {[
             { label: "LinkedIn", href: "https://www.linkedin.com/in/abdellah-kachani-8284a5251/" },
             { label: "GitHub", href: "https://github.com/kachaniabdellah86" },
-            { label: "Instagram", href: "" },
           ].map(({ label, href }) => (
             <a
               key={label}

@@ -162,7 +162,7 @@ function createFrame(width: number, height: number, color: number) {
   return { group, material };
 }
 
-function createOriginWorld(): StoryWorld {
+function createOriginWorld(isCompact: boolean): StoryWorld {
   const group = new THREE.Group();
   group.position.copy(STORY_POINTS[0]);
   const materials: THREE.Material[] = [];
@@ -182,8 +182,8 @@ function createOriginWorld(): StoryWorld {
   materials.push(coreMaterial);
 
   const orbitMaterial = createGlowMaterial(0x8eb0ff, 0.68);
-  const orbitA = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.018, 6, 128), orbitMaterial);
-  const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.75, 0.012, 6, 128), orbitMaterial);
+  const orbitA = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.018, 6, isCompact ? 64 : 128), orbitMaterial);
+  const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.75, 0.012, 6, isCompact ? 64 : 128), orbitMaterial);
   orbitA.rotation.set(1.08, 0.2, 0.35);
   orbitB.rotation.set(0.42, 1.1, -0.2);
   materials.push(orbitMaterial);
@@ -242,7 +242,7 @@ function createOriginWorld(): StoryWorld {
   };
 }
 
-function createNeuralWorld(): StoryWorld {
+function createNeuralWorld(isCompact: boolean): StoryWorld {
   const group = new THREE.Group();
   group.position.copy(STORY_POINTS[2]);
   const materials: THREE.Material[] = [];
@@ -263,7 +263,7 @@ function createNeuralWorld(): StoryWorld {
 
   const nodePositions: THREE.Vector3[] = [];
   const nodeMaterial = createGlowMaterial(0xd8e5ff, 0.92);
-  const nodeGeometry = new THREE.SphereGeometry(0.075, 12, 12);
+  const nodeGeometry = new THREE.SphereGeometry(0.075, isCompact ? 6 : 12, isCompact ? 6 : 12);
   const nodes = new THREE.Group();
   for (let index = 0; index < 18; index += 1) {
     const y = 1 - (index / 17) * 2;
@@ -300,7 +300,7 @@ function createNeuralWorld(): StoryWorld {
   materials.push(edgeMaterial);
 
   const scanMaterial = createGlowMaterial(0x7aa2ff, 0.2);
-  const scan = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.13, 96), scanMaterial);
+  const scan = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.13, isCompact ? 48 : 96), scanMaterial);
   scan.rotation.x = Math.PI / 2;
   materials.push(scanMaterial);
 
@@ -336,7 +336,7 @@ function createNeuralWorld(): StoryWorld {
   };
 }
 
-function createFinanceWorld(): StoryWorld {
+function createFinanceWorld(isCompact: boolean): StoryWorld {
   const group = new THREE.Group();
   group.position.copy(STORY_POINTS[3]);
   const materials: THREE.Material[] = [];
@@ -381,13 +381,13 @@ function createFinanceWorld(): StoryWorld {
     metalness: 0.95,
     roughness: 0.09,
   });
-  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.13, 64), coinMaterial);
+  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.13, isCompact ? 32 : 64), coinMaterial);
   coin.position.set(1.1, 0.25, 0.55);
   coin.rotation.x = Math.PI / 2;
   materials.push(coinMaterial);
 
   const orbitMaterial = createGlowMaterial(0xb083ff, 0.72);
-  const orbit = new THREE.Mesh(new THREE.TorusGeometry(2.9, 0.022, 8, 144), orbitMaterial);
+  const orbit = new THREE.Mesh(new THREE.TorusGeometry(2.9, 0.022, 8, isCompact ? 64 : 144), orbitMaterial);
   orbit.rotation.set(1.18, 0.18, -0.22);
   materials.push(orbitMaterial);
 
@@ -424,13 +424,13 @@ function createFinanceWorld(): StoryWorld {
   };
 }
 
-function createBridgeWorld(): StoryWorld {
+function createBridgeWorld(isCompact: boolean): StoryWorld {
   const group = new THREE.Group();
   group.position.copy(STORY_POINTS[4]);
   const materials: THREE.Material[] = [];
 
   const portalMaterial = createGlassMaterial(0xff5c45, 0.32);
-  const portalGeometry = new THREE.TorusGeometry(1.58, 0.12, 16, 128);
+  const portalGeometry = new THREE.TorusGeometry(1.58, 0.12, isCompact ? 8 : 16, isCompact ? 64 : 128);
   const leftPortal = new THREE.Mesh(portalGeometry, portalMaterial);
   const rightPortal = new THREE.Mesh(portalGeometry, portalMaterial);
   leftPortal.position.x = -2.05;
@@ -447,7 +447,7 @@ function createBridgeWorld(): StoryWorld {
     new THREE.Vector3(2.05, 0.2, 0),
   ]);
   const bridgeMaterial = createGlowMaterial(0xffb08f, 0.95);
-  const bridge = new THREE.Mesh(new THREE.TubeGeometry(bridgeCurve, 96, 0.035, 8, false), bridgeMaterial);
+  const bridge = new THREE.Mesh(new THREE.TubeGeometry(bridgeCurve, isCompact ? 48 : 96, 0.035, isCompact ? 4 : 8, false), bridgeMaterial);
   materials.push(bridgeMaterial);
 
   const languageMaterial = createGlowMaterial(0xffd1bd, 0.78);
@@ -490,12 +490,12 @@ function createBridgeWorld(): StoryWorld {
   };
 }
 
-function createHorizonWorld(): StoryWorld {
+function createHorizonWorld(isCompact: boolean): StoryWorld {
   const group = new THREE.Group();
   group.position.copy(STORY_POINTS[5]);
   const materials: THREE.Material[] = [];
   const ringMaterial = createGlowMaterial(0xffd8a3, 0.72);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.55, 0.035, 8, 192), ringMaterial);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.55, 0.035, 8, isCompact ? 64 : 192), ringMaterial);
   materials.push(ringMaterial);
 
   const monolithMaterial = new THREE.MeshPhysicalMaterial({
@@ -530,7 +530,7 @@ function createHorizonWorld(): StoryWorld {
 
   const particles = new THREE.Group();
   const particleMaterial = createGlowMaterial(0xffd8a3, 0.66);
-  const particleGeometry = new THREE.SphereGeometry(0.045, 8, 8);
+  const particleGeometry = new THREE.SphereGeometry(0.045, isCompact ? 4 : 8, isCompact ? 4 : 8);
   for (let index = 0; index < 36; index += 1) {
     const particle = new THREE.Mesh(particleGeometry, particleMaterial);
     const angle = (index / 36) * Math.PI * 2;
@@ -587,8 +587,8 @@ function createDust(random: () => number, count: number) {
   return new THREE.Points(geometry, material);
 }
 
-function createTerrain() {
-  const geometry = new THREE.PlaneGeometry(36, 115, 32, 96);
+function createTerrain(isCompact: boolean) {
+  const geometry = new THREE.PlaneGeometry(36, 115, isCompact ? 16 : 32, isCompact ? 48 : 96);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;
   for (let index = 0; index < positions.count; index += 1) {
@@ -679,13 +679,7 @@ export function createScrollJourneyRenderer(
     return pulse;
   });
 
-  const worlds = [
-    createOriginWorld(),
-    createNeuralWorld(),
-    createFinanceWorld(),
-    createBridgeWorld(),
-    createHorizonWorld(),
-  ];
+  const worlds = [createOriginWorld(isCompact), createNeuralWorld(isCompact), createFinanceWorld(isCompact), createBridgeWorld(isCompact), createHorizonWorld(isCompact)];
   worlds.forEach((world) => {
     world.materials.forEach((material) => {
       material.userData.baseOpacity = material.opacity;
@@ -694,8 +688,8 @@ export function createScrollJourneyRenderer(
     scene.add(world.group);
   });
   const random = createSeededRandom(20260829);
-  const dust = createDust(random, isCompact ? 650 : 1500);
-  const terrain = createTerrain();
+  const dust = createDust(random, isCompact ? 300 : 1500);
+  const terrain = createTerrain(isCompact);
   scene.add(dust, terrain);
 
   let composer: EffectComposer | null = null;

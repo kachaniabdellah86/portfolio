@@ -21,14 +21,15 @@ function Counter({ stat }: { stat: Stat }) {
   const reduce = useReducedMotionPreference();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
-  const [display, setDisplay] = useState(0);
+  const [display, setDisplay] = useState(stat.value);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (!inView) return;
+    if (hasAnimatedRef.current || !inView) return;
+    hasAnimatedRef.current = true;
 
     if (reduce) {
-      const raf = requestAnimationFrame(() => setDisplay(stat.value));
-      return () => cancelAnimationFrame(raf);
+      return;
     }
 
     let raf = 0;

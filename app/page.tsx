@@ -9,6 +9,7 @@ import Marquee from "@/components/Marquee";
 import WorkSection from "@/components/WorkSection";
 import Gallery from "@/components/Gallery";
 import Services from "@/components/Services";
+import About from "@/components/About";
 import Stats from "@/components/Stats";
 import Footer from "@/components/Footer";
 
@@ -27,6 +28,7 @@ export default function Home() {
         <WorkSection />
         <Gallery />
         <Services />
+        <About />
         <Stats />
         <Footer />
       </main>

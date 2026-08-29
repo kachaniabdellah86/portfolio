@@ -50,21 +50,21 @@ const instrumentSerif = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Abdellah Kachani — UI/UX Designer",
+  title: "Abdellah Kachani — Creative Developer",
   description:
-    "Portfolio of Abdellah Kachani, UI/UX designer crafting cinematic, conversion-focused digital experiences.",
+    "Creative Developer & Computer Engineering Student. I design and build intelligent digital products — from AI systems and full-stack platforms to cinematic interfaces.",
   metadataBase: new URL("https://abdellahkachani.com"),
   openGraph: {
-    title: "Abdellah Kachani — UI/UX Designer",
+    title: "Abdellah Kachani — Creative Developer",
     description:
-      "Cinematic, conversion-focused digital experiences. Selected work and case studies.",
+      "I design and build intelligent digital products. From AI systems to full-stack platforms to cinematic interfaces.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Abdellah Kachani — UI/UX Designer",
+    title: "Abdellah Kachani — Creative Developer",
     description:
-      "Cinematic, conversion-focused digital experiences. Selected work and case studies.",
+      "Creative Developer & Computer Engineering Student. Designing and building intelligent digital products.",
   },
 };
 

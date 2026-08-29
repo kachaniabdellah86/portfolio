@@ -14,20 +14,20 @@ import { EASE_OUT as EASE } from "./tokens";
 import { useReducedMotionPreference } from "./use-reduced-motion";
 
 const ROW_A = [
-  "UI/UX Design",
-  "Case Studies",
-  "Design Systems",
-  "Motion",
+  "Creative Development",
+  "AI Interfaces",
+  "Product Design",
+  "Motion & Interaction",
   "Web Experiences",
-  "Product Thinking",
+  "Full-Stack Engineering",
 ];
 
 const ROW_B = [
   "React / Next.js",
   "Figma",
   "Three.js / WebGL",
-  "Conversion UX",
-  "Trust Design",
+  "TypeScript",
+  "System Design",
   "Cinematic Interfaces",
 ];
 

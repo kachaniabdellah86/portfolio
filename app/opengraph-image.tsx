@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Abdellah Kachani — UI/UX Designer";
+export const alt = "Abdellah Kachani — Creative Developer";
 export const size = {
   width: 1200,
   height: 630,
@@ -69,7 +69,7 @@ export default function Image() {
               color: "rgba(232, 230, 225, 0.6)",
             }}
           >
-            UI/UX designer — cinematic, conversion-focused experiences
+            Creative Developer — designing & building intelligent digital products
           </div>
         </div>
 

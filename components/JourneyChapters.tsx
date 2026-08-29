@@ -25,7 +25,7 @@ type Chapter = {
 const CHAPTERS: Chapter[] = [
   {
     id: "spark",
-    eyebrow: "Abdellah Kachani / Product designer & creative developer",
+    eyebrow: "Abdellah Kachani / Creative Developer & Computer Engineering Student",
     title: (
       <>
         This is the line
@@ -34,7 +34,7 @@ const CHAPTERS: Chapter[] = [
       </>
     ),
     description:
-      "Not a gallery of screens. A living path through the questions, systems, and products that shaped how I design.",
+      "Not a gallery of screens. A living path through the questions, systems, and products that shaped how I design and build.",
     range: [0, 0.2],
     align: "left",
     intro: true,

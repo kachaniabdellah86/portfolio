@@ -49,8 +49,15 @@ type Project = {
   tone: string;
   cursorBg?: string;
   href?: string;
+  sourceHref?: string;
   live?: boolean;
   image?: string;
+  details?: {
+    role: string;
+    problem: string;
+    built: string;
+    stack: string[];
+  };
 };
 
 const PROJECTS: Project[] = [
@@ -64,20 +71,51 @@ const PROJECTS: Project[] = [
     tone: "from-[#0a1128] via-[#0e1738] to-[#060b18]",
     cursorBg: "linear-gradient(135deg, #0a1128 0%, #1c2b5e 65%, #5b8fff 140%)",
     live: false,
+    details: {
+      role: "Designer & Developer",
+      problem: "Autonomous agents operate as black boxes. Making invisible computation visible requires designing interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
+      built: "Interactive DAG visualization of multi-agent routing. Real-time task execution pipeline with typed orchestration. Simulated agent telemetry showing architectural patterns (multi-agent routing, typed handoff, privacy-safe public architecture).",
+      stack: ["React 19", "TypeScript", "SVG/Canvas", "Motion/Framer"],
+    },
   },
   {
     index: "02",
+    title: "FICAM Festival Platform",
+    subtitle:
+      "Full-stack festival companion application — student registration, QR-code verification, gamified progression and reward system.",
+    tags: ["Next.js", "Full-Stack", "Supabase"],
+    year: "2024",
+    tone: "from-[#0c1433] via-[#1a2856] to-[#070a18]",
+    cursorBg: "linear-gradient(135deg, #0c1433 0%, #1f3a6b 60%, #5b8fff 135%)",
+    href: "https://ficam-festival-final.vercel.app",
+    sourceHref: "https://github.com/kachaniabdellah86/ficam-festival-app",
+    live: true,
+    details: {
+      role: "Full-Stack Developer",
+      problem: "Festival organizers needed a way to engage student participants, track attendance, validate film screenings, and reward engagement across multiple sessions.",
+      built: "Student registration and authentication. QR-code scanning for session validation. Gamified progression system with badges and level unlocking. Real-time reward accumulation.",
+      stack: ["Next.js", "TypeScript", "Supabase (PostgreSQL)", "Real-time Subscriptions"],
+    },
+  },
+  {
+    index: "03",
     title: "Aura Pay",
     subtitle:
       "Next-generation spatial finance & wealth OS — titanium cards, automated yield routing and instant biometric settlements.",
-    tags: ["iOS / Swift", "FinTech UX", "Spatial Design"],
+    tags: ["FinTech Concept", "Product Design", "Spatial UI"],
     year: "2026",
     tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
     cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
     live: false,
+    details: {
+      role: "Product Designer",
+      problem: "Digital finance feels weightless. How do you make trust feel tactile? How do you make instantaneous transactions feel intentional?",
+      built: "Interactive prototype of a spatial finance interface. Dynamic currency switching (USD/EUR/ETH). Real-time spending graph with monotone cubic interpolation. Biometric settlement flows.",
+      stack: ["React 19", "TypeScript", "SVG Graphics", "Motion Animations"],
+    },
   },
   {
-    index: "03",
+    index: "04",
     title: "Yalla China",
     subtitle:
       "Multilingual study-abroad platform — trust-centered journey for Moroccan families (FR/EN/AR).",
@@ -88,6 +126,12 @@ const PROJECTS: Project[] = [
     href: "https://go-china-site.vercel.app/fr",
     live: true,
     image: "/media/yallachina-preview.webp",
+    details: {
+      role: "Product Designer & Frontend Developer",
+      problem: "Moroccan students and families needed clarity and trust around study abroad in China. Language and cultural distance created friction. Testimonials and social proof were missing.",
+      built: "Fully internationalized web platform (French, English, Arabic, Darija). Right-to-left support for Arabic. Trust-centered UX with clear program pathways, FAQ, and decision support.",
+      stack: ["Next.js", "TypeScript", "i18n-next", "Tailwind CSS"],
+    },
   },
 ];
 
@@ -382,8 +426,8 @@ function KachaniosLiveEngine() {
 
       {/* ── Status bar ── */}
       <div className="flex items-center justify-between border-t border-white/8 pt-2 text-[0.48rem] text-white/30 z-10">
-        <span>hybrid-reasoning · eval 99.8 %</span>
-        <span>convergence <span className="text-emerald-400/80">zero-drift ✓</span></span>
+        <span>multi-agent routing · typed orchestration</span>
+        <span>architecture <span className="text-emerald-400/80">production-ready ✓</span></span>
       </div>
     </div>
   );
@@ -706,6 +750,7 @@ function ProjectPreview({ project }: { project: Project }) {
 function Card({ project }: { project: Project }) {
   const reduce = useReducedMotionPreference();
   const tilt = useTilt(!reduce);
+  const [showDetails, setShowDetails] = useState(false);
 
   const focusPrototype = () => {
     const preview = document.getElementById(`project-${project.index}-preview`);
@@ -756,20 +801,33 @@ function Card({ project }: { project: Project }) {
         <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-xl">
             <p className="text-sm leading-relaxed text-muted">{project.subtitle}</p>
-            {project.href ? (
-              <a href={project.href} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-[var(--accent)] hover:underline">
-                Visit live platform <span>↗</span>
-              </a>
-            ) : (
-              <button
-                type="button"
-                onClick={focusPrototype}
-                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
-              >
-                Explore interactive prototype <span aria-hidden="true">↑</span>
-              </button>
-            )}
+            <div className="inline-flex items-center gap-3 mt-2">
+              {project.href ? (
+                <a href={project.href} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline">
+                  Visit live platform <span>↗</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={focusPrototype}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
+                >
+                  Explore interactive prototype <span aria-hidden="true">↑</span>
+                </button>
+              )}
+              {project.details && (
+                <button
+                  type="button"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
+                  aria-expanded={showDetails}
+                  aria-label={`${showDetails ? "Hide" : "Show"} project details`}
+                >
+                  {showDetails ? "Hide" : "Show"} details
+                </button>
+              )}
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {project.tags.map((tag) => (
@@ -780,6 +838,49 @@ function Card({ project }: { project: Project }) {
             ))}
           </div>
         </div>
+
+        {/* Project Details */}
+        {project.details && showDetails && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-6 grid gap-4 border-t border-white/8 pt-6"
+          >
+            <div>
+              <p className="label-caps text-white/50 mb-2">My Role</p>
+              <p className="text-sm text-white/80">{project.details.role}</p>
+            </div>
+            <div>
+              <p className="label-caps text-white/50 mb-2">Problem</p>
+              <p className="text-sm text-white/70 leading-relaxed">{project.details.problem}</p>
+            </div>
+            <div>
+              <p className="label-caps text-white/50 mb-2">What I Built</p>
+              <p className="text-sm text-white/70 leading-relaxed">{project.details.built}</p>
+            </div>
+            <div>
+              <p className="label-caps text-white/50 mb-2">Stack</p>
+              <div className="flex flex-wrap gap-2">
+                {project.details.stack.map((tech) => (
+                  <span key={tech}
+                    className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.65rem] font-medium text-white/70">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {project.sourceHref && (
+              <div className="pt-2">
+                <a href={project.sourceHref} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 hover:text-[var(--accent)] transition-colors">
+                  Source code <span>↗</span>
+                </a>
+              </div>
+            )}
+          </motion.div>
+        )}
       </motion.article>
     </Reveal>
   );

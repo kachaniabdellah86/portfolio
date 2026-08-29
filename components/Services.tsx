@@ -3,23 +3,23 @@ import { Reveal } from "./Marquee";
 const SERVICES = [
   {
     index: "01",
-    title: "Product & UI/UX Design",
-    desc: "End-to-end product design — research, flows and high-fidelity interfaces built to convert, not just to impress.",
+    title: "Creative Development",
+    desc: "Full-stack development with motion and interaction at the core — building experiences that feel alive, not static.",
   },
   {
     index: "02",
-    title: "Design Systems",
-    desc: "Tokens, components and documentation that keep teams fast and products consistent at any scale.",
+    title: "Product Design & Engineering",
+    desc: "End-to-end product development — research, flows, high-fidelity interfaces, and the code that brings them to life.",
   },
   {
     index: "03",
     title: "Motion & Interaction",
-    desc: "Micro-interactions, WebGL scenes and page transitions with intent — motion that carries the story.",
+    desc: "Micro-interactions, WebGL scenes and page transitions with intent — motion that carries the story forward.",
   },
   {
     index: "04",
-    title: "Conversion & Trust UX",
-    desc: "Multilingual journeys (FR / EN / AR) designed around clarity, credibility and the next click.",
+    title: "AI Interfaces & Agents",
+    desc: "Designing interfaces for complex AI systems — making invisible processes visible, translating computation into clarity.",
   },
 ];
 
