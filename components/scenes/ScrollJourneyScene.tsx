@@ -8,17 +8,18 @@ import {
   SCROLL_JOURNEY_DEFAULTS,
   type ScrollJourneyOptions,
 } from "./scrollJourneyRenderer";
+import { shouldRunJourney } from "./renderQuality";
 
 type ScrollJourneySceneProps = {
   setStatus: Dispatch<SetStateAction<SceneStatus>>;
 };
 
 function getScenePhase(progress: number) {
-  if (progress < 0.18) return "arrival";
+  if (progress < 0.18) return "spark";
   if (progress < 0.4) return "kachanios";
   if (progress < 0.64) return "aura-pay";
   if (progress < 0.86) return "yalla-china";
-  return "contact";
+  return "horizon";
 }
 
 export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProps) {
@@ -50,9 +51,16 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     const resize = () => {
       const bounds = host.getBoundingClientRect();
       journey.resize(bounds.width, bounds.height);
-      journey.render(performance.now());
     };
+    const canRun = () =>
+      shouldRunJourney({
+        contextAvailable,
+        documentHidden: document.hidden,
+        journeyVisible: scrollBus.journeyVisible,
+      });
     const tick = (timestamp: number) => {
+      animationFrame = 0;
+      if (!canRun()) return;
       options.progress = scrollBus.journeyProgress;
       options.velocity = scrollBus.velocity;
       const phase = getScenePhase(options.progress);
@@ -61,8 +69,15 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
         lastPhase = phase;
       }
       journey.render(timestamp);
-      animationFrame =
-        !document.hidden && contextAvailable ? requestAnimationFrame(tick) : 0;
+      animationFrame = requestAnimationFrame(tick);
+    };
+    const syncAnimationLoop = () => {
+      if (canRun() && !animationFrame) {
+        animationFrame = requestAnimationFrame(tick);
+      } else if (!canRun() && animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
@@ -74,30 +89,26 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     const onContextLost = (event: Event) => {
       event.preventDefault();
       contextAvailable = false;
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
+      syncAnimationLoop();
       setStatus("failed");
-    };
-    const onVisibilityChange = () => {
-      if (!document.hidden && contextAvailable && !animationFrame) {
-        animationFrame = requestAnimationFrame(tick);
-      }
     };
     const resizeObserver = new ResizeObserver(resize);
 
     resizeObserver.observe(host);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("journey-visibility-change", syncAnimationLoop);
+    document.addEventListener("visibilitychange", syncAnimationLoop);
     canvas.addEventListener("webglcontextlost", onContextLost);
     resize();
     setStatus("active");
-    animationFrame = requestAnimationFrame(tick);
+    syncAnimationLoop();
 
     return () => {
       if (animationFrame) cancelAnimationFrame(animationFrame);
       resizeObserver.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("journey-visibility-change", syncAnimationLoop);
+      document.removeEventListener("visibilitychange", syncAnimationLoop);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       journey.dispose();
     };

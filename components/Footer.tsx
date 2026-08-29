@@ -164,6 +164,7 @@ export default function Footer() {
           {[
             { label: "LinkedIn", href: "https://www.linkedin.com/in/abdellah-kachani-8284a5251/" },
             { label: "GitHub", href: "https://github.com/kachaniabdellah86" },
+            { label: "Instagram", href: "" },
           ].map(({ label, href }) => (
             <a
               key={label}

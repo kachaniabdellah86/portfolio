@@ -22,4 +22,5 @@ export const scrollBus = {
   velocity: 0,
   progress: 0,
   journeyProgress: 0,
+  journeyVisible: true,
 };

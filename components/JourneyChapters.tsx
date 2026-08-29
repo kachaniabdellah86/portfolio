@@ -24,82 +24,84 @@ type Chapter = {
 
 const CHAPTERS: Chapter[] = [
   {
-    id: "arrival",
-    eyebrow: "Scroll-driven portfolio / 2026",
+    id: "spark",
+    eyebrow: "Abdellah Kachani / Product designer & creative developer",
     title: (
       <>
-        Enter the work<span className="accent">.</span>
+        This is the line
         <br />
-        Don&apos;t just watch it.
+        that made <em className="serif accent italic">me.</em>
       </>
     ),
     description:
-      "A live 3D journey through product systems, spatial finance, and multilingual experience design.",
-    range: [0, 0.19],
+      "Not a gallery of screens. A living path through the questions, systems, and products that shaped how I design.",
+    range: [0, 0.2],
     align: "left",
     intro: true,
   },
   {
     id: "kachanios",
-    eyebrow: "01 / KachaniOS — Agentic systems",
+    eyebrow: "Chapter 01 / KachaniOS — The system",
     title: (
       <>
-        An intelligence system
+        The interface learned
         <br />
-        with a <em className="serif accent italic">visible mind.</em>
+        how to <em className="serif accent italic">think.</em>
       </>
     ),
     description:
-      "A cognitive operating system where planning, memory, execution, and verification become one legible interface.",
-    range: [0.14, 0.42],
+      "KachaniOS turned an invisible agent loop into a world people can read: thought becomes nodes, memory becomes structure, and complexity becomes calm.",
+    range: [0.15, 0.44],
     align: "right",
   },
   {
     id: "aura-pay",
-    eyebrow: "02 / Aura Pay — Spatial finance",
+    eyebrow: "Chapter 02 / Aura Pay — The feeling",
     title: (
       <>
-        Money that feels
+        Digital money found
         <br />
-        immediate, calm, <em className="serif accent italic">alive.</em>
+        a physical <em className="serif accent italic">weight.</em>
       </>
     ),
     description:
-      "A secure wealth OS shaped around biometric settlement, titanium tactility, and clear financial momentum.",
-    range: [0.37, 0.66],
+      "Aura Pay explored how trust can feel tactile—titanium surfaces, spatial data, and biometric moments designed to make finance immediate without making it loud.",
+    range: [0.39, 0.68],
     align: "left",
   },
   {
     id: "yalla-china",
-    eyebrow: "03 / Yalla China — Multilingual trust",
+    eyebrow: "Chapter 03 / Yalla China — The bridge",
     title: (
       <>
-        One journey across
+        Design crossed language,
         <br />
-        languages and <em className="serif accent italic">borders.</em>
+        distance, and <em className="serif accent italic">doubt.</em>
       </>
     ),
     description:
-      "A conversion-focused study-abroad platform that makes a complex decision feel credible to students and families.",
-    range: [0.61, 0.88],
+      "Yalla China connected students and families across French, English, Arabic, and a life-changing decision—using clarity as the bridge between ambition and trust.",
+    range: [0.63, 0.9],
     align: "right",
   },
   {
-    id: "handoff",
-    eyebrow: "Three worlds / One practice",
+    id: "horizon",
+    eyebrow: "Chapter 04 / What comes next",
     title: (
       <>
-        Now see the interfaces
+        The line is still
         <br />
-        behind the <em className="serif accent italic">worlds.</em>
+        being <em className="serif accent italic">drawn.</em>
       </>
     ),
     description:
-      "Continue into the working prototypes, interaction systems, and decisions behind each project.",
-    range: [0.83, 1],
+      "Every project below is another point on it. Scroll on to see the interfaces, prototypes, and decisions behind these worlds.",
+    range: [0.85, 1],
     align: "left",
   },
 ];
+
+const CHAPTER_LABELS = ["Spark", "System", "Feeling", "Bridge", "Next"];
 
 function ChapterPanel({
   chapter,
@@ -212,6 +214,23 @@ export default function JourneyChapters() {
     };
   }, []);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      scrollBus.journeyVisible = entry.isIntersecting;
+      window.dispatchEvent(new Event("journey-visibility-change"));
+    });
+
+    observer.observe(track);
+    return () => {
+      observer.disconnect();
+      scrollBus.journeyVisible = false;
+      window.dispatchEvent(new Event("journey-visibility-change"));
+    };
+  }, []);
+
   if (reduceMotion) {
     return (
       <section ref={trackRef} aria-label="Portfolio journey">
@@ -229,19 +248,44 @@ export default function JourneyChapters() {
       className="relative h-[520vh]"
     >
       <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="pointer-events-none absolute left-6 top-7 flex items-center gap-3 sm:left-12">
+          <span className="size-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_14px_var(--accent)]" />
+          <span className="label-caps text-white/40">A life in making</span>
+        </div>
+
         {CHAPTERS.map((chapter) => (
           <ChapterPanel key={chapter.id} chapter={chapter} progress={progress} />
         ))}
 
-        <div className="absolute bottom-8 left-6 right-6 flex items-center gap-4 sm:left-12 sm:right-12">
-          <span className="label-caps text-white/35">Journey</span>
-          <div className="h-px flex-1 overflow-hidden bg-white/10">
+        <div className="absolute bottom-7 left-6 right-6 sm:left-12 sm:right-12">
+          <div className="mb-3 hidden grid-cols-5 text-[0.56rem] font-medium uppercase tracking-[0.2em] text-white/30 sm:grid">
+            {CHAPTER_LABELS.map((label, index) => (
+              <span
+                key={label}
+                className={index === CHAPTER_LABELS.length - 1 ? "text-right" : ""}
+              >
+                {String(index).padStart(2, "0")} / {label}
+              </span>
+            ))}
+          </div>
+          <div className="relative h-px bg-white/10">
             <motion.div
               style={{ scaleX: progress }}
-              className="h-full origin-left bg-gradient-to-r from-[#5b8fff] via-[#9d7bff] to-[#ff6b55]"
+              className="absolute inset-y-0 left-0 right-0 origin-left bg-gradient-to-r from-[#5b8fff] via-[#9d7bff] to-[#ffb36b] shadow-[0_0_12px_rgba(91,143,255,0.65)]"
             />
+            {CHAPTER_LABELS.map((label, index) => (
+              <span
+                key={label}
+                aria-hidden="true"
+                className="absolute top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-[#030610]"
+                style={{ left: `${(index / (CHAPTER_LABELS.length - 1)) * 100}%` }}
+              />
+            ))}
           </div>
-          <span className="label-caps text-white/35">Scroll ↓</span>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="label-caps text-white/30">Follow the signal</span>
+            <span className="label-caps text-white/30">Scroll to move ↓</span>
+          </div>
         </div>
       </div>
     </section>
