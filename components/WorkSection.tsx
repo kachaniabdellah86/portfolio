@@ -715,6 +715,20 @@ function ProjectPreview({ project }: { project: Project }) {
       {project.title === "KachaniOS" && <KachaniosLiveEngine />}
       {project.title === "Aura Pay" && <AuraPayLiveSimulator />}
 
+      {project.title === "FICAM Festival Platform" && project.href && (
+        <div className="absolute inset-0 overflow-hidden">
+          <iframe 
+            src={project.href}
+            className="w-full h-full border-0 opacity-80 transition-all duration-700 ease-out group-hover:opacity-100 pointer-events-none"
+            title={`${project.title} live preview`}
+            loading="lazy"
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080b18]/60 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-10" />
+        </div>
+      )}
+
       {project.image && (
         <div className="absolute inset-0 overflow-hidden">
           <Image src={project.image} alt={project.title} fill quality={95}
