@@ -16,12 +16,9 @@ This document outlines the performance and battery-life improvements made to the
 - `components/scenes/scrollJourneyRenderer.ts` (line ~703)
 
 ### 2. **Intelligent Quality Scaling for High-DPI Displays**
-- **Implementation**: Reduced pixel ratio on ultra-high-density screens (3x+)
-- **Strategy**: 
-  - Standard devices: Up to 1.75x pixel ratio
-  - High-DPI (3x+): Capped at 1.25x pixel ratio
-  - Compact mode: Progressive reduction based on frame performance
-- **Rationale**: 3x+ displays already provide sharp visuals; exceeding this wastes battery without noticeable quality gain
+- **Full desktop**: Starts at `clamp(devicePixelRatio + 0.25, 1.4, 1.8)` with a 1.25 adaptive floor
+- **Compact/narrow mode**: Preserves the conservative native-DPR policy, capped at 1.5 or 1.25 on 3x+ displays
+- **Rationale**: Mild desktop supersampling improves thin and diagonal geometry, while compact mode retains its battery budget and sustained frame pressure can still reduce desktop DPR
 
 **Files Modified**:
 - `components/scenes/renderQuality.ts` (getRenderQuality function)
@@ -40,10 +37,11 @@ This document outlines the performance and battery-life improvements made to the
 
 ### 4. **Frame-Time Adaptive Quality**
 - **How It Works**:
-  - Monitors `frameTimeMs` each render
-  - If >20ms for 24+ consecutive frames: Reduce pixel ratio by 0.25x
-  - If <17.5ms for 180+ consecutive frames: Increase pixel ratio by 0.25x
-- **Result**: Automatic graceful degradation on overloaded hardware
+  - Monitors an exponentially smoothed frame time each render
+  - If >22ms for 72 consecutive classifications: Reduce pixel ratio by 0.1
+  - If <18ms for 90 consecutive classifications: Increase pixel ratio by 0.1
+  - Neutral frame times reset both counters, preventing intermittent spikes from accumulating
+- **Result**: Sustained overload still degrades gracefully, while short interaction spikes do not trigger visible resolution pumping
 
 **Files Modified**:
 - `components/scenes/renderQuality.ts` (updateAdaptiveQuality function - existing)
@@ -61,11 +59,11 @@ This document outlines the performance and battery-life improvements made to the
 
 ## Performance Metrics
 
-### Expected Improvements
-- **Mobile Battery**: 15-20% reduction in GPU power consumption
-- **High-DPI Devices**: 25-30% faster rendering when needed
-- **Frame Time**: More stable 60fps on mid-range devices
-- **Context Stability**: Automatic recovery from WebGL context loss
+### Expected Tradeoffs
+- **Desktop clarity**: Higher initial drawing-buffer resolution and a 0.70 bloom sizing scale
+- **Desktop GPU load**: More fill-rate work at the target DPR, bounded by the 1.8 cap and adaptive floor
+- **Mobile battery**: Compact DPR, disabled bloom, and reduced geometry remain unchanged
+- **Context stability**: Automatic recovery from WebGL context loss remains in place
 
 ### Testing Recommendations
 
@@ -86,7 +84,7 @@ This document outlines the performance and battery-life improvements made to the
    - Verify scene auto-recovers
 
 4. **Adaptive Quality**:
-   - Throttle network to observe quality scaling
+   - Use CPU/GPU throttling to observe quality scaling
    - Monitor canvas performance with Firefox Performance Monitor
 
 ## Architecture Notes
@@ -101,12 +99,18 @@ This document outlines the performance and battery-life improvements made to the
 1. **Texture Atlasing**: Combine multiple textures into single atlas for reduced draw calls
 2. **LOD (Level of Detail)**: Simplify geometry on low-end devices beyond compact mode
 3. **GPU Memory Monitoring**: Detect and respond to GPU memory pressure (via `EXT_disjoint_timer_query`)
-4. **Bloom Strength Curve**: Adjust bloom based on framerate for better visual stability
+4. **GPU Timing**: Use disjoint timer queries to distinguish GPU pressure from CPU frame delays
 5. **Pointer Predictive Tracking**: Implement velocity-based camera prediction for smoother pointer follow
 
 ## Changelog
 
-**v1.1.0** (Current)
+**v1.2.0** (Current)
+- ✅ Mild full-desktop supersampling with a 1.8 DPR cap
+- ✅ Longer downscale hysteresis and 0.1 DPR steps
+- ✅ Faster proportional recovery and lower motion-driven bloom
+- ✅ Higher full-desktop bloom buffer resolution
+
+**v1.1.0**
 - ✅ Adaptive bloom disable for compact and high-DPI modes
 - ✅ WebGL context restoration support
 - ✅ Improved high-DPI quality scaling

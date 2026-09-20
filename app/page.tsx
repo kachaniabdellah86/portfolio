@@ -24,13 +24,15 @@ export default function Home() {
 
       <main id="top" className="relative z-10">
         <JourneyChapters />
-        <Marquee />
-        <WorkSection />
-        <Gallery />
-        <Services />
-        <About />
-        <Stats />
-        <Footer />
+        <div className="relative bg-[var(--bg)]">
+          <Marquee />
+          <WorkSection />
+          <Gallery />
+          <Services />
+          <About />
+          <Stats />
+          <Footer />
+        </div>
       </main>
     </SmoothScroll>
   );

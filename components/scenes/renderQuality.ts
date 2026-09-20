@@ -25,11 +25,39 @@ type AdaptiveQualityInput = {
   targetPixelRatio: number;
 };
 
+type BloomResolutionInput = {
+  quality: RenderQuality;
+  width: number;
+};
+
 type JourneyRuntimeInput = {
   contextAvailable: boolean;
   documentHidden: boolean;
   journeyVisible: boolean;
 };
+
+const SLOW_FRAME_TIME_MS = 22;
+const FAST_FRAME_TIME_MS = 18;
+const SLOW_FRAME_LIMIT = 72;
+const FAST_FRAME_LIMIT = 90;
+const PIXEL_RATIO_STEP = 0.1;
+
+function roundPixelRatio(pixelRatio: number) {
+  return Math.round(pixelRatio * 100) / 100;
+}
+
+export function getBloomResolutionScale({
+  quality,
+  width,
+}: BloomResolutionInput) {
+  return quality === "full" && width >= 768 ? 0.7 : 0.55;
+}
+
+export function getBloomStrength(velocity: number) {
+  const safeVelocity = Number.isFinite(velocity) ? Math.abs(velocity) : 0;
+  const motionEnergy = Math.min(safeVelocity / 1100, 1);
+  return roundPixelRatio(0.66 + motionEnergy * 0.06);
+}
 
 export function getRenderQuality({
   devicePixelRatio,
@@ -39,19 +67,21 @@ export function getRenderQuality({
   const safePixelRatio = Number.isFinite(devicePixelRatio)
     ? Math.max(1, devicePixelRatio)
     : 1;
-  // High DPI devices (3x+) or mobile tablets should reduce quality to conserve battery
+  const isFullDesktop = width >= 768 && quality === "full";
+  if (isFullDesktop) {
+    return {
+      antialias: true,
+      minPixelRatio: 1.25,
+      pixelRatio: Math.min(1.8, Math.max(1.4, safePixelRatio + 0.25)),
+      samples: 0,
+    };
+  }
+
+  // Compact and narrow layouts stay bounded to protect mobile GPU and battery budgets.
   const isHighDensity = safePixelRatio > 2;
-  const maxPixelRatio = isHighDensity
-    ? 1.25
-    : width >= 768 && quality === "full"
-      ? 1.75
-      : 1.5;
+  const maxPixelRatio = isHighDensity ? 1.25 : 1.5;
   const minBudget =
-    isHighDensity || quality === "compact"
-      ? 1
-      : width >= 768
-        ? 1.25
-        : 1.15;
+    isHighDensity || quality === "compact" ? 1 : 1.15;
   const pixelRatio = Math.min(safePixelRatio, maxPixelRatio);
 
   return {
@@ -66,26 +96,32 @@ export function updateAdaptiveQuality(
   state: AdaptiveQualityState,
   { frameTimeMs, minPixelRatio, targetPixelRatio }: AdaptiveQualityInput,
 ): AdaptiveQualityState {
-  if (frameTimeMs > 20) {
+  if (frameTimeMs > SLOW_FRAME_TIME_MS) {
     const slowFrames = state.slowFrames + 1;
-    if (slowFrames < 24) {
+    if (slowFrames < SLOW_FRAME_LIMIT) {
       return { ...state, fastFrames: 0, slowFrames };
     }
     return {
       fastFrames: 0,
-      pixelRatio: Math.max(minPixelRatio, state.pixelRatio - 0.25),
+      pixelRatio: Math.max(
+        minPixelRatio,
+        roundPixelRatio(state.pixelRatio - PIXEL_RATIO_STEP),
+      ),
       slowFrames: 0,
     };
   }
 
-  if (frameTimeMs < 17.5) {
+  if (frameTimeMs < FAST_FRAME_TIME_MS) {
     const fastFrames = state.fastFrames + 1;
-    if (fastFrames < 180) {
+    if (fastFrames < FAST_FRAME_LIMIT) {
       return { ...state, fastFrames, slowFrames: 0 };
     }
     return {
       fastFrames: 0,
-      pixelRatio: Math.min(targetPixelRatio, state.pixelRatio + 0.25),
+      pixelRatio: Math.min(
+        targetPixelRatio,
+        roundPixelRatio(state.pixelRatio + PIXEL_RATIO_STEP),
+      ),
       slowFrames: 0,
     };
   }
