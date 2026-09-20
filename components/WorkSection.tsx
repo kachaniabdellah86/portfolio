@@ -1,58 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { motion, useSpring } from "motion/react";
+import { AnimatePresence, motion, useInView, useSpring } from "motion/react";
 import { Reveal } from "./Marquee";
-
 import { EASE_OUT as EASE } from "./tokens";
 import { useReducedMotionPreference } from "./use-reduced-motion";
 
-function useTilt(enabled: boolean) {
-  const rx = useSpring(0, { stiffness: 180, damping: 20 });
-  const ry = useSpring(0, { stiffness: 180, damping: 20 });
-
-  const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
-    if (!enabled) return;
-    const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    
-    rx.set((0.5 - py) * 7);
-    ry.set((px - 0.5) * 9);
-    
-    el.style.setProperty("--mx", `${(px * 100).toFixed(2)}%`);
-    el.style.setProperty("--my", `${(py * 100).toFixed(2)}%`);
-  };
-
-  const onPointerLeave = () => {
-    rx.set(0);
-    ry.set(0);
-  };
-
-  return {
-    onPointerMove,
-    onPointerLeave,
-    style: enabled
-      ? ({ rotateX: rx, rotateY: ry, transformPerspective: 900 } as const)
-      : {},
-  };
-}
+type Brand = {
+  accent: string;
+  accentSoft: string;
+  background: string;
+  ink: string;
+};
 
 type Project = {
+  id: "kachanios" | "ficam" | "yalla" | "aura";
   index: string;
   title: string;
+  meaning: string;
   subtitle: string;
   tags: string[];
   year: string;
-  tone: string;
-  cursorBg?: string;
+  status: string;
+  brand: Brand;
   href?: string;
   sourceHref?: string;
-  live?: boolean;
-  image?: string;
-  details?: {
+  details: {
     role: string;
     problem: string;
     built: string;
@@ -62,847 +36,972 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
+    id: "kachanios",
     index: "01",
     title: "KachaniOS",
+    meaning: "The interface that thinks.",
     subtitle:
-      "Designing the interface for a self-evolving AI agent — neural graph architecture, AST inspection and autonomous cognition.",
-    tags: ["Product UX", "AI Interfaces", "Desktop OS"],
+      "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
+    tags: ["AI Interfaces", "Product UX", "Desktop OS"],
     year: "2026",
-    tone: "from-[#0a1128] via-[#0e1738] to-[#060b18]",
-    cursorBg: "linear-gradient(135deg, #0a1128 0%, #1c2b5e 65%, #5b8fff 140%)",
-    live: false,
+    status: "Interactive prototype",
+    brand: {
+      accent: "#7fa5ff",
+      accentSoft: "rgba(91,143,255,0.16)",
+      background:
+        "radial-gradient(ellipse at 72% 28%, rgba(91,143,255,0.2), transparent 55%), linear-gradient(180deg, #060b1c 0%, #04070f 100%)",
+      ink: "#e6edff",
+    },
     details: {
       role: "Designer & Developer",
-      problem: "Autonomous agents operate as black boxes. Making invisible computation visible requires designing interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
-      built: "Interactive DAG visualization of multi-agent routing. Real-time task execution pipeline with typed orchestration. Simulated agent telemetry showing architectural patterns (multi-agent routing, typed handoff, privacy-safe public architecture).",
-      stack: ["React 19", "TypeScript", "SVG/Canvas", "Motion/Framer"],
+      problem:
+        "Autonomous agents operate as black boxes. Making invisible computation visible requires interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
+      built:
+        "Interactive graph of multi-agent routing. Real-time task pipeline with typed orchestration. Simulated telemetry that shows the architecture without exposing private context.",
+      stack: ["React 19", "TypeScript", "SVG / Canvas", "Motion"],
     },
   },
   {
+    id: "ficam",
     index: "02",
     title: "FICAM Festival Platform",
+    meaning: "Vivez le cinéma — in your pocket.",
     subtitle:
-      "Full-stack festival companion application — student registration, QR-code verification, gamified progression and reward system.",
-    tags: ["Next.js", "Full-Stack", "Supabase"],
+      "The official companion app for the FICAM film festival: student registration, QR-code session validation, gamified progression and live rewards.",
+    tags: ["Next.js", "Supabase", "Full-Stack"],
     year: "2024",
-    tone: "from-[#0c1433] via-[#1a2856] to-[#070a18]",
-    cursorBg: "linear-gradient(135deg, #0c1433 0%, #1f3a6b 60%, #5b8fff 135%)",
+    status: "Live product",
+    brand: {
+      accent: "#e879f9",
+      accentSoft: "rgba(168,85,247,0.18)",
+      background:
+        "radial-gradient(ellipse at 28% 42%, rgba(168,85,247,0.24), transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(219,39,119,0.14), transparent 50%), linear-gradient(180deg, #0d0618 0%, #07040f 100%)",
+      ink: "#f5e9ff",
+    },
     href: "https://ficam-festival-final.vercel.app",
     sourceHref: "https://github.com/kachaniabdellah86/ficam-festival-app",
-    live: true,
     details: {
       role: "Full-Stack Developer",
-      problem: "Festival organizers needed a way to engage student participants, track attendance, validate film screenings, and reward engagement across multiple sessions.",
-      built: "Student registration and authentication. QR-code scanning for session validation. Gamified progression system with badges and level unlocking. Real-time reward accumulation.",
-      stack: ["Next.js", "TypeScript", "Supabase (PostgreSQL)", "Real-time Subscriptions"],
+      problem:
+        "Festival organizers needed to engage student participants, track attendance, validate screenings and reward engagement across multiple sessions.",
+      built:
+        "Registration and authentication. QR scanning for session validation. Gamified progression with badges and level unlocks. Real-time reward accumulation.",
+      stack: ["Next.js", "TypeScript", "Supabase (PostgreSQL)", "Realtime"],
     },
   },
   {
+    id: "yalla",
     index: "03",
     title: "Yalla China",
+    meaning: "From Morocco to a campus in China, step by step.",
     subtitle:
-      "Multilingual study-abroad platform — trust-centered journey for Moroccan families (FR/EN/AR).",
+      "A trust-first, multilingual platform (FR / EN / AR) guiding Moroccan students and their families through a seven-step journey to studying in China.",
     tags: ["Next.js", "i18n + RTL", "Conversion"],
     year: "2025",
-    tone: "from-[#0c1433] via-[#0f1a40] to-[#080b18]",
-    cursorBg: "linear-gradient(135deg, #0c1433 0%, #1a2f6b 60%, #5b8fff 135%)",
+    status: "Live product",
+    brand: {
+      accent: "#f0b64a",
+      accentSoft: "rgba(240,182,74,0.16)",
+      background:
+        "radial-gradient(ellipse at 74% 34%, rgba(240,182,74,0.16), transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(217,51,63,0.16), transparent 50%), linear-gradient(180deg, #1a0709 0%, #0d0405 100%)",
+      ink: "#fff1dc",
+    },
     href: "https://go-china-site.vercel.app/fr",
-    live: true,
-    image: "/media/yallachina-preview.webp",
     details: {
       role: "Product Designer & Frontend Developer",
-      problem: "Moroccan students and families needed clarity and trust around study abroad in China. Language and cultural distance created friction. Testimonials and social proof were missing.",
-      built: "Fully internationalized web platform (French, English, Arabic, Darija). Right-to-left support for Arabic. Trust-centered UX with clear program pathways, FAQ, and decision support.",
+      problem:
+        "Families needed clarity and trust around studying abroad in China. Language and cultural distance created friction; reassurance was missing.",
+      built:
+        "Fully internationalized platform (French, English, Arabic, Darija) with right-to-left support. A trust-centered flow with clear program pathways, FAQ and decision support.",
       stack: ["Next.js", "TypeScript", "i18n-next", "Tailwind CSS"],
     },
   },
   {
+    id: "aura",
     index: "04",
     title: "Aura Pay",
+    meaning: "Digital money with physical weight.",
     subtitle:
-      "Next-generation spatial finance & wealth OS — titanium cards, automated yield routing and instant biometric settlements.",
-    tags: ["FinTech Concept", "Product Design", "Spatial UI"],
+      "A spatial finance concept: a titanium card, biometric settlement in one gesture, and yield that routes itself — trust you can feel.",
+    tags: ["FinTech Concept", "Spatial UI", "Product Design"],
     year: "2026",
-    tone: "from-[#140e28] via-[#1a1236] to-[#0a0718]",
-    cursorBg: "linear-gradient(135deg, #140e28 0%, #301f5c 65%, #a855f7 140%)",
-    live: false,
+    status: "Interactive prototype",
+    brand: {
+      accent: "#a78bfa",
+      accentSoft: "rgba(167,139,250,0.16)",
+      background:
+        "radial-gradient(ellipse at 30% 62%, rgba(167,139,250,0.2), transparent 55%), linear-gradient(180deg, #0a0812 0%, #050408 100%)",
+      ink: "#efeaff",
+    },
     details: {
       role: "Product Designer",
-      problem: "Digital finance feels weightless. How do you make trust feel tactile? How do you make instantaneous transactions feel intentional?",
-      built: "Interactive prototype of a spatial finance interface. Dynamic currency switching (USD/EUR/ETH). Real-time spending graph with monotone cubic interpolation. Biometric settlement flows.",
-      stack: ["React 19", "TypeScript", "SVG Graphics", "Motion Animations"],
+      problem:
+        "Digital finance feels weightless. How do you make trust tactile and make an instant transaction feel intentional?",
+      built:
+        "Interactive prototype of a spatial finance interface: a physical-feeling card, biometric settlement flow, dynamic currency switching and a spending model.",
+      stack: ["React 19", "TypeScript", "SVG", "Motion"],
     },
   },
 ];
 
-/* ── 1. KachaniOS — Interactive AI Agent Cognitive Sandbox ──────────────
- *  A real developer-tool-grade cockpit. One system-level animate-pulse
- *  on the status LED, everything else driven by React state transitions.
- *  The DAG uses a single SVG viewBox so node circles and edge lines
- *  share the same coordinate space — zero alignment drift.
- * ──────────────────────────────────────────────────────────────────── */
-function KachaniosLiveEngine() {
+/* ── 01 · KachaniOS — ask the agent, watch it think ─────────────────── */
+
+const AGENT_NODES = [
+  { id: "plan", label: "Plan", x: 78, y: 62, color: "#818cf8" },
+  { id: "vault", label: "Vault", x: 322, y: 62, color: "#22d3ee" },
+  { id: "kernel", label: "Kernel", x: 200, y: 132, color: "#7fa5ff" },
+  { id: "run", label: "Run", x: 78, y: 202, color: "#c084fc" },
+  { id: "judge", label: "Judge", x: 322, y: 202, color: "#34d399" },
+] as const;
+
+type AgentNodeId = (typeof AGENT_NODES)[number]["id"];
+
+const AGENT_EDGES: [AgentNodeId, AgentNodeId][] = [
+  ["plan", "kernel"],
+  ["vault", "kernel"],
+  ["kernel", "run"],
+  ["kernel", "judge"],
+  ["plan", "vault"],
+  ["run", "judge"],
+];
+
+const AGENT_PROMPTS = [
+  {
+    label: "Audit the auth flow",
+    route: ["plan", "kernel", "run", "judge"] as AgentNodeId[],
+    lines: [
+      "Decomposed into four verifiable steps.",
+      "Routed to the security auditor with typed context.",
+      "Sandboxed scan across /app — zero secrets exposed.",
+      "Verified. Handoff ready.",
+    ],
+  },
+  {
+    label: "Recall the project context",
+    route: ["plan", "vault", "kernel", "judge"] as AgentNodeId[],
+    lines: [
+      "Question framed: multilingual routing decisions.",
+      "Three sessions of structured memory retrieved.",
+      "Context merged and typed for the next agent.",
+      "Consistent with prior intent. Ready.",
+    ],
+  },
+  {
+    label: "Optimize the build",
+    route: ["plan", "kernel", "judge"] as AgentNodeId[],
+    lines: [
+      "Dependency graph mapped: routes, motion, state.",
+      "Visual overhead reduced, motion preserved.",
+      "Benchmarked for predictable frame times. Pass.",
+    ],
+  },
+];
+
+function edgePath(a: AgentNodeId, b: AgentNodeId) {
+  const from = AGENT_NODES.find((node) => node.id === a)!;
+  const to = AGENT_NODES.find((node) => node.id === b)!;
+  const mx = (from.x + to.x) / 2;
+  const my = (from.y + to.y) / 2;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const bow = 14;
+  return `M ${from.x} ${from.y} Q ${mx + (dy / length) * bow} ${my - (dx / length) * bow} ${to.x} ${to.y}`;
+}
+
+function KachaniosShowcase({ brand }: { brand: Brand }) {
   const reduceMotion = useReducedMotionPreference();
-  const [activeTask, setActiveTask] = useState<"security" | "memory" | "optimizer">("security");
-  const [selectedNode, setSelectedNode] = useState<string>("kernel");
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [streamIndex, setStreamIndex] = useState(4);
-  const [runVersion, setRunVersion] = useState(0);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(hostRef, { once: true, amount: 0.45 });
+  const [prompt, setPrompt] = useState(0);
+  const [step, setStep] = useState(0);
+  const [running, setRunning] = useState(false);
+  const timers = useRef<number[]>([]);
+  const started = useRef(false);
 
-  const tasks = {
-    security: {
-      title: "Typed Security Routing",
-      target: "@security-auditor",
-      telemetry: [
-        { level: "KERNEL", msg: "Decomposed prompt → 'Verify auth flow and route safety'", color: "text-[var(--accent)]" },
-        { level: "AST", msg: "Parsed route contracts across /app and /components — typed handoff preserved", color: "text-indigo-300" },
-        { level: "CHECK", msg: "Context stays local · secrets never exposed in public UI", color: "text-emerald-400" },
-        { level: "PASS", msg: "Routing validated · typed orchestration · context ready", color: "text-amber-300" },
-      ],
-    },
-    memory: {
-      title: "Context Memory Synthesis",
-      target: "@memory-vault",
-      telemetry: [
-        { level: "QUERY", msg: "Semantic retrieval → 'project context and multilingual routing'", color: "text-[var(--accent)]" },
-        { level: "EMBED", msg: "Cross-session context merged into structured project memory", color: "text-cyan-300" },
-        { level: "MERGE", msg: "Connected design intent with engineering constraints and handoff states", color: "text-purple-300" },
-        { level: "DONE", msg: "Context ready · structured handoff · agent-ready", color: "text-emerald-400" },
-      ],
-    },
-    optimizer: {
-      title: "Build & Flow Optimizer",
-      target: "@code-architect",
-      telemetry: [
-        { level: "TRACE", msg: "Dependency graph → nested routes, motion layers, and UI state mapped", color: "text-indigo-300" },
-        { level: "SHAKE", msg: "Reduced visual overhead while preserving motion and clarity", color: "text-amber-300" },
-        { level: "BENCH", msg: "System tuned for readability, flow, and predictable performance", color: "text-[var(--accent)]" },
-        { level: "PASS", msg: "Validated · typed · ready for handoff", color: "text-emerald-400" },
-      ],
-    },
-  };
-
-  /* ── SVG-native DAG — single viewBox, no CSS positioning ── */
-  const dagNodes = [
-    { id: "kernel",  label: "Kernel",  cx: 150, cy: 55, color: "#5b8fff" },
-    { id: "planner", label: "Plan",    cx: 55,  cy: 20, color: "#818cf8" },
-    { id: "vault",   label: "Vault",   cx: 245, cy: 20, color: "#22d3ee" },
-    { id: "harness", label: "Run",     cx: 55,  cy: 90, color: "#c084fc" },
-    { id: "judge",   label: "Judge",   cx: 245, cy: 90, color: "#34d399" },
-  ];
-  const dagEdges = [
-    ["planner", "kernel"], ["vault", "kernel"],
-    ["kernel", "harness"], ["kernel", "judge"],
-    ["planner", "vault"],  ["harness", "judge"],
-  ];
-  const taskRoutes: Record<typeof activeTask, Set<string>> = {
-    security: new Set(["planner-kernel", "kernel-harness", "harness-judge"]),
-    memory: new Set(["planner-vault", "vault-kernel", "kernel-judge"]),
-    optimizer: new Set(["planner-kernel", "kernel-judge"]),
-  };
-  const nodeMap = Object.fromEntries(dagNodes.map((n) => [n.id, n]));
-
-  const nodeInfo: Record<string, { role: string; lat: string; desc: string }> = {
-    kernel:  { role: "Orchestration Kernel",   lat: "ROUTING", desc: "Autonomous loop controller & task-graph dispatcher" },
-    planner: { role: "Planner & Decomposer",   lat: "TYPED", desc: "Breaks goals into verifiable machine-decidable steps" },
-    vault:   { role: "Context Memory",         lat: "LOCAL", desc: "Structured memory for cross-session knowledge" },
-    harness: { role: "Sandboxed AST Runner",    lat: "VALIDATED", desc: "Zero-network sandbox & public-safe verification" },
-    judge:   { role: "Adversarial Verifier",    lat: "HANDOFF", desc: "Independent quality gate for design-to-engineering handoff" },
+  const run = (index: number) => {
+    timers.current.forEach(window.clearTimeout);
+    timers.current = [];
+    setPrompt(index);
+    setRunning(true);
+    const total = AGENT_PROMPTS[index].lines.length;
+    if (reduceMotion) {
+      setStep(total);
+      setRunning(false);
+      return;
+    }
+    setStep(0);
+    for (let i = 1; i <= total; i += 1) {
+      timers.current.push(
+        window.setTimeout(() => {
+          setStep(i);
+          if (i === total) setRunning(false);
+        }, 420 + i * 620),
+      );
+    }
   };
 
   useEffect(() => {
-    if (runVersion === 0) return;
+    if (!inView || started.current) return;
+    started.current = true;
+    run(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView]);
 
-    if (reduceMotion) {
-      const frame = requestAnimationFrame(() => {
-        setStreamIndex(4);
-        setIsExecuting(false);
-      });
-      return () => cancelAnimationFrame(frame);
-    }
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
-    const timers = [
-      window.setTimeout(() => setStreamIndex(1), 60),
-      window.setTimeout(() => setStreamIndex(2), 220),
-      window.setTimeout(() => setStreamIndex(3), 440),
-      window.setTimeout(() => {
-        setStreamIndex(4);
-        setIsExecuting(false);
-      }, 700),
-    ];
-
-    return () => timers.forEach(window.clearTimeout);
-  }, [reduceMotion, runVersion]);
-
-  const runTask = (task: typeof activeTask) => {
-    setActiveTask(task);
-    setIsExecuting(true);
-    setStreamIndex(reduceMotion ? 4 : 0);
-    setRunVersion((version) => version + 1);
-  };
+  const active = AGENT_PROMPTS[prompt];
+  const reached = new Set(active.route.slice(0, Math.min(step + 1, active.route.length)));
+  const litEdges = new Set<string>();
+  for (let i = 0; i < Math.min(step, active.route.length - 1); i += 1) {
+    litEdges.add(`${active.route[i]}-${active.route[i + 1]}`);
+    litEdges.add(`${active.route[i + 1]}-${active.route[i]}`);
+  }
 
   return (
-    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden p-3 sm:p-5 font-mono select-none pointer-events-auto bg-[#070b16]">
-      {/* ── Chrome title-bar ── */}
-      <div className="flex items-center justify-between border-b border-white/8 pb-2 z-10">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <span className="size-[7px] rounded-full bg-[#ff5f57]" />
-            <span className="size-[7px] rounded-full bg-[#febc2e]" />
-            <span className="size-[7px] rounded-full bg-[#28c840]" />
-          </div>
-          <span className="text-[0.6rem] sm:text-[0.7rem] font-semibold tracking-wider text-white/90">
-            kachani.os<span className="text-white/30 font-normal hidden sm:inline"> — cognitive agent harness v2.4</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 text-[0.5rem] text-emerald-400/90">
-          <span className={`size-1.5 rounded-full bg-emerald-400 ${reduceMotion ? "" : "animate-pulse"}`} />
-          <span className="hidden sm:inline">system nominal</span>
-        </div>
+    <div
+      ref={hostRef}
+      className="relative min-h-[460px] overflow-hidden rounded-[1.75rem] border border-white/10 sm:min-h-[540px]"
+      style={{ background: "linear-gradient(180deg, #071022 0%, #040816 100%)" }}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 42%, rgba(91,143,255,0.22), transparent 42%)",
+        }}
+      />
+      <div className="absolute inset-x-0 top-0 flex items-center justify-between px-5 py-4 text-[0.65rem] tracking-[0.2em] uppercase text-white/45 sm:px-7">
+        <span className="flex items-center gap-2">
+          <span className="size-1.5 rounded-full" style={{ background: brand.accent }} />
+          kachani.os
+        </span>
+        <span aria-live="polite">{running ? "thinking…" : "idle"}</span>
       </div>
 
-      {/* ── Pipeline selector ── */}
-      <div className="flex items-center gap-2 py-2 border-b border-white/5 z-10 overflow-x-auto">
-        {(["security", "memory", "optimizer"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            aria-pressed={activeTask === t}
-            onClick={(e) => { e.stopPropagation(); runTask(t); }}
-            className={`min-h-7 whitespace-nowrap rounded-md border px-2.5 py-1 text-[0.55rem] transition-colors cursor-pointer ${
-              activeTask === t
-                ? "bg-white/10 border-white/20 text-white font-semibold"
-                : "border-transparent text-white/40 hover:text-white/70"
-            }`}
-          >
-            {t === "security" && "Security Audit"}
-            {t === "memory"   && "Vector Vault"}
-            {t === "optimizer" && "AST Optimizer"}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Main split: terminal + DAG ── */}
-      <div className="grid grid-cols-12 gap-2 flex-1 py-2 z-10 min-h-0">
-
-        {/* Terminal */}
-        <div className="col-span-7 flex min-w-0 flex-col bg-black/50 rounded-lg border border-white/8 p-2 sm:p-2.5 min-h-0">
-          <div className="flex items-center justify-between text-[0.5rem] text-white/40 pb-1.5 border-b border-white/5">
-            <span>{tasks[activeTask].target} <span className="text-white/20">→</span> {tasks[activeTask].title}</span>
-            {isExecuting
-              ? <span className="text-amber-400">running…</span>
-              : <span className="text-emerald-400">done ✓</span>}
-          </div>
-          <div className="flex-1 flex flex-col justify-center gap-1 py-1.5">
-            {tasks[activeTask].telemetry.slice(0, streamIndex).map((log, i) => (
-              <motion.p
-                key={`${activeTask}-${i}`}
-                initial={reduceMotion ? false : { opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.15 }}
-                className="truncate text-[0.5rem] leading-snug sm:text-[0.55rem]"
+      <svg viewBox="0 0 400 264" className="absolute inset-x-0 top-10 mx-auto h-[52%] w-full sm:top-12">
+        {AGENT_EDGES.map(([a, b]) => {
+          const lit = litEdges.has(`${a}-${b}`);
+          const d = edgePath(a, b);
+          return (
+            <g key={`${a}-${b}`}>
+              <path d={d} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={1.2} />
+              <motion.path
+                d={d}
+                fill="none"
+                stroke={brand.accent}
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                initial={false}
+                animate={{ pathLength: lit ? 1 : 0, opacity: lit ? 0.9 : 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.55, ease: EASE }}
+                style={{ filter: "drop-shadow(0 0 6px rgba(127,165,255,0.8))" }}
+              />
+            </g>
+          );
+        })}
+        {AGENT_NODES.map((node) => {
+          const lit = reached.has(node.id);
+          const isKernel = node.id === "kernel";
+          const radius = isKernel ? 30 : 19;
+          return (
+            <g key={node.id}>
+              <motion.circle
+                cx={node.x}
+                cy={node.y}
+                r={radius + 10}
+                fill={node.color}
+                initial={false}
+                animate={{ opacity: lit ? 0.16 : 0 }}
+                transition={{ duration: 0.4 }}
+              />
+              <motion.circle
+                cx={node.x}
+                cy={node.y}
+                r={radius}
+                fill="#070f24"
+                stroke={node.color}
+                initial={false}
+                animate={{ strokeWidth: lit ? 2.4 : 1.2, opacity: lit ? 1 : 0.55 }}
+                transition={{ duration: 0.3 }}
+              />
+              {isKernel && (
+                <motion.circle
+                  cx={node.x}
+                  cy={node.y}
+                  r={16}
+                  fill="none"
+                  stroke={node.color}
+                  strokeWidth={1}
+                  strokeDasharray="3 5"
+                  animate={reduceMotion ? undefined : { rotate: 360 }}
+                  transition={{ duration: 14, ease: "linear", repeat: Infinity }}
+                  style={{ transformOrigin: `${node.x}px ${node.y}px` }}
+                />
+              )}
+              <text
+                x={node.x}
+                y={node.y + (isKernel ? 1 : 0.5)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={lit ? "#ffffff" : node.color}
+                fontSize={isKernel ? 12 : 10}
+                fontWeight={600}
+                letterSpacing="0.08em"
+                className="select-none uppercase"
               >
-                <span className={`font-semibold ${log.color}`}>[{log.level}]</span>{" "}
-                <span className="text-white/70">{log.msg}</span>
+                {node.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 px-5 pb-5 pt-6 sm:px-7 sm:pb-7"
+        style={{ background: "linear-gradient(180deg, transparent, rgba(4,8,22,0.92) 30%)" }}>
+        <div className="min-h-[5.5rem] space-y-1.5" aria-live="polite">
+          <AnimatePresence initial={false}>
+            {active.lines.slice(0, step).map((line, i) => (
+              <motion.p
+                key={`${prompt}-${i}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                className="text-sm leading-relaxed sm:text-[0.95rem]"
+                style={{ color: i === active.lines.length - 1 ? brand.accent : "rgba(230,237,255,0.82)" }}
+              >
+                <span className="mr-2 font-semibold uppercase tracking-[0.16em] text-white/40 text-[0.62rem]">
+                  {active.route[Math.min(i, active.route.length - 1)]}
+                </span>
+                {line}
               </motion.p>
             ))}
-          </div>
-          <div className="flex items-center justify-between text-[0.45rem] text-white/25 pt-1 border-t border-white/5">
-            <span>ctx ready</span>
-            <span>local context</span>
-          </div>
+          </AnimatePresence>
         </div>
-
-        {/* DAG — fully SVG, zero CSS alignment issues */}
-        <div className="col-span-5 flex min-w-0 flex-col bg-black/40 rounded-lg border border-white/8 p-2 sm:p-2.5 min-h-0">
-          <div className="flex items-center justify-between text-[0.5rem] text-white/40 pb-1.5 border-b border-white/5">
-            <span>agent graph</span>
-            <span className="text-white/60">{nodeInfo[selectedNode].lat}</span>
-          </div>
-
-          <svg viewBox="0 0 300 110" className="flex-1 w-full" style={{ minHeight: 64 }}>
-            <defs>
-              <linearGradient id="dag-flow" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#818cf8" />
-                <stop offset="55%" stopColor="#5b8fff" />
-                <stop offset="100%" stopColor="#34d399" />
-              </linearGradient>
-            </defs>
-            {/* Edges — quadratic beziers through kernel center for organic curves */}
-            {dagEdges.map(([fromId, toId], i) => {
-              const a = nodeMap[fromId], b = nodeMap[toId];
-              const lit = selectedNode === fromId || selectedNode === toId;
-              const routeActive = taskRoutes[activeTask].has(`${fromId}-${toId}`);
-              /* Slight curve: control point offset perpendicular to midpoint */
-              const mx = (a.cx + b.cx) / 2, my = (a.cy + b.cy) / 2;
-              const dx = b.cx - a.cx, dy = b.cy - a.cy;
-              const off = 8; /* curve offset */
-              const cx = mx + (dy / Math.hypot(dx, dy || 1)) * off;
-              const cy2 = my - (dx / Math.hypot(dx, dy || 1)) * off;
-              const path = `M ${a.cx} ${a.cy} Q ${cx} ${cy2} ${b.cx} ${b.cy}`;
-              return (
-                <g key={`${fromId}-${toId}`}>
-                  <path
-                    d={path}
-                    fill="none"
-                    stroke={lit || routeActive ? "rgba(91,143,255,0.55)" : "rgba(255,255,255,0.1)"}
-                    strokeWidth={lit ? 1.8 : routeActive ? 1.35 : 0.8}
-                    className="transition-all duration-300"
-                  />
-                  <motion.path
-                    d={path}
-                    fill="none"
-                    stroke="url(#dag-flow)"
-                    strokeWidth={routeActive ? 2 : 1}
-                    strokeLinecap="round"
-                    strokeDasharray="3 10"
-                    initial={false}
-                    animate={
-                      isExecuting && routeActive && !reduceMotion
-                        ? { strokeDashoffset: [0, -26], opacity: [0.25, 1, 0.25] }
-                        : { strokeDashoffset: 0, opacity: routeActive ? 0.55 : 0 }
-                    }
-                    transition={
-                      isExecuting && routeActive && !reduceMotion
-                        ? { duration: 0.72, ease: "linear", repeat: Infinity, delay: i * 0.06 }
-                        : { duration: 0.2 }
-                    }
-                  />
-                </g>
-              );
-            })}
-
-            {/* Nodes */}
-            {dagNodes.map((n) => {
-              const sel = selectedNode === n.id;
-              return (
-                <g
-                  key={n.id}
-                  onClick={(e) => { e.stopPropagation(); setSelectedNode(n.id); }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSelectedNode(n.id);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Inspect ${nodeInfo[n.id].role}`}
-                  className="cursor-pointer"
-                >
-                  <circle cx={n.cx} cy={n.cy} r={20} fill="transparent" />
-                  {/* Glow ring on selected */}
-                  {sel && (
-                    <circle cx={n.cx} cy={n.cy} r={16} fill="none"
-                      stroke={n.color} strokeWidth={1} opacity={0.3} />
-                  )}
-                  <circle cx={n.cx} cy={n.cy} r={11}
-                    fill={sel ? n.color : "#0d1225"}
-                    stroke={n.color}
-                    strokeWidth={sel ? 2 : 1}
-                    opacity={sel ? 1 : 0.6}
-                    className="transition-all duration-200"
-                  />
-                  <text x={n.cx} y={n.cy + 1} textAnchor="middle" dominantBaseline="central"
-                    fill={sel ? "#fff" : n.color}
-                    fontSize={8} fontWeight={600} fontFamily="monospace"
-                    className="pointer-events-none select-none transition-all duration-200"
-                  >
-                    {n.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Inspector */}
-          <div aria-live="polite" className="truncate text-[0.44rem] text-white/50 pt-1 border-t border-white/5 sm:text-[0.48rem]">
-            <span className="text-white/80 font-semibold">{nodeInfo[selectedNode].role}</span>
-            <span className="text-white/30"> — </span>
-            <span>{nodeInfo[selectedNode].desc}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Status bar ── */}
-      <div className="flex items-center justify-between border-t border-white/8 pt-2 text-[0.48rem] text-white/30 z-10">
-        <span>multi-agent routing · typed orchestration</span>
-        <span>architecture <span className="text-emerald-400/80">production-ready ✓</span></span>
-      </div>
-    </div>
-  );
-}
-
-/* ── 2. Aura Pay — Spatial FinTech Mobile Prototype ────────────────────
- *  Clean financial UI. One subtle animate-pulse on the Dynamic Island
- *  status LED — nothing else animates permanently. The spending graph
- *  uses proper monotone cubic interpolation so curves flow naturally
- *  between data points instead of sharp kinks.
- * ──────────────────────────────────────────────────────────────────── */
-
-/* Attempt a smooth monotone cubic spline. For each interior point we
- * compute tangent = (y[i+1] - y[i-1]) / 2 and build C commands.
- * Falls back to straight segments at endpoints. */
-function smoothPath(xs: number[], ys: number[]): string {
-  if (xs.length < 2) return "";
-  let d = `M ${xs[0]} ${ys[0]}`;
-  for (let i = 1; i < xs.length; i++) {
-    const x0 = xs[i - 1], y0 = ys[i - 1];
-    const x1 = xs[i], y1 = ys[i];
-    const seg = (x1 - x0) / 3;
-    /* Tangent at previous point */
-    const t0 = i === 1 ? (y1 - y0) : (ys[i] - ys[i - 2]) / 2;
-    /* Tangent at current point */
-    const t1 = i === xs.length - 1 ? (y1 - y0) : (ys[i + 1] - ys[i - 1]) / 2;
-    d += ` C ${x0 + seg} ${y0 + t0 / 3}, ${x1 - seg} ${y1 - t1 / 3}, ${x1} ${y1}`;
-  }
-  return d;
-}
-
-function AuraPayLiveSimulator() {
-  const reduceMotion = useReducedMotionPreference();
-  const [currency, setCurrency] = useState<"USD" | "EUR" | "ETH">("USD");
-  const [isFrozen, setIsFrozen] = useState(false);
-  const [faceIdState, setFaceIdState] = useState<"idle" | "scanning" | "verified">("idle");
-  const [activeDayIndex, setActiveDayIndex] = useState(2);
-  const [balanceAdjustmentUsd, setBalanceAdjustmentUsd] = useState(0);
-  const [spendAdjustmentsUsd, setSpendAdjustmentsUsd] = useState<number[]>(() => Array(7).fill(0));
-  const [pendingPaymentUsd, setPendingPaymentUsd] = useState<number | null>(null);
-  const [lastPaymentUsd, setLastPaymentUsd] = useState<number | null>(null);
-  const authTimers = useRef<number[]>([]);
-
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const xs = [25, 70, 115, 160, 205, 250, 295];
-
-  const balanceUsd = 142850.75;
-  const spendUsd = [320, 450, 1245, 680, 890, 210, 140];
-  const baseChartYs = [38, 28, 12, 26, 18, 44, 48];
-  const currencyRates = { USD: 1, EUR: 0.92, ETH: 0.0003 } as const;
-  const rate = currencyRates[currency];
-  const chartYs = baseChartYs.map((y, index) =>
-    Math.max(7, y - Math.min(18, spendAdjustmentsUsd[index] / 8))
-  );
-  const splineD = smoothPath(xs, chartYs);
-  const areaD = `${splineD} L ${xs[6]} 56 L ${xs[0]} 56 Z`;
-  const activeSpend = (spendUsd[activeDayIndex] + spendAdjustmentsUsd[activeDayIndex]) * rate;
-  const balance = (balanceUsd + balanceAdjustmentUsd) * rate;
-
-  const formatAmount = (amount: number, precise = false) => {
-    if (currency === "ETH") return `${amount.toFixed(2)} ETH`;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      minimumFractionDigits: precise ? 2 : 0,
-      maximumFractionDigits: precise ? 2 : 0,
-    }).format(amount);
-  };
-
-  const clearAuthTimers = () => {
-    authTimers.current.forEach(window.clearTimeout);
-    authTimers.current = [];
-  };
-
-  useEffect(() => () => clearAuthTimers(), []);
-
-  const settlePayment = (amountUsd: number | null, dayIndex: number) => {
-    if (amountUsd === null) return;
-    setBalanceAdjustmentUsd((current) => current - amountUsd);
-    setSpendAdjustmentsUsd((current) =>
-      current.map((amount, index) => index === dayIndex ? amount + amountUsd : amount)
-    );
-    setLastPaymentUsd(amountUsd);
-  };
-
-  const doFaceId = (amountUsd: number | null = null) => {
-    if (faceIdState !== "idle" || (amountUsd !== null && isFrozen)) return;
-
-    clearAuthTimers();
-    const paymentDayIndex = activeDayIndex;
-    setPendingPaymentUsd(amountUsd);
-    setLastPaymentUsd(null);
-
-    if (reduceMotion) {
-      setFaceIdState("scanning");
-      authTimers.current.push(
-        window.setTimeout(() => {
-          setFaceIdState("verified");
-          settlePayment(amountUsd, paymentDayIndex);
-        }, 200),
-        window.setTimeout(() => {
-          setFaceIdState("idle");
-          setPendingPaymentUsd(null);
-        }, 1600),
-      );
-      return;
-    }
-
-    setFaceIdState("scanning");
-    authTimers.current.push(
-      window.setTimeout(() => {
-        setFaceIdState("verified");
-        settlePayment(amountUsd, paymentDayIndex);
-      }, 800),
-      window.setTimeout(() => {
-        setFaceIdState("idle");
-        setPendingPaymentUsd(null);
-      }, 2800),
-    );
-  };
-
-  const islandLabel = faceIdState === "scanning"
-    ? pendingPaymentUsd === null ? "Scanning Face…" : `Authorizing ${formatAmount(pendingPaymentUsd * rate)}…`
-    : faceIdState === "verified"
-      ? lastPaymentUsd === null ? "Face ID verified ✓" : `${formatAmount(lastPaymentUsd * rate)} settled ✓`
-      : isFrozen ? "Card frozen" : "Aura Pay";
-
-  return (
-    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden p-3 sm:p-5 font-mono select-none pointer-events-auto bg-[#0d0a1c]">
-      {/* ── Status bar ── */}
-      <div className="flex items-center justify-between border-b border-white/8 pb-2 z-10">
-        <div className="flex items-center gap-2 text-[0.55rem] text-white/50">
-          <span className="font-semibold text-white/70">9:41</span>
-          <span className="hidden sm:inline">5G</span>
-        </div>
-
-        {/* Dynamic Island */}
-        <div aria-live="polite" className="flex max-w-[9rem] items-center gap-1.5 rounded-full bg-black/80 border border-white/10 px-2.5 py-0.5">
-          <span className={`size-1.5 rounded-full ${
-            faceIdState === "scanning" ? "bg-amber-400" : faceIdState === "verified" ? "bg-emerald-400" : isFrozen ? "bg-cyan-300" : "bg-violet-400"
-          } ${reduceMotion ? "" : "animate-pulse"}`} />
-          <span className="truncate text-[0.48rem] text-white/70 font-medium sm:text-[0.52rem]">{islandLabel}</span>
-        </div>
-
-        {/* Currency tabs */}
-        <div className="flex rounded-md border border-white/10 bg-black/40 overflow-hidden">
-          {(["USD", "EUR", "ETH"] as const).map((c) => (
-            <button key={c} type="button"
-              aria-pressed={currency === c}
-              onClick={(e) => { e.stopPropagation(); setCurrency(c); }}
-              className={`min-h-6 px-2 py-0.5 text-[0.48rem] uppercase tracking-wider cursor-pointer transition-colors ${
-                currency === c ? "bg-violet-600 text-white font-semibold" : "text-white/35 hover:text-white/60"
-              }`}
-            >{c}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Card + Chart ── */}
-      <div className="grid grid-cols-12 gap-2 flex-1 py-2 z-10 min-h-0">
-
-        {/* Titanium card */}
-        <div className={`col-span-5 flex min-w-0 flex-col justify-between p-2 sm:p-3 rounded-xl border transition-colors duration-300 min-h-0 ${
-          isFrozen
-            ? "bg-[#0a1525] border-cyan-500/30"
-            : "bg-gradient-to-br from-[#1e1040] to-[#12081e] border-white/10"
-        }`}>
-          <div className="flex items-center justify-between">
-            <span className="text-[0.5rem] uppercase tracking-widest font-bold text-violet-300/80">
-              {isFrozen ? "❄ frozen" : "✦ titanium"}
-            </span>
-            <button type="button"
-              onClick={(e) => { e.stopPropagation(); setIsFrozen(!isFrozen); }}
-              disabled={faceIdState !== "idle"}
-              className="min-h-6 rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-[0.45rem] text-white/60 transition-colors hover:bg-white/10 hover:text-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-            >{isFrozen ? "Unfreeze" : "Freeze"}</button>
-          </div>
-
-          <div className="my-auto py-1">
-            <p className="text-[0.45rem] text-white/35 uppercase tracking-wider">Balance</p>
-            <p className="truncate text-base font-bold tracking-tight text-white sm:text-xl">{formatAmount(balance, true)}</p>
-          </div>
-
-          <div className="flex items-center justify-between text-[0.48rem] text-white/30">
-            <span>•••• 8824</span>
-            <span className="text-violet-400/70">09 / 29</span>
-          </div>
-        </div>
-
-        {/* Spending chart */}
-        <div className="col-span-7 flex min-w-0 flex-col bg-black/40 rounded-lg border border-white/8 p-2 sm:p-2.5 min-h-0">
-          <div className="flex items-center justify-between text-[0.48rem] text-white/40 pb-1.5 border-b border-white/5">
-            <span>spending</span>
-            <span aria-live="polite" className="text-violet-300 font-medium">
-              {days[activeDayIndex]} · {formatAmount(activeSpend)}
-            </span>
-          </div>
-
-          {/* SVG chart */}
-          <svg viewBox="0 0 320 60" className="flex-1 w-full" style={{ minHeight: 50 }} preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="ap-grad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#a855f7" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-              <linearGradient id="ap-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(168,85,247,0.18)" />
-                <stop offset="100%" stopColor="rgba(168,85,247,0)" />
-              </linearGradient>
-            </defs>
-            <motion.path initial={false} d={areaD} animate={{ d: areaD }} transition={{ duration: reduceMotion ? 0 : 0.4, ease: EASE }} fill="url(#ap-fill)" />
-            <motion.path initial={false} d={splineD} animate={{ d: splineD }} transition={{ duration: reduceMotion ? 0 : 0.4, ease: EASE }} fill="none" stroke="url(#ap-grad)" strokeWidth="2" strokeLinecap="round" />
-            {/* Scrubber */}
-            <motion.line initial={false} x1={xs[activeDayIndex]} y1={chartYs[activeDayIndex]} x2={xs[activeDayIndex]} animate={{ x1: xs[activeDayIndex], y1: chartYs[activeDayIndex], x2: xs[activeDayIndex] }} transition={{ duration: reduceMotion ? 0 : 0.35, ease: EASE }} y2={56}
-              stroke="#a855f7" strokeWidth="1" strokeDasharray="2 2" opacity={0.5} />
-            <motion.circle initial={false} cx={xs[activeDayIndex]} cy={chartYs[activeDayIndex]} animate={{ cx: xs[activeDayIndex], cy: chartYs[activeDayIndex] }} transition={{ duration: reduceMotion ? 0 : 0.35, ease: EASE }} r="5"
-              fill="none" stroke="#a855f7" strokeWidth="1.5" opacity={0.4} />
-            <motion.circle initial={false} cx={xs[activeDayIndex]} cy={chartYs[activeDayIndex]} animate={{ cx: xs[activeDayIndex], cy: chartYs[activeDayIndex] }} transition={{ duration: reduceMotion ? 0 : 0.35, ease: EASE }} r="3"
-              fill="#fff" stroke="#a855f7" strokeWidth="1.5" />
-          </svg>
-
-          {/* Day buttons */}
-          <div className="flex justify-between pt-1 border-t border-white/5">
-            {days.map((d, i) => (
-              <button key={d} type="button"
-                onClick={(e) => { e.stopPropagation(); setActiveDayIndex(i); }}
-                aria-pressed={activeDayIndex === i}
-                className={`min-h-6 min-w-6 rounded px-1.5 py-0.5 text-[0.48rem] cursor-pointer transition-colors ${
-                  activeDayIndex === i
-                    ? "text-violet-300 font-semibold bg-violet-500/15"
-                    : "text-white/25 hover:text-white/50"
-                }`}
-              >{d}</button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Bottom bar ── */}
-      <div className="flex items-center justify-between gap-1 border-t border-white/8 pt-2 text-[0.48rem] z-10">
-        <button type="button"
-          onClick={(e) => { e.stopPropagation(); doFaceId(null); }}
-          disabled={faceIdState !== "idle"}
-          className="flex min-h-7 items-center gap-1.5 text-white/40 transition-colors hover:text-white/60 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="3" y="2" width="10" height="12" rx="2" />
-            <circle cx="8" cy="7" r="2" />
-            <path d="M6 10.5 a2 2 0 0 1 4 0" />
-          </svg>
-          <span className="hidden sm:inline">{faceIdState === "verified" ? "Authorized ✓" : "Authenticate"}</span>
-          <span className="sm:hidden">Face ID</span>
-        </button>
-        <div className="flex items-center gap-1">
-          {[48, 120].map((amountUsd) => (
+        <div className="flex flex-wrap gap-2">
+          {AGENT_PROMPTS.map((item, index) => (
             <button
-              key={amountUsd}
+              key={item.label}
               type="button"
-              disabled={isFrozen || faceIdState !== "idle"}
-              onClick={(e) => { e.stopPropagation(); doFaceId(amountUsd); }}
-              className="min-h-7 rounded border border-violet-500/25 bg-violet-500/10 px-1.5 py-0.5 text-violet-200/80 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-35"
+              aria-pressed={prompt === index}
+              onClick={() => run(index)}
+              className="rounded-full border px-4 py-2 text-xs font-medium transition-colors"
+              style={
+                prompt === index
+                  ? { background: brand.accentSoft, borderColor: brand.accent, color: "#fff" }
+                  : { borderColor: "rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.6)" }
+              }
             >
-              Pay {formatAmount(amountUsd * rate)}
+              {item.label}
             </button>
           ))}
         </div>
-        <span className="hidden text-white/25 sm:inline">
-          {lastPaymentUsd === null ? "secure settlement · 4 ms" : `${formatAmount(lastPaymentUsd * rate)} posted`}
-        </span>
       </div>
     </div>
   );
 }
 
-/* ── Preview Panel ──────────────────────────────────────────────────── */
-function ProjectPreview({ project }: { project: Project }) {
-  return (
-    <div
-      id={`project-${project.index}-preview`}
-      role="region"
-      aria-label={`${project.title} ${project.live ? "live preview" : "interactive prototype"}`}
-      tabIndex={-1}
-      className={`relative h-[280px] sm:h-[340px] md:h-[380px] w-full overflow-hidden rounded-xl bg-gradient-to-br outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${project.tone}`}
-    >
-      {project.title === "KachaniOS" && <KachaniosLiveEngine />}
-      {project.title === "Aura Pay" && <AuraPayLiveSimulator />}
+/* ── 02 · FICAM — a live product, framed as the phone it lives on ────── */
 
-      {project.title === "FICAM Festival Platform" && project.href && (
-        <div className="absolute inset-0 overflow-hidden">
-          <iframe 
+function FicamShowcase({ project }: { project: Project }) {
+  return (
+    <a
+      href={project.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cursor="view"
+      aria-label="Open the live FICAM festival app"
+      className="group relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/10 sm:min-h-[600px]"
+      style={{ background: "linear-gradient(180deg, #120a24 0%, #08050f 100%)" }}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-90 transition-opacity duration-700 group-hover:opacity-100"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 55%, rgba(168,85,247,0.35), transparent 40%), radial-gradient(circle at 20% 20%, rgba(219,39,119,0.18), transparent 35%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white sm:left-8 sm:top-8"
+        style={{ background: "linear-gradient(90deg, #9333ea, #db2777)" }}
+      >
+        Live
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-6 top-8 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-[0.62rem] font-semibold text-emerald-300 sm:right-10 sm:top-10"
+      >
+        +50 XP
+      </div>
+
+      <div className="relative w-[260px] transition-transform duration-700 ease-out group-hover:-translate-y-2 sm:w-[300px]">
+        <div
+          aria-hidden="true"
+          className="absolute -inset-6 rounded-[3rem] opacity-60 blur-2xl transition-opacity duration-700 group-hover:opacity-90"
+          style={{ background: "linear-gradient(135deg, rgba(147,51,234,0.5), rgba(219,39,119,0.35))" }}
+        />
+        <div className="relative aspect-[9/19] overflow-hidden rounded-[2.6rem] border-[6px] border-[#1a1424] bg-black shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+          <div className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
+          <iframe
             src={project.href}
-            className="w-full h-full border-0 opacity-80 transition-all duration-700 ease-out group-hover:opacity-100 pointer-events-none"
-            title={`${project.title} live preview`}
+            title="FICAM festival app, live"
             loading="lazy"
             tabIndex={-1}
             aria-hidden="true"
+            className="pointer-events-none size-full border-0 opacity-90 transition-opacity duration-700 group-hover:opacity-100"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080b18]/60 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-10" />
         </div>
-      )}
+      </div>
 
-      {project.image && (
-        <div className="absolute inset-0 overflow-hidden">
-          <Image src={project.image} alt={project.title} fill quality={95}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1400px"
-            className="object-cover object-top opacity-95 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080b18]/60 via-transparent to-transparent opacity-40 transition-opacity duration-700 group-hover:opacity-10" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-6 text-[0.65rem] uppercase tracking-[0.2em] text-white/50 sm:px-8 sm:pb-8">
+        <span>ficam-festival · companion app</span>
+        <span className="text-white transition-transform duration-500 group-hover:translate-x-1">Open ↗</span>
+      </div>
+    </a>
+  );
+}
+
+/* ── 03 · Yalla China — the seven-step route, Morocco → campus ────────── */
+
+const YALLA_STEPS = [
+  { label: "Consultation", detail: "Un premier échange clair avec la famille." },
+  { label: "Orientation", detail: "L'université et la ville qui correspondent au profil." },
+  { label: "Dossier", detail: "Documents vérifiés, traductions préparées." },
+  { label: "Admission", detail: "La candidature devient réelle et suivie." },
+  { label: "Visa", detail: "Rendez-vous, délais et démarches organisés." },
+  { label: "Préparation", detail: "Billet, briefing famille, support WhatsApp." },
+  { label: "Arrivée", detail: "Accueil, transfert et premiers repères sur le campus." },
+];
+
+const YALLA_CITIES = ["Chongqing", "Nanchang", "Ningbo", "Harbin", "Xi'an", "Chengdu"];
+
+function YallaChinaShowcase({ project }: { project: Project }) {
+  const reduceMotion = useReducedMotionPreference();
+  const hostRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(hostRef, { amount: 0.3 });
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (!inView || paused || reduceMotion) return;
+    const interval = window.setInterval(
+      () => setActive((current) => (current + 1) % YALLA_STEPS.length),
+      2200,
+    );
+    return () => window.clearInterval(interval);
+  }, [inView, paused, reduceMotion]);
+
+  const progress = active / (YALLA_STEPS.length - 1);
+
+  return (
+    <div
+      ref={hostRef}
+      className="relative flex min-h-[520px] flex-col overflow-hidden rounded-[1.75rem] border border-[#f0b64a]/20 sm:min-h-[600px]"
+      style={{ background: "linear-gradient(180deg, #23090c 0%, #120405 100%)" }}
+      onPointerEnter={() => setPaused(true)}
+      onPointerLeave={() => setPaused(false)}
+    >
+      <a
+        href={project.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="view"
+        aria-label="Open the live Yalla China platform"
+        className="group relative block flex-1 overflow-hidden"
+      >
+        <Image
+          src="/media/yallachina-preview.webp"
+          alt="Yalla China website hero"
+          fill
+          sizes="(max-width: 1024px) 100vw, 60vw"
+          className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(35,9,12,0.1) 0%, rgba(35,9,12,0.15) 55%, rgba(35,9,12,0.95) 100%)",
+          }}
+        />
+        <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full border border-[#f0b64a]/40 bg-[#1a0709]/70 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[#f0b64a] backdrop-blur-md sm:left-8 sm:top-8">
+          <span className="size-1.5 rounded-full bg-[#f0b64a]" />
+          Live · FR / EN / AR
         </div>
-      )}
+        <span className="absolute right-6 top-7 text-[0.65rem] uppercase tracking-[0.2em] text-white/70 transition-transform duration-500 group-hover:translate-x-1 sm:right-8 sm:top-9">
+          Open ↗
+        </span>
+      </a>
 
-      {/* Noise grain */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.035]"
-        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px" }} />
-
-      {/* Glows */}
-      <div className="pointer-events-none absolute inset-0 rounded-xl"
-        style={{ background: "radial-gradient(ellipse at 30% 40%, rgba(91,143,255,0.12) 0%, transparent 65%)" }} />
-      <div aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: "radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(91,143,255,0.18), transparent 65%)" }} />
-
-      {/* Badge */}
-      {project.live && (
-        <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-[var(--accent)] bg-[rgba(91,143,255,0.18)] px-3 py-1 backdrop-blur-md">
-          <span className="size-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
-          <span className="label-caps accent">Live ↗</span>
+      <div className="relative px-6 pb-6 pt-5 sm:px-8 sm:pb-8">
+        <div className="mb-4 flex items-center justify-between text-[0.62rem] uppercase tracking-[0.2em] text-[#f0b64a]/80">
+          <span>Maroc → Campus en Chine</span>
+          <span className="text-white/45">
+            Étape {String(active + 1).padStart(2, "0")} / 07
+          </span>
         </div>
-      )}
+
+        <div className="relative h-8">
+          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/12" />
+          <motion.div
+            className="absolute left-0 top-1/2 h-px -translate-y-1/2 origin-left"
+            style={{ background: "linear-gradient(90deg, #f0b64a, #d9333f)", width: "100%" }}
+            initial={false}
+            animate={{ scaleX: progress }}
+            transition={{ duration: reduceMotion ? 0 : 0.6, ease: EASE }}
+          />
+          <div className="absolute inset-0 flex items-center justify-between">
+            {YALLA_STEPS.map((stepItem, index) => {
+              const done = index <= active;
+              return (
+                <button
+                  key={stepItem.label}
+                  type="button"
+                  aria-pressed={index === active}
+                  aria-label={`Étape ${index + 1}: ${stepItem.label}`}
+                  onClick={() => setActive(index)}
+                  className="relative flex size-8 items-center justify-center"
+                >
+                  <motion.span
+                    className="block rounded-full border"
+                    initial={false}
+                    animate={{
+                      width: index === active ? 18 : 10,
+                      height: index === active ? 18 : 10,
+                      backgroundColor: done ? "#f0b64a" : "#2a0a0c",
+                      borderColor: index === active ? "#d9333f" : done ? "#f0b64a" : "rgba(255,255,255,0.25)",
+                    }}
+                    transition={{ duration: reduceMotion ? 0 : 0.35, ease: EASE }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-4 min-h-[3.6rem]" aria-live="polite">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={active}
+              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: EASE }}
+            >
+              <p className="display text-2xl text-[#fff1dc] sm:text-3xl">{YALLA_STEPS[active].label}</p>
+              <p className="mt-1 text-sm text-white/65">{YALLA_STEPS[active].detail}</p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {YALLA_CITIES.map((city) => (
+            <span
+              key={city}
+              className="rounded-full border border-[#f0b64a]/25 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.14em] text-[#f0b64a]/80"
+            >
+              {city}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ── Card ────────────────────────────────────────────────────────────── */
-function Card({ project }: { project: Project }) {
-  const reduce = useReducedMotionPreference();
-  const tilt = useTilt(!reduce);
-  const [showDetails, setShowDetails] = useState(false);
+/* ── 04 · Aura Pay — one gesture: tap, Face ID, settled ──────────────── */
 
-  const focusPrototype = () => {
-    const preview = document.getElementById(`project-${project.index}-preview`);
-    preview?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    preview?.focus({ preventScroll: true });
+const AURA_BALANCE = 142850.75;
+const AURA_AMOUNT = 48;
+
+function formatEuro(amount: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
+function AuraPayShowcase({ brand }: { brand: Brand }) {
+  const reduceMotion = useReducedMotionPreference();
+  const [phase, setPhase] = useState<"idle" | "scanning" | "settled">("idle");
+  const [payments, setPayments] = useState(0);
+  const timers = useRef<number[]>([]);
+  const rotateX = useSpring(0, { stiffness: 160, damping: 18 });
+  const rotateY = useSpring(0, { stiffness: 160, damping: 18 });
+  const [sheen, setSheen] = useState<CSSProperties>({});
+
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
+
+  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (reduceMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width;
+    const py = (event.clientY - rect.top) / rect.height;
+    rotateX.set((0.5 - py) * 14);
+    rotateY.set((px - 0.5) * 18);
+    setSheen({ "--mx": `${(px * 100).toFixed(1)}%`, "--my": `${(py * 100).toFixed(1)}%` } as CSSProperties);
   };
 
-  const previewClass = `block card-glow rounded-xl border border-[var(--hairline)] will-change-transform ${
-    project.href ? "cursor-pointer" : ""
-  }`;
+  const onPointerLeave = () => {
+    rotateX.set(0);
+    rotateY.set(0);
+  };
+
+  const pay = () => {
+    if (phase !== "idle") return;
+    timers.current.forEach(window.clearTimeout);
+    setPhase("scanning");
+    const scanMs = reduceMotion ? 150 : 1100;
+    timers.current = [
+      window.setTimeout(() => {
+        setPhase("settled");
+        setPayments((count) => count + 1);
+      }, scanMs),
+      window.setTimeout(() => setPhase("idle"), scanMs + 2200),
+    ];
+  };
+
+  const balance = AURA_BALANCE - payments * AURA_AMOUNT;
 
   return (
-    <Reveal>
-      <motion.article
-        whileHover={reduce ? undefined : { y: -6 }}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="group hairline-t py-8"
-      >
-        {/* Header */}
-        <div className="mb-5 flex items-baseline justify-between">
-          <div className="flex items-baseline gap-4">
-            <span className="serif accent text-xl italic">{project.index}</span>
-            <h3 className="display text-2xl tracking-tight transition-transform duration-500 ease-out group-hover:translate-x-2 sm:text-4xl">
+    <div
+      className="relative flex min-h-[520px] flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/10 px-6 py-10 sm:min-h-[600px]"
+      style={{ background: "linear-gradient(180deg, #0f0b1c 0%, #06040b 100%)" }}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 45%, rgba(167,139,250,0.24), transparent 45%)",
+        }}
+      />
+
+      <div className="relative mb-6 text-center">
+        <p className="text-[0.62rem] uppercase tracking-[0.24em] text-white/45">Balance</p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={payments}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.35, ease: EASE }}
+            className="display mt-1 text-3xl tabular-nums text-white sm:text-4xl"
+          >
+            {formatEuro(balance)}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+
+      <div className="relative w-full max-w-[460px]" style={{ perspective: 1200 }}>
+        <motion.div
+          onPointerMove={onPointerMove}
+          onPointerLeave={onPointerLeave}
+          style={{ rotateX, rotateY, transformStyle: "preserve-3d", ...sheen }}
+          animate={
+            phase === "settled" && !reduceMotion
+              ? { y: [0, 8, 0], scale: [1, 0.982, 1] }
+              : { y: 0, scale: 1 }
+          }
+          transition={{ duration: 0.55, ease: EASE }}
+          className="relative aspect-[1.586] w-full select-none rounded-[1.4rem] border border-white/12 shadow-[0_50px_90px_rgba(0,0,0,0.65)]"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[1.4rem]"
+            style={{
+              background:
+                "linear-gradient(135deg, #2a2a38 0%, #15151d 38%, #0e0e14 62%, #23232f 100%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[1.4rem] opacity-80 mix-blend-screen"
+            style={{
+              background:
+                "radial-gradient(420px circle at var(--mx, 30%) var(--my, 30%), rgba(255,255,255,0.16), transparent 60%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[1.4rem] opacity-[0.07]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(115deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 4px)",
+            }}
+          />
+
+          <div className="relative flex h-full flex-col justify-between p-6 sm:p-7">
+            <div className="flex items-start justify-between">
+              <span className="display text-xl tracking-tight text-white sm:text-2xl">
+                Aura<span style={{ color: brand.accent }}>.</span>
+              </span>
+              <svg viewBox="0 0 24 24" className="size-6 text-white/70" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                <path d="M6 8.5a6 6 0 0 1 0 7" />
+                <path d="M9.5 6a10 10 0 0 1 0 12" />
+                <path d="M13 3.5a14 14 0 0 1 0 17" />
+              </svg>
+            </div>
+
+            <div className="flex items-end justify-between">
+              <div className="flex flex-col gap-3">
+                <div
+                  aria-hidden="true"
+                  className="h-8 w-11 rounded-md border border-[#e5c07b]/60"
+                  style={{ background: "linear-gradient(135deg, #f1d28a, #b8873b 55%, #e8c37a)" }}
+                >
+                  <div className="mx-auto mt-2.5 h-px w-8 bg-[#5a3d12]/50" />
+                  <div className="mx-auto mt-1 h-px w-8 bg-[#5a3d12]/50" />
+                </div>
+                <p className="font-mono text-sm tracking-[0.28em] text-white/85 sm:text-base">
+                  •••• •••• •••• 8824
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[0.58rem] uppercase tracking-[0.24em] text-white/40">Titanium</p>
+                <p className="mt-1 text-xs font-medium tracking-[0.18em] text-white/85">A. KACHANI</p>
+                <p className="mt-0.5 font-mono text-[0.65rem] text-white/50">09 / 29</p>
+              </div>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {phase !== "idle" && (
+              <motion.div
+                key="faceid"
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.94 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                className="absolute inset-0 flex items-center justify-center rounded-[1.4rem] bg-[#06040b]/55 backdrop-blur-[3px]"
+              >
+                <svg viewBox="0 0 120 120" className="size-28" aria-hidden="true">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+                  <motion.circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke={phase === "settled" ? "#34d399" : brand.accent}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: reduceMotion ? 0 : 1, ease: "easeInOut" }}
+                    style={{ rotate: -90, transformOrigin: "60px 60px" }}
+                  />
+                  {phase === "scanning" ? (
+                    <g stroke={brand.accent} strokeWidth="2.5" strokeLinecap="round" fill="none">
+                      <path d="M42 40 v-6 a6 6 0 0 1 6 -6 h6" />
+                      <path d="M78 40 v-6 a6 6 0 0 0 -6 -6 h-6" />
+                      <path d="M42 80 v6 a6 6 0 0 0 6 6 h6" />
+                      <path d="M78 80 v6 a6 6 0 0 1 -6 6 h-6" />
+                      <path d="M52 55 v4" />
+                      <path d="M68 55 v4" />
+                      <path d="M60 54 v10 h-3" />
+                      <path d="M51 70 q9 7 18 0" />
+                    </g>
+                  ) : (
+                    <motion.path
+                      d="M42 61 l12 12 l24 -26"
+                      fill="none"
+                      stroke="#34d399"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.4, ease: EASE }}
+                    />
+                  )}
+                </svg>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+
+      <div className="relative mt-8 flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={pay}
+          disabled={phase !== "idle"}
+          className="rounded-full px-7 py-3 text-sm font-semibold text-white transition-transform duration-300 hover:scale-[1.03] disabled:cursor-default disabled:opacity-80"
+          style={{
+            background: `linear-gradient(90deg, ${brand.accent}, #6d5bd6)`,
+            boxShadow: "0 18px 40px rgba(167,139,250,0.28)",
+          }}
+        >
+          {phase === "scanning"
+            ? "Authorizing with Face ID…"
+            : phase === "settled"
+              ? `${formatEuro(AURA_AMOUNT)} settled`
+              : `Tap to pay ${formatEuro(AURA_AMOUNT)}`}
+        </button>
+        <p aria-live="polite" className="text-[0.62rem] uppercase tracking-[0.22em] text-white/40">
+          {phase === "settled" ? "Instant settlement · 4 ms" : "Biometric · one gesture"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Project band ────────────────────────────────────────────────────── */
+
+function Showcase({ project }: { project: Project }) {
+  switch (project.id) {
+    case "kachanios":
+      return <KachaniosShowcase brand={project.brand} />;
+    case "ficam":
+      return <FicamShowcase project={project} />;
+    case "yalla":
+      return <YallaChinaShowcase project={project} />;
+    case "aura":
+      return <AuraPayShowcase brand={project.brand} />;
+  }
+}
+
+function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const { brand } = project;
+
+  return (
+    <article
+      id={`project-${project.id}`}
+      className="relative -mx-6 px-6 py-20 sm:-mx-12 sm:px-12 sm:py-28"
+      style={{ background: brand.background, color: brand.ink }}
+    >
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" aria-hidden="true" />
+      <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
+          <Reveal>
+            <div className="flex items-center gap-4 text-[0.65rem] uppercase tracking-[0.22em]" style={{ color: brand.accent }}>
+              <span className="serif text-xl italic normal-case tracking-normal">{project.index}</span>
+              <span className="h-px w-8" style={{ background: brand.accent, opacity: 0.6 }} />
+              <span>{project.year}</span>
+              <span className="text-white/40">·</span>
+              <span className="text-white/60">{project.status}</span>
+            </div>
+          </Reveal>
+          <Reveal delay={0.06}>
+            <h3 className="display mt-6 text-[clamp(2.6rem,5vw,4.6rem)] leading-[0.98] tracking-[-0.02em]">
               {project.title}
             </h3>
-          </div>
-          <div className="text-right">
-            <p className="label-caps text-muted">{project.year}</p>
-            <p className={`label-caps mt-1 ${project.live ? "accent" : "text-[var(--faint)]"}`}>
-              {project.live ? "Live ↗" : "Interactive"}
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="serif mt-4 text-xl italic sm:text-2xl" style={{ color: brand.accent }}>
+              {project.meaning}
             </p>
-          </div>
-        </div>
-
-        {/* Preview */}
-        {project.href ? (
-          <motion.a href={project.href} target="_blank" rel="noopener noreferrer"
-            className={previewClass} data-cursor="view" data-cursor-img={project.cursorBg} {...tilt}>
-            <ProjectPreview project={project} />
-          </motion.a>
-        ) : (
-          <motion.div className={previewClass} data-cursor="explore" data-cursor-img={project.cursorBg} {...tilt}>
-            <ProjectPreview project={project} />
-          </motion.div>
-        )}
-
-        {/* Footer */}
-        <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-xl">
-            <p className="text-sm leading-relaxed text-muted">{project.subtitle}</p>
-            <div className="inline-flex items-center gap-3 mt-2">
-              {project.href ? (
-                <a href={project.href} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline">
-                  Visit live platform <span>↗</span>
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={focusPrototype}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
+          </Reveal>
+          <Reveal delay={0.14}>
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-white/70">{project.subtitle}</p>
+          </Reveal>
+          <Reveal delay={0.18}>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border px-3 py-1 text-[0.65rem] font-medium uppercase tracking-[0.14em]"
+                  style={{ borderColor: `${brand.accent}55`, color: brand.accent, background: brand.accentSoft }}
                 >
-                  Explore interactive prototype <span aria-hidden="true">↑</span>
-                </button>
-              )}
-              {project.details && (
-                <button
-                  type="button"
-                  onClick={() => setShowDetails(!showDetails)}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
-                  aria-expanded={showDetails}
-                  aria-label={`${showDetails ? "Hide" : "Show"} project details`}
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={0.22}>
+            <div className="mt-8 flex flex-wrap items-center gap-5 text-sm">
+              {project.href && (
+                <a
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-medium transition-transform duration-300 hover:translate-x-0.5"
+                  style={{ color: brand.accent }}
                 >
-                  {showDetails ? "Hide" : "Show"} details
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {project.tags.map((tag) => (
-              <span key={tag}
-                className="rounded-full border border-[var(--hairline)] px-3 py-1 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-muted">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Project Details */}
-        {project.details && showDetails && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-6 grid gap-4 border-t border-white/8 pt-6"
-          >
-            <div>
-              <p className="label-caps text-white/50 mb-2">My Role</p>
-              <p className="text-sm text-white/80">{project.details.role}</p>
-            </div>
-            <div>
-              <p className="label-caps text-white/50 mb-2">Problem</p>
-              <p className="text-sm text-white/70 leading-relaxed">{project.details.problem}</p>
-            </div>
-            <div>
-              <p className="label-caps text-white/50 mb-2">What I Built</p>
-              <p className="text-sm text-white/70 leading-relaxed">{project.details.built}</p>
-            </div>
-            <div>
-              <p className="label-caps text-white/50 mb-2">Stack</p>
-              <div className="flex flex-wrap gap-2">
-                {project.details.stack.map((tech) => (
-                  <span key={tech}
-                    className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.65rem] font-medium text-white/70">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-            {project.sourceHref && (
-              <div className="pt-2">
-                <a href={project.sourceHref} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-white/50 hover:text-[var(--accent)] transition-colors">
-                  Source code <span>↗</span>
+                  Visit live platform <span aria-hidden="true">↗</span>
                 </a>
-              </div>
+              )}
+              {project.sourceHref && (
+                <a
+                  href={project.sourceHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-white/60 transition-colors hover:text-white"
+                >
+                  Source <span aria-hidden="true">↗</span>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowDetails((open) => !open)}
+                aria-expanded={showDetails}
+                aria-controls={`project-${project.id}-details`}
+                className="inline-flex items-center gap-1.5 text-white/60 transition-colors hover:text-white"
+              >
+                {showDetails ? "Hide the story" : "Read the story"}
+                <span aria-hidden="true" className={`transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}>↓</span>
+              </button>
+            </div>
+          </Reveal>
+
+          <AnimatePresence initial={false}>
+            {showDetails && (
+              <motion.div
+                id={`project-${project.id}-details`}
+                key="details"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                className="overflow-hidden"
+              >
+                <div className="mt-8 grid gap-5 border-t border-white/10 pt-7 sm:grid-cols-2">
+                  <div>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">My role</p>
+                    <p className="mt-2 text-sm text-white/85">{project.details.role}</p>
+                  </div>
+                  <div>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">Stack</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {project.details.stack.map((tech) => (
+                        <span key={tech} className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.65rem] text-white/75">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">Problem</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/70">{project.details.problem}</p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">What I built</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/70">{project.details.built}</p>
+                  </div>
+                </div>
+              </motion.div>
             )}
-          </motion.div>
-        )}
-      </motion.article>
-    </Reveal>
+          </AnimatePresence>
+        </div>
+
+        <div className={`lg:col-span-7 ${flip ? "lg:order-1" : ""}`}>
+          <Reveal delay={0.1} y={40}>
+            <Showcase project={project} />
+          </Reveal>
+        </div>
+      </div>
+    </article>
   );
 }
 
 export default function WorkSection() {
   return (
-    <section id="work" className="relative px-6 py-24 sm:px-12 sm:py-36">
+    <section id="work" className="relative px-6 pt-24 sm:px-12 sm:pt-36">
       <span aria-hidden="true" className="ghost-numeral">
         01
       </span>
@@ -910,7 +1009,7 @@ export default function WorkSection() {
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"
       >
-        Selected Work — 2025 / 2026
+        Selected Work — 2024 / 2026
       </span>
 
       <Reveal>
@@ -926,9 +1025,16 @@ export default function WorkSection() {
         </h2>
       </Reveal>
 
-      <div className="mt-16">
-        {PROJECTS.map((project) => (
-          <Card key={project.index} project={project} />
+      <Reveal delay={0.12}>
+        <p className="mt-8 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
+          Four products, four worlds. Each one keeps its own identity here — and
+          each one you can touch.
+        </p>
+      </Reveal>
+
+      <div className="mt-20">
+        {PROJECTS.map((project, index) => (
+          <ProjectBand key={project.id} project={project} flip={index % 2 === 1} />
         ))}
       </div>
     </section>
