@@ -79,7 +79,7 @@ export default function Nav() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-5 z-[80] flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 top-5 z-[80] flex justify-center px-3 sm:px-4">
       <motion.nav
         aria-label="Primary"
         initial={false}
@@ -102,7 +102,7 @@ export default function Nav() {
                 window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
               }
             }}
-            className="display mr-2 px-3 text-lg tracking-tight text-[var(--ink)]"
+            className="display mr-1 px-2 text-lg tracking-tight text-[var(--ink)] sm:mr-2 sm:px-3"
             aria-label="Back to top"
           >
             AK<span className="accent">.</span>
@@ -115,7 +115,10 @@ export default function Nav() {
               key={link.href}
               href={link.href}
               onClick={(e) => onLinkClick(e, link.href)}
-              className="label-caps rounded-full px-4 py-2 text-muted transition-colors hover:bg-[rgba(91,143,255,0.08)] hover:text-[var(--ink)]"
+              // Phones get tighter padding and drop "Lab" so the pill fits a 360px screen.
+              className={`label-caps rounded-full px-2 py-2 text-muted transition-colors hover:bg-[rgba(91,143,255,0.08)] hover:text-[var(--ink)] sm:px-4 ${
+                link.href === "#lab" ? "hidden sm:inline" : ""
+              }`}
             >
               {link.label}
             </a>

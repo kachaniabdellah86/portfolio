@@ -34,31 +34,33 @@ type Project = {
   };
 };
 
+// Real client work first: it is what a business visiting this page needs to see.
 const PROJECTS: Project[] = [
   {
-    id: "kachanios",
+    id: "yalla",
     index: "01",
-    title: "KachaniOS",
-    meaning: "The interface that thinks.",
+    title: "Yalla China",
+    meaning: "From Morocco to a campus in China, step by step.",
     subtitle:
-      "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
-    tags: ["AI Interfaces", "Product UX", "Desktop OS"],
-    year: "2026",
-    status: "Interactive prototype",
+      "A trust-first platform in French, English and Arabic that guides Moroccan students and their families through a seven-step journey to studying in China — and turns visitors into applications and WhatsApp conversations.",
+    tags: ["Client project", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
+    year: "2025",
+    status: "Client project · Live",
     brand: {
-      accent: "#7fa5ff",
-      accentSoft: "rgba(91,143,255,0.16)",
+      accent: "#f0b64a",
+      accentSoft: "rgba(240,182,74,0.16)",
       background:
-        "radial-gradient(ellipse at 72% 28%, rgba(91,143,255,0.2), transparent 55%), linear-gradient(180deg, #060b1c 0%, #04070f 100%)",
-      ink: "#e6edff",
+        "radial-gradient(ellipse at 74% 34%, rgba(240,182,74,0.16), transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(217,51,63,0.16), transparent 50%), linear-gradient(180deg, #1a0709 0%, #0d0405 100%)",
+      ink: "#fff1dc",
     },
+    href: "https://go-china-site.vercel.app/fr",
     details: {
-      role: "Designer & Developer",
+      role: "Full-stack developer — design, build and launch for a study-abroad agency",
       problem:
-        "Autonomous agents operate as black boxes. Making invisible computation visible requires interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
+        "Families needed clarity and trust around studying abroad in China. Language and cultural distance created friction; reassurance was missing.",
       built:
-        "Interactive graph of multi-agent routing. Real-time task pipeline with typed orchestration. Simulated telemetry that shows the architecture without exposing private context.",
-      stack: ["React 19", "TypeScript", "SVG / Canvas", "Motion"],
+        "Trilingual site (French, English, Arabic with right-to-left layout), a seven-step journey, two pricing packs, an application form with server-side validation and spam protection, an admin area to manage applications, and WhatsApp lead capture.",
+      stack: ["Next.js", "TypeScript", "Prisma + Supabase", "Tailwind CSS"],
     },
   },
   {
@@ -90,30 +92,29 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    id: "yalla",
+    id: "kachanios",
     index: "03",
-    title: "Yalla China",
-    meaning: "From Morocco to a campus in China, step by step.",
+    title: "KachaniOS",
+    meaning: "The interface that thinks.",
     subtitle:
-      "A trust-first, multilingual platform (FR / EN / AR) guiding Moroccan students and their families through a seven-step journey to studying in China.",
-    tags: ["Next.js", "i18n + RTL", "Conversion"],
-    year: "2025",
-    status: "Live product",
+      "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
+    tags: ["AI Interfaces", "Product UX", "Desktop OS"],
+    year: "2026",
+    status: "Interactive prototype",
     brand: {
-      accent: "#f0b64a",
-      accentSoft: "rgba(240,182,74,0.16)",
+      accent: "#7fa5ff",
+      accentSoft: "rgba(91,143,255,0.16)",
       background:
-        "radial-gradient(ellipse at 74% 34%, rgba(240,182,74,0.16), transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(217,51,63,0.16), transparent 50%), linear-gradient(180deg, #1a0709 0%, #0d0405 100%)",
-      ink: "#fff1dc",
+        "radial-gradient(ellipse at 72% 28%, rgba(91,143,255,0.2), transparent 55%), linear-gradient(180deg, #060b1c 0%, #04070f 100%)",
+      ink: "#e6edff",
     },
-    href: "https://go-china-site.vercel.app/fr",
     details: {
-      role: "Product Designer & Frontend Developer",
+      role: "Designer & Developer",
       problem:
-        "Families needed clarity and trust around studying abroad in China. Language and cultural distance created friction; reassurance was missing.",
+        "Autonomous agents operate as black boxes. Making invisible computation visible requires interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
       built:
-        "Fully internationalized platform (French, English, Arabic, Darija) with right-to-left support. A trust-centered flow with clear program pathways, FAQ and decision support.",
-      stack: ["Next.js", "TypeScript", "i18n-next", "Tailwind CSS"],
+        "Interactive graph of multi-agent routing. Real-time task pipeline with typed orchestration. Simulated telemetry that shows the architecture without exposing private context.",
+      stack: ["React 19", "TypeScript", "SVG / Canvas", "Motion"],
     },
   },
   {

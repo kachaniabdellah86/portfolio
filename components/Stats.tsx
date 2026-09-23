@@ -11,10 +11,11 @@ type Stat = {
   label: string;
 };
 
+// Only numbers a visitor can check for themselves.
 const STATS: Stat[] = [
-  { value: 3, suffix: "+", label: "Years of craft" },
-  { value: 12, suffix: "+", label: "Projects designed" },
-  { value: 3, suffix: "", label: "Working languages" },
+  { value: 2, suffix: "", label: "Live products in production" },
+  { value: 3, suffix: "", label: "Languages shipped — FR · EN · AR" },
+  { value: 96, suffix: "/100", label: "Lighthouse mobile score, client site" },
 ];
 
 function Counter({ stat }: { stat: Stat }) {

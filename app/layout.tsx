@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import localFont from "next/font/local";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const zodiak = localFont({
@@ -21,11 +22,6 @@ const satoshi = localFont({
       path: "./fonts/Satoshi-Variable.woff2",
       weight: "300 900",
       style: "normal",
-    },
-    {
-      path: "./fonts/Satoshi-Variable-Italic.woff2",
-      weight: "300 900",
-      style: "italic",
     },
   ],
   variable: "--font-sans",
@@ -53,7 +49,7 @@ export const metadata: Metadata = {
   title: "Abdellah Kachani — Creative Developer",
   description:
     "Creative Developer & Computer Engineering Student. I design and build intelligent digital products — from AI systems and full-stack platforms to cinematic interfaces.",
-  metadataBase: new URL("https://abdellahkachani.com"),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "Abdellah Kachani — Creative Developer",
     description:

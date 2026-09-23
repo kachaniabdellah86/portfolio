@@ -1,3 +1,4 @@
+import { whatsappUrl } from "@/lib/site";
 import { Reveal } from "./Marquee";
 
 export default function About() {
@@ -57,6 +58,14 @@ export default function About() {
           <div className="grid gap-3 border-t border-white/8 pt-8">
             <p className="label-caps text-white/50">Connect</p>
             <div className="flex flex-wrap gap-3 text-sm">
+              <a
+                href={whatsappUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--accent)] transition-colors hover:text-white"
+              >
+                WhatsApp →
+              </a>
               <a
                 href="https://github.com/kachaniabdellah86"
                 target="_blank"
