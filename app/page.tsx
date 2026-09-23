@@ -1,6 +1,5 @@
 import SmoothScroll from "@/components/SmoothScroll";
 import GrainOverlay from "@/components/GrainOverlay";
-import Preloader from "@/components/Preloader";
 import Cursor from "@/components/Cursor";
 import Nav from "@/components/Nav";
 import BackgroundScene from "@/components/three/BackgroundScene";
@@ -17,7 +16,6 @@ export default function Home() {
   return (
     <SmoothScroll>
       <BackgroundScene />
-      <Preloader />
       <Cursor />
       <GrainOverlay />
       <Nav />
