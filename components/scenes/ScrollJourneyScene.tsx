@@ -33,6 +33,8 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
 
     let animationFrame = 0;
     let contextAvailable = true;
+    let ready = false;
+    let disposed = false;
     let lastPhase = "";
     const compact = window.matchMedia("(max-width: 767px)").matches;
     const options: ScrollJourneyOptions = {
@@ -53,6 +55,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       journey.resize(bounds.width, bounds.height);
     };
     const canRun = () =>
+      ready &&
       shouldRunJourney({
         contextAvailable,
         documentHidden: document.hidden,
@@ -106,10 +109,20 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     canvas.addEventListener("webglcontextlost", onContextLost);
     canvas.addEventListener("webglcontextrestored", onContextRestored);
     resize();
-    setStatus("active");
-    syncAnimationLoop();
+    // The static fallback stays up until every shader is compiled, so the
+    // first scroll through the chapters never stalls on a compile.
+    journey
+      .warmup()
+      .catch(() => {})
+      .then(() => {
+        if (disposed) return;
+        ready = true;
+        setStatus("active");
+        syncAnimationLoop();
+      });
 
     return () => {
+      disposed = true;
       if (animationFrame) cancelAnimationFrame(animationFrame);
       resizeObserver.disconnect();
       window.removeEventListener("pointermove", onPointerMove);

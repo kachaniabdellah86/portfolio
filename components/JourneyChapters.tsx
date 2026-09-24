@@ -138,14 +138,16 @@ function ChapterPanel({
     <motion.article
       data-journey-chapter={chapter.id}
       style={{ opacity, y, filter: blur }}
-      className={`pointer-events-none absolute inset-0 flex items-end px-6 pb-28 pt-20 sm:items-center sm:px-12 sm:py-28 ${
+      // Phones skip the blur: re-rasterising a blurred text layer every scroll
+      // frame costs more than the whole WebGL frame on a mid-range GPU.
+      className={`pointer-events-none absolute inset-0 flex max-md:[filter:none!important] items-end px-6 pb-28 pt-20 sm:items-center sm:px-12 sm:py-28 ${
         chapter.align === "right" ? "justify-end text-right" : "justify-start"
       }`}
     >
       <div className="relative max-w-[min(46rem,78vw)]">
         <div
           aria-hidden="true"
-          className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_center,rgba(2,4,11,0.82)_0%,rgba(2,4,11,0.45)_42%,transparent_72%)] blur-xl sm:-inset-x-16 sm:-inset-y-12"
+          className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_center,rgba(2,4,11,0.82)_0%,rgba(2,4,11,0.45)_42%,transparent_72%)] md:blur-xl sm:-inset-x-16 sm:-inset-y-12"
         />
         <p className="label-caps accent">{chapter.eyebrow}</p>
         <Heading

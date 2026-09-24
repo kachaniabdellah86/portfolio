@@ -1209,6 +1209,35 @@ export function createScrollJourneyRenderer(
     });
     scene.add(world.group);
   });
+  // Shader programs are keyed on the scene's light count, so a light that
+  // appears or disappears with its world forces every lit material to
+  // recompile mid-scroll. World lights live on the scene instead and fade to
+  // zero intensity when their world is out of range, keeping the count fixed.
+  scene.updateMatrixWorld(true);
+  const worldLights = worlds.map((world) => {
+    const lights: THREE.Light[] = [];
+    world.group.traverse((object) => {
+      if (object instanceof THREE.Light) lights.push(object);
+    });
+    lights.forEach((light) => {
+      scene.attach(light);
+      light.intensity = 0;
+    });
+    return lights;
+  });
+  // Transmission re-renders the scene into an extra target every frame, which
+  // phones cannot afford. Compact glass stays translucent without it.
+  if (isCompact) {
+    worlds.forEach((world) =>
+      world.group.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const objectMaterials = Array.isArray(object.material) ? object.material : [object.material];
+        objectMaterials.forEach((material) => {
+          if (material instanceof THREE.MeshPhysicalMaterial) material.transmission = 0;
+        });
+      }),
+    );
+  }
   const random = createSeededRandom(20260829);
   const dust = createDust(random, isCompact ? 300 : 1500);
   const terrain = createTerrain(isCompact);
@@ -1282,7 +1311,53 @@ export function createScrollJourneyRenderer(
     );
   };
 
+  let disposed = false;
+  const parallelCompile = renderer.extensions.has("KHR_parallel_shader_compile");
+  // Like renderer.compileAsync, but stops polling once the renderer is
+  // disposed (for example by a remount while shaders are still compiling),
+  // since disposal clears the programs it would be checking.
+  const waitForPrograms = (materials: Set<THREE.Material>) =>
+    new Promise<void>((resolve) => {
+      const check = () => {
+        if (disposed) return resolve();
+        materials.forEach((material) => {
+          const { currentProgram: program } = renderer.properties.get(material) as {
+            currentProgram?: { isReady(): boolean };
+          };
+          if (!program || program.isReady()) materials.delete(material);
+        });
+        if (materials.size === 0) resolve();
+        else window.setTimeout(check, 10);
+      };
+      if (parallelCompile) check();
+      else window.setTimeout(check, 10);
+    });
+
   return {
+    /**
+     * Compiles every shader the journey can need before the first frame, so
+     * scrolling into a new chapter never stalls on a shader compile. Materials
+     * that switch between the opaque and transparent queues get both variants.
+     * Uses parallel compilation where available, so the page stays responsive.
+     */
+    async warmup() {
+      const flippable = worlds.flatMap((world) =>
+        world.materials.filter((material) => material.userData.opaqueAtFullFocus === true),
+      );
+      for (const transparent of [true, false]) {
+        if (disposed) return;
+        flippable.forEach((material) => {
+          material.transparent = transparent;
+          material.needsUpdate = true;
+        });
+        // Desktop renders through the composer's target, which changes the
+        // tone-mapping and colour-space program variants.
+        renderer.setRenderTarget(composer ? composer.readBuffer : null);
+        const materials = renderer.compile(scene, camera);
+        renderer.setRenderTarget(null);
+        await waitForPrograms(materials);
+      }
+    },
     resize(width: number, height: number) {
       const renderQuality = getRenderQuality({
         devicePixelRatio: window.devicePixelRatio || 1,
@@ -1419,10 +1494,15 @@ export function createScrollJourneyRenderer(
         pulse.scale.setScalar(0.7 + energy * 1.7);
       });
 
-      worlds.forEach((world) => {
+      worlds.forEach((world, index) => {
         const distance = Math.abs(smoothProgress - world.at);
         world.group.visible = distance < 0.32;
-        if (!world.group.visible) return;
+        if (!world.group.visible) {
+          worldLights[index].forEach((light) => {
+            light.intensity = 0;
+          });
+          return;
+        }
         const focus = 1 - THREE.MathUtils.smoothstep(distance, 0.09, 0.28);
         const visibility = 0.08 + focus * 0.92;
         world.group.scale.setScalar(0.84 + focus * 0.16);
@@ -1431,6 +1511,10 @@ export function createScrollJourneyRenderer(
           material.opacity = baseOpacity * visibility;
         });
         world.tick(time, delta, focus);
+        // Ticks set full intensity; fade it with focus so lights ease in.
+        worldLights[index].forEach((light) => {
+          light.intensity *= focus;
+        });
       });
 
       dust.rotation.y = Math.sin(time * 0.035) * 0.035;
@@ -1441,6 +1525,7 @@ export function createScrollJourneyRenderer(
       else renderer.render(scene, camera);
     },
     dispose() {
+      disposed = true;
       const geometries = new Set<THREE.BufferGeometry>();
       const materials = new Set<THREE.Material>();
       scene.traverse((object) => {
