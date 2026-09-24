@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
+  animate,
   motion,
+  useInView,
   useMotionValue,
-  useMotionValueEvent,
   useScroll,
   useSpring,
   useTransform,
@@ -16,6 +17,7 @@ type Slide = {
   index: string;
   title: string;
   tag: string;
+  gesture: string;
   tone: string;
 };
 
@@ -23,31 +25,36 @@ const SLIDES: Slide[] = [
   {
     index: "01",
     title: "Variable Type",
-    tag: "Interactive font-weight & style morpher",
+    tag: "Each letter's weight follows your finger, from 100 to 900 on one variable axis.",
+    gesture: "Drag across",
     tone: "linear-gradient(135deg, #0c1433 0%, #101a3f 55%, #070a16 100%)",
   },
   {
     index: "02",
-    title: "Wave Resonance",
-    tag: "Acoustic spectrum hover modulation",
+    title: "Signal Field",
+    tag: "A live canvas of signal lines that bends around touch and carries pulses.",
+    gesture: "Tap · drag",
     tone: "linear-gradient(135deg, #0e1428 0%, #16204a 50%, #080a14 100%)",
   },
   {
     index: "03",
     title: "Spring Physics",
-    tag: "Draggable elastic inertia sandbox",
+    tag: "A real damped spring. Fling it, change its character, watch the decay.",
+    gesture: "Pull & fling",
     tone: "linear-gradient(135deg, #10131f 0%, #1a2342 60%, #090b12 100%)",
   },
   {
     index: "04",
     title: "Design Tokens",
-    tag: "Live CSS matrix switchboard",
+    tag: "One hue token re-themes a whole component, with the contrast checked live.",
+    gesture: "Turn the hue",
     tone: "linear-gradient(135deg, #0b1024 0%, #141d44 55%, #070910 100%)",
   },
   {
     index: "05",
-    title: "Tactile Stepper",
-    tag: "Interactive slide gesture confirmation",
+    title: "Slide to Confirm",
+    tag: "A payment gesture with resistance, snap-back and a haptic confirmation.",
+    gesture: "Slide right",
     tone: "linear-gradient(135deg, #0d1120 0%, #182148 50%, #080a13 100%)",
   },
 ];
@@ -65,486 +72,692 @@ function Grain({ id }: { id: string }) {
   );
 }
 
-/* ── 01. Kinetic Variable Typography Lab ── */
+/** Runs `frame` on every animation frame while `active` is true. */
+function useFrameLoop(active: boolean, frame: (time: number, delta: number) => void) {
+  const frameRef = useRef(frame);
+  useEffect(() => {
+    frameRef.current = frame;
+  });
+
+  useEffect(() => {
+    if (!active) return;
+    let id = 0;
+    let last = performance.now();
+    const loop = (now: number) => {
+      const delta = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      frameRef.current(now / 1000, delta);
+      id = requestAnimationFrame(loop);
+    };
+    id = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(id);
+  }, [active]);
+}
+
+function useLabActive(ref: RefObject<Element | null>) {
+  const inView = useInView(ref, { amount: 0.25 });
+  const [pageVisible, setPageVisible] = useState(true);
+  useEffect(() => {
+    const sync = () => setPageVisible(!document.hidden);
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+  return inView && pageVisible;
+}
+
+function Hint({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[0.6rem] font-mono uppercase tracking-[0.18em] text-white/45">{children}</span>
+  );
+}
+
+/* ── 01. Variable type that follows the finger ── */
+
+const TYPE_WORD = "Motion";
+
 function TypeStudiesLab() {
-  const [activeStyle, setActiveStyle] = useState<"serif" | "italic" | "sans" | "mono">("serif");
-  const [weight, setWeight] = useState(400);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const readoutRef = useRef<HTMLSpanElement>(null);
+  const pointer = useRef<{ x: number; lastInput: number }>({ x: -1, lastInput: -10 });
+  const reduce = useReducedMotionPreference();
+  const active = useLabActive(stageRef);
 
-  const getWeightLabel = (w: number) => {
-    if (w < 250) return "Thin 100";
-    if (w < 400) return "Light 300";
-    if (w < 600) return "Regular 400";
-    if (w < 750) return "Medium 600";
-    if (w < 850) return "Bold 700";
-    return "Black 900";
+  const setPointer = (clientX: number) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    pointer.current = { x: clientX - rect.left, lastInput: performance.now() / 1000 };
   };
 
-  const handlePointer = (clientX: number, rect: DOMRect) => {
-    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    setWeight(Math.round(100 + p * 800));
-  };
+  useFrameLoop(active, (time) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const letters = lettersRef.current.filter((letter): letter is HTMLSpanElement => letter !== null);
+    if (letters.length === 0) return;
+    const wordLeft = letters[0].offsetLeft;
+    const wordRight = letters[letters.length - 1].offsetLeft + letters[letters.length - 1].offsetWidth;
+    const wordWidth = Math.max(1, wordRight - wordLeft);
+    const idle = time - pointer.current.lastInput > 1.6;
+    // With no input the focus sweeps across the word on its own, so the
+    // specimen is alive before anyone touches it.
+    const focusX = idle
+      ? reduce
+        ? wordLeft + wordWidth / 2
+        : wordLeft + wordWidth * (0.5 + Math.sin(time * 1.2) * 0.55)
+      : pointer.current.x;
+    let peak = 100;
+    letters.forEach((letter) => {
+      const center = letter.offsetLeft + letter.offsetWidth / 2;
+      const distance = (center - focusX) / (wordWidth * 0.2);
+      const target = 100 + 800 * Math.exp(-distance * distance);
+      const current = Number(letter.dataset.weight ?? 100);
+      const next = current + (target - current) * 0.2;
+      letter.dataset.weight = String(next);
+      letter.style.fontWeight = String(Math.round(next));
+      letter.style.opacity = String(0.45 + ((next - 100) / 800) * 0.55);
+      peak = Math.max(peak, next);
+    });
+    if (readoutRef.current) readoutRef.current.textContent = String(Math.round(peak / 10) * 10);
+  });
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
-      {/* Top Style Selector Pills */}
-      <div className="flex gap-1.5 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-md">
-        {(["serif", "italic", "sans", "mono"] as const).map((s) => (
+    <div className="flex h-full w-full flex-col items-center justify-between">
+      <Hint>Drag across the letters</Hint>
+      <div
+        ref={stageRef}
+        className="relative flex w-full cursor-ew-resize items-center justify-center py-4"
+        style={{ touchAction: "pan-y" }}
+        onPointerDown={(event) => setPointer(event.clientX)}
+        onPointerMove={(event) => {
+          if (event.pointerType === "mouse" || event.buttons > 0) setPointer(event.clientX);
+        }}
+        aria-label={`The word ${TYPE_WORD} set in a variable font whose weight follows the pointer`}
+        role="img"
+      >
+        <p className="display flex whitespace-nowrap text-[clamp(2.7rem,11vw,4.4rem)] leading-none text-white">
+          {TYPE_WORD.split("").map((char, index) => (
+            <span
+              key={index}
+              ref={(node) => {
+                lettersRef.current[index] = node;
+              }}
+              aria-hidden="true"
+              style={{ fontWeight: 100 }}
+            >
+              {char}
+            </span>
+          ))}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 text-[0.6rem] font-mono text-white/50">
+        <span>Zodiak Variable</span>
+        <span>·</span>
+        <span className="text-[var(--accent)]">
+          wght <span ref={readoutRef}>100</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── 02. Signal field on a canvas ── */
+
+type Ripple = { x: number; y: number; born: number };
+
+function SignalFieldLab() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointer = useRef({ x: 0, y: 0, strength: 0, target: 0 });
+  const ripples = useRef<Ripple[]>([]);
+  const [pulses, setPulses] = useState(0);
+  const reduce = useReducedMotionPreference();
+  const active = useLabActive(canvasRef);
+
+  const toLocal = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  };
+
+  useFrameLoop(active, (time, delta) => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.clearRect(0, 0, width, height);
+
+    const p = pointer.current;
+    p.strength += (p.target - p.strength) * Math.min(1, delta * 6);
+    const drift = reduce ? 0 : time;
+    ripples.current = ripples.current.filter((ripple) => time - ripple.born < 2.2);
+
+    const lines = 13;
+    for (let line = 0; line < lines; line += 1) {
+      const baseY = ((line + 1) / (lines + 1)) * height;
+      const depth = line / (lines - 1);
+      context.beginPath();
+      for (let x = 0; x <= width; x += 6) {
+        let y = baseY + Math.sin(x * 0.022 + drift * 1.3 + line * 0.55) * (3 + depth * 4);
+        // The pointer parts the lines like a hand through water.
+        const dx = x - p.x;
+        const dy = baseY - p.y;
+        const reach = Math.exp(-(dx * dx + dy * dy) / 2600) * p.strength;
+        y += Math.sign(dy || 1) * reach * 22;
+        for (const ripple of ripples.current) {
+          const age = time - ripple.born;
+          const distance = Math.hypot(x - ripple.x, baseY - ripple.y);
+          const front = distance - age * 170;
+          y += Math.sin(front * 0.09) * Math.exp(-front * front / 900) * 16 * (1 - age / 2.2);
+        }
+        if (x === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      const alpha = 0.18 + (1 - Math.abs(depth - 0.5) * 2) * 0.5;
+      context.strokeStyle = `rgba(${Math.round(91 + depth * 60)}, ${Math.round(143 - depth * 40)}, 255, ${alpha})`;
+      context.lineWidth = 1.2;
+      context.stroke();
+    }
+    if (p.strength > 0.02) {
+      const glow = context.createRadialGradient(p.x, p.y, 0, p.x, p.y, 60);
+      glow.addColorStop(0, `rgba(140, 180, 255, ${0.28 * p.strength})`);
+      glow.addColorStop(1, "rgba(140, 180, 255, 0)");
+      context.fillStyle = glow;
+      context.fillRect(p.x - 60, p.y - 60, 120, 120);
+    }
+  });
+
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-between gap-2">
+      <Hint>Tap for a pulse · drag to part</Hint>
+      <canvas
+        ref={canvasRef}
+        aria-label="Interactive signal field. Tap to send pulses through the lines."
+        role="img"
+        className="h-full min-h-0 w-full flex-1 cursor-crosshair rounded-xl"
+        style={{ touchAction: "pan-y" }}
+        onPointerDown={(event) => {
+          const { x, y } = toLocal(event);
+          ripples.current.push({ x, y, born: performance.now() / 1000 });
+          if (ripples.current.length > 6) ripples.current.shift();
+          pointer.current = { ...pointer.current, x, y, target: 1 };
+          setPulses((count) => count + 1);
+        }}
+        onPointerMove={(event) => {
+          const { x, y } = toLocal(event);
+          pointer.current.x = x;
+          pointer.current.y = y;
+          if (event.pointerType === "mouse" || event.buttons > 0) pointer.current.target = 1;
+        }}
+        onPointerUp={(event) => {
+          if (event.pointerType !== "mouse") pointer.current.target = 0;
+        }}
+        onPointerLeave={() => {
+          pointer.current.target = 0;
+        }}
+      />
+      <div className="flex items-center gap-2 text-[0.6rem] font-mono text-white/50">
+        <span>Canvas 2D · live</span>
+        <span>·</span>
+        <span className="text-[var(--accent)]">
+          {pulses} {pulses === 1 ? "pulse" : "pulses"} sent
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── 03. A real damped spring ── */
+
+const SPRING_PRESETS = {
+  snappy: { label: "Snappy", stiffness: 420, damping: 26 },
+  wobbly: { label: "Wobbly", stiffness: 180, damping: 4 },
+  soft: { label: "Soft", stiffness: 70, damping: 9 },
+} as const;
+type SpringPreset = keyof typeof SPRING_PRESETS;
+const TRACE_LENGTH = 90;
+
+function SpringPhysicsLab() {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const puckRef = useRef<HTMLButtonElement>(null);
+  const tetherRef = useRef<SVGLineElement>(null);
+  const traceRef = useRef<SVGPolylineElement>(null);
+  const [preset, setPreset] = useState<SpringPreset>("wobbly");
+  const [moving, setMoving] = useState(false);
+  const state = useRef({
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    dragging: false,
+    grabX: 0,
+    grabY: 0,
+    lastX: 0,
+    lastY: 0,
+    lastT: 0,
+    trace: new Array<number>(TRACE_LENGTH).fill(0),
+  });
+  const inView = useLabActive(stageRef);
+
+  const bounds = () => {
+    const stage = stageRef.current;
+    return stage
+      ? { x: stage.clientWidth / 2 - 26, y: stage.clientHeight / 2 - 26 }
+      : { x: 100, y: 50 };
+  };
+
+  const paint = () => {
+    const s = state.current;
+    if (puckRef.current) puckRef.current.style.transform = `translate(${s.x}px, ${s.y}px)`;
+    tetherRef.current?.setAttribute("x2", String(s.x));
+    tetherRef.current?.setAttribute("y2", String(s.y));
+    if (traceRef.current) {
+      traceRef.current.setAttribute(
+        "points",
+        s.trace.map((value, index) => `${(index / (TRACE_LENGTH - 1)) * 100},${12 - value * 11}`).join(" "),
+      );
+    }
+  };
+
+  useFrameLoop(inView && moving, (_time, delta) => {
+    const s = state.current;
+    const { stiffness, damping } = SPRING_PRESETS[preset];
+    if (!s.dragging) {
+      // Semi-implicit Euler in small steps keeps stiff springs stable.
+      const steps = 4;
+      const dt = delta / steps;
+      for (let step = 0; step < steps; step += 1) {
+        s.vx += (-stiffness * s.x - damping * s.vx) * dt;
+        s.vy += (-stiffness * s.y - damping * s.vy) * dt;
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+      }
+      const limit = bounds();
+      s.x = Math.max(-limit.x * 1.3, Math.min(limit.x * 1.3, s.x));
+      s.y = Math.max(-limit.y * 1.3, Math.min(limit.y * 1.3, s.y));
+    }
+    const reach = bounds().x || 1;
+    s.trace.push(Math.max(-1, Math.min(1, s.x / reach)));
+    s.trace.shift();
+    paint();
+    const resting =
+      !s.dragging && Math.abs(s.x) < 0.3 && Math.abs(s.y) < 0.3 && Math.abs(s.vx) < 2 && Math.abs(s.vy) < 2;
+    if (resting && s.trace.every((value) => Math.abs(value) < 0.01)) {
+      s.x = 0;
+      s.y = 0;
+      paint();
+      setMoving(false);
+    }
+  });
+
+  const kick = (vx: number, vy: number) => {
+    state.current.vx += vx;
+    state.current.vy += vy;
+    setMoving(true);
+  };
+
+  // One flick the first time the card is seen, so it reads as alive.
+  const introduced = useRef(false);
+  useEffect(() => {
+    if (!inView || introduced.current) return;
+    introduced.current = true;
+    const timer = window.setTimeout(() => {
+      state.current.vx += 380;
+      state.current.vy -= 140;
+      setMoving(true);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [inView]);
+
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-between gap-2">
+      <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+        {(Object.keys(SPRING_PRESETS) as SpringPreset[]).map((key) => (
           <button
-            key={s}
+            key={key}
             type="button"
-            aria-pressed={activeStyle === s}
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveStyle(s);
+            aria-pressed={preset === key}
+            onClick={() => {
+              setPreset(key);
+              kick(420, -160);
             }}
-            className={`rounded-full px-2.5 py-1 text-[0.6rem] font-mono uppercase tracking-wider transition-all ${
-              activeStyle === s
-                ? "bg-[var(--accent)] text-white shadow-[0_0_12px_rgba(91,143,255,0.5)] font-semibold"
-                : "text-muted hover:text-white"
+            className={`rounded-full px-3 py-1 text-[0.6rem] font-mono uppercase tracking-wider transition-colors ${
+              preset === key ? "bg-[var(--accent)] text-white" : "text-white/55 hover:text-white"
             }`}
           >
-            {s}
+            {SPRING_PRESETS[key].label}
           </button>
         ))}
       </div>
 
-      {/* Interactive Kinetic Letterform Canvas */}
-      <div
-        className="my-auto flex w-full flex-col items-center justify-center cursor-ew-resize py-1 touch-none"
-        onPointerMove={(e) => {
-          if (e.buttons > 0 || e.pointerType === "mouse") {
-            handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
-          }
-        }}
-        onPointerDown={(e) => {
-          handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
-        }}
-      >
-        <motion.p
-          className={`text-5xl sm:text-6xl text-white transition-all duration-150 drop-shadow-[0_0_25px_rgba(91,143,255,0.25)] ${
-            activeStyle === "serif"
-              ? "serif"
-              : activeStyle === "italic"
-              ? "serif italic"
-              : activeStyle === "mono"
-              ? "font-mono"
-              : "font-sans"
-          }`}
-          style={{ fontWeight: weight }}
+      <div ref={stageRef} className="relative w-full flex-1">
+        <svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full overflow-visible">
+          <svg x="50%" y="50%" overflow="visible">
+            <circle r={3} fill="rgba(255,255,255,0.45)" />
+            <line ref={tetherRef} x1={0} y1={0} x2={0} y2={0} stroke="#5b8fff" strokeWidth={1.5} strokeDasharray="4 3" />
+          </svg>
+        </svg>
+        <button
+          ref={puckRef}
+          type="button"
+          aria-label="Spring puck. Drag and release it, or press the arrow keys to flick it."
+          className="absolute left-1/2 top-1/2 -ml-[22px] -mt-[22px] flex size-11 cursor-grab items-center justify-center rounded-full border border-[var(--accent)]/80 bg-gradient-to-br from-[#2a3f8c] to-[#0c132b] shadow-[0_0_28px_rgba(91,143,255,0.5)] active:cursor-grabbing"
+          style={{ touchAction: "none" }}
+          onPointerDown={(event) => {
+            const s = state.current;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            s.dragging = true;
+            s.grabX = event.clientX - s.x;
+            s.grabY = event.clientY - s.y;
+            s.lastX = event.clientX;
+            s.lastY = event.clientY;
+            s.lastT = performance.now();
+            s.vx = 0;
+            s.vy = 0;
+            setMoving(true);
+          }}
+          onPointerMove={(event) => {
+            const s = state.current;
+            if (!s.dragging) return;
+            const limit = bounds();
+            s.x = Math.max(-limit.x, Math.min(limit.x, event.clientX - s.grabX));
+            s.y = Math.max(-limit.y, Math.min(limit.y, event.clientY - s.grabY));
+            const now = performance.now();
+            const dt = Math.max(1, now - s.lastT) / 1000;
+            s.vx = (event.clientX - s.lastX) / dt;
+            s.vy = (event.clientY - s.lastY) / dt;
+            s.lastX = event.clientX;
+            s.lastY = event.clientY;
+            s.lastT = now;
+          }}
+          onPointerUp={() => {
+            state.current.dragging = false;
+          }}
+          onPointerCancel={() => {
+            state.current.dragging = false;
+          }}
+          onKeyDown={(event) => {
+            const impulse = event.shiftKey ? 900 : 500;
+            const directions: Record<string, [number, number]> = {
+              ArrowLeft: [-impulse, 0],
+              ArrowRight: [impulse, 0],
+              ArrowUp: [0, -impulse],
+              ArrowDown: [0, impulse],
+            };
+            const direction = directions[event.key];
+            if (!direction) return;
+            event.preventDefault();
+            kick(direction[0], direction[1]);
+          }}
         >
-          Aa Ж & ✦
-        </motion.p>
+          <span className="size-2 rounded-full bg-white shadow-[0_0_8px_#5b8fff]" />
+        </button>
       </div>
 
-      {/* Touch-Friendly Slider Track & Metrics */}
-      <div className="flex w-full max-w-[220px] flex-col items-center gap-1.5">
-        <input
-          type="range"
-          aria-label="Variable font weight"
-          min={100}
-          max={900}
-          step={10}
-          value={weight}
-          onChange={(e) => setWeight(Number(e.target.value))}
-          className="w-full accent-[var(--accent)] cursor-pointer h-1.5 bg-white/10 rounded-full appearance-none"
-        />
-        <div className="flex items-center gap-2 text-[0.6rem] font-mono text-muted/70">
-          <span className="text-[var(--accent)] font-semibold">{getWeightLabel(weight)}</span>
-          <span>·</span>
-          <span className="text-[0.55rem] tracking-wider uppercase">Slide or drag to morph</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 02. Interactive Wave Resonance Lab ── */
-function WaveFrequencyLab() {
-  const [hoverIndex, setHoverIndex] = useState(7);
-  const baseHeights = [20, 38, 60, 32, 75, 48, 92, 65, 88, 52, 78, 36, 62, 28, 45, 22];
-
-  const handlePointer = (clientX: number, rect: DOMRect) => {
-    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const idx = Math.floor(p * baseHeights.length);
-    setHoverIndex(Math.max(0, Math.min(baseHeights.length - 1, idx)));
-  };
-
-  return (
-    <div
-      role="slider"
-      tabIndex={0}
-      aria-label="Wave resonance band"
-      aria-valuemin={1}
-      aria-valuemax={baseHeights.length}
-      aria-valuenow={hoverIndex + 1}
-      aria-valuetext={`Band ${hoverIndex + 1} of ${baseHeights.length}`}
-      className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none touch-none"
-      onKeyDown={(e) => {
-        if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
-          e.preventDefault();
-          setHoverIndex((current) => Math.max(0, current - 1));
-        } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
-          e.preventDefault();
-          setHoverIndex((current) => Math.min(baseHeights.length - 1, current + 1));
-        } else if (e.key === "Home") {
-          e.preventDefault();
-          setHoverIndex(0);
-        } else if (e.key === "End") {
-          e.preventDefault();
-          setHoverIndex(baseHeights.length - 1);
-        }
-      }}
-      onPointerMove={(e) => {
-        handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
-      }}
-      onPointerDown={(e) => {
-        handlePointer(e.clientX, e.currentTarget.getBoundingClientRect());
-      }}
-    >
-      {/* Status hint */}
-      <span className="text-[0.6rem] font-mono text-muted/70 tracking-wider uppercase">
-        Sweep finger or mouse across spectrum
-      </span>
-
-      {/* Frequency Equalizer Bars */}
-      <div className="my-auto flex items-center justify-center gap-1.5 h-24 w-full px-2 cursor-pointer">
-        {baseHeights.map((h, i) => {
-          const isNear = Math.abs(hoverIndex - i) <= 2;
-          const boost = isNear ? (3 - Math.abs(hoverIndex - i)) * 18 : 0;
-          return (
-            <motion.div
-              key={i}
-              className="flex-1 max-w-[8px] rounded-full"
-              animate={{
-                height: `${Math.min(100, h + boost)}%`,
-                backgroundColor: isNear ? "#5b8fff" : "rgba(232, 230, 225, 0.2)",
-                boxShadow: isNear ? "0 0 16px #5b8fff" : "0 0 0px transparent",
-              }}
-              transition={{ type: "spring", stiffness: 450, damping: 20 }}
-            />
-          );
-        })}
-      </div>
-
-      {/* Footer Metrics */}
-      <div className="flex items-center gap-2 text-[0.6rem] font-mono text-muted/70">
-        <span className="text-[var(--accent)] font-semibold">16 Band Harmonic Resonance</span>
-      </div>
-    </div>
-  );
-}
-
-/* ── 03. Draggable Spring Physics Sandbox ── */
-function SpringPhysicsLab() {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const [metrics, setMetrics] = useState({ distance: 0, tension: "0.0", stiffness: 350 });
-  const [isDragging, setIsDragging] = useState(false);
-
-  const movePuck = (deltaX: number, deltaY: number) => {
-    x.set(Math.max(-110, Math.min(110, x.get() + deltaX)));
-    y.set(Math.max(-50, Math.min(50, y.get() + deltaY)));
-  };
-
-  // Sync metrics continuously on every frame
-  useMotionValueEvent(x, "change", (latestX) => {
-    const latestY = y.get();
-    const d = Math.round(Math.hypot(latestX, latestY));
-    setMetrics({
-      distance: d,
-      tension: (d * 0.45).toFixed(1),
-      stiffness: Math.round(350 + d * 3.2),
-    });
-  });
-
-  useMotionValueEvent(y, "change", (latestY) => {
-    const latestX = x.get();
-    const d = Math.round(Math.hypot(latestX, latestY));
-    setMetrics({
-      distance: d,
-      tension: (d * 0.45).toFixed(1),
-      stiffness: Math.round(350 + d * 3.2),
-    });
-  });
-
-  return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none touch-none">
-      {/* Instruction */}
-      <span className="text-[0.6rem] font-mono text-muted/70 tracking-wider uppercase">
-        {isDragging ? "Release to fling" : "Grab & pull the spring puck"}
-      </span>
-
-      {/* Arena Stage */}
-      <div className="relative my-auto flex h-28 w-full items-center justify-center">
-        {/* Dynamic Elastic String Line bound directly to motion values */}
-        <svg
-          className="absolute inset-0 h-full w-full pointer-events-none overflow-visible"
-          viewBox="-150 -70 300 140"
-        >
-          {/* Origin anchor dot */}
-          <circle cx={0} cy={0} r={3} fill="rgba(255,255,255,0.4)" />
-
-          {/* Elastic tether line that stays 100% synced with circle position */}
-          <motion.line
-            x1={0}
-            y1={0}
-            x2={x}
-            y2={y}
-            stroke={isDragging ? "#5b8fff" : "rgba(255,255,255,0.25)"}
-            strokeWidth={isDragging ? 2.5 : 1}
-            strokeDasharray={isDragging ? undefined : "3 3"}
+      <div className="w-full max-w-[240px]">
+        <svg aria-hidden="true" viewBox="0 0 100 24" preserveAspectRatio="none" className="h-6 w-full">
+          <line x1={0} x2={100} y1={12} y2={12} stroke="rgba(255,255,255,0.12)" strokeWidth={0.5} />
+          <polyline
+            ref={traceRef}
+            fill="none"
+            stroke="#5b8fff"
+            strokeWidth={1.2}
+            vectorEffect="non-scaling-stroke"
+            points={Array.from({ length: TRACE_LENGTH }, (_, index) => `${(index / (TRACE_LENGTH - 1)) * 100},12`).join(" ")}
           />
         </svg>
-
-        {/* Real Physics Puck */}
-        <motion.div
-          role="slider"
-          tabIndex={0}
-          aria-label="Spring puck position"
-          aria-valuemin={0}
-          aria-valuemax={121}
-          aria-valuenow={Math.min(121, metrics.distance)}
-          aria-valuetext={`${Math.round(x.get())} pixels horizontal, ${Math.round(y.get())} pixels vertical`}
-          style={{ x, y, touchAction: "none" }}
-          drag
-          dragConstraints={{ left: -110, right: 110, top: -50, bottom: 50 }}
-          dragElastic={0.45}
-          dragTransition={{ bounceStiffness: 450, bounceDamping: 18 }}
-          onDragStart={() => setIsDragging(true)}
-          onDragEnd={() => setIsDragging(false)}
-          onKeyDown={(e) => {
-            const step = e.shiftKey ? 20 : 10;
-            if (e.key === "ArrowLeft") {
-              e.preventDefault();
-              movePuck(-step, 0);
-            } else if (e.key === "ArrowRight") {
-              e.preventDefault();
-              movePuck(step, 0);
-            } else if (e.key === "ArrowUp") {
-              e.preventDefault();
-              movePuck(0, -step);
-            } else if (e.key === "ArrowDown") {
-              e.preventDefault();
-              movePuck(0, step);
-            } else if (e.key === "Home") {
-              e.preventDefault();
-              x.set(0);
-              y.set(0);
-            }
-          }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative z-20 size-12 rounded-full bg-gradient-to-br from-[#1c2c63] to-[#0c132b] border border-[var(--accent)]/80 shadow-[0_0_24px_rgba(91,143,255,0.45)] flex flex-col items-center justify-center cursor-grab active:cursor-grabbing backdrop-blur-md touch-none"
-        >
-          <span className="size-1.5 rounded-full bg-white drop-shadow-[0_0_4px_#5b8fff]" />
-          <span className="mt-0.5 text-[0.45rem] font-mono text-[var(--accent)] font-semibold tracking-tighter">
-            PULL
-          </span>
-        </motion.div>
-      </div>
-
-      {/* Dynamic Live Physics Telemetry */}
-      <div className="flex items-center gap-2 text-[0.6rem] font-mono text-muted/70">
-        <span className="text-[var(--accent)] font-semibold">Tension {metrics.tension}N</span>
-        <span>·</span>
-        <span className="text-white font-medium">Stiffness {metrics.stiffness}</span>
-        <span>·</span>
-        <span>{metrics.distance > 2 ? `Δ ${metrics.distance}px` : "Rest"}</span>
+        <p className="mt-1 text-center text-[0.6rem] font-mono text-white/50">
+          k {SPRING_PRESETS[preset].stiffness} · c {SPRING_PRESETS[preset].damping} ·{" "}
+          <span className="text-[var(--accent)]">{moving ? "oscillating" : "at rest"}</span>
+        </p>
       </div>
     </div>
   );
 }
 
-/* ── 04. Interactive Design Token Switchboard ── */
+/* ── 04. One hue token, a whole component, contrast checked ── */
+
+function oklchToLinearSrgb(lightness: number, chroma: number, hue: number) {
+  const a = chroma * Math.cos((hue * Math.PI) / 180);
+  const b = chroma * Math.sin((hue * Math.PI) / 180);
+  const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const clamp = (value: number) => Math.min(1, Math.max(0, value));
+  return [
+    clamp(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    clamp(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    clamp(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  ];
+}
+
+function contrastRatio(luminanceA: number, luminanceB: number) {
+  const [light, dark] = luminanceA > luminanceB ? [luminanceA, luminanceB] : [luminanceB, luminanceA];
+  return (light + 0.05) / (dark + 0.05);
+}
+
+const ACCENT_LIGHTNESS = 0.7;
+const ACCENT_CHROMA = 0.16;
+const INK_DARK_LUMINANCE = 0.0036; // #0b0b12
+
 function DesignTokensLab() {
-  const [radius, setRadius] = useState<"sm" | "md" | "full">("md");
-  const [glow, setGlow] = useState(true);
-  const [glass, setGlass] = useState(true);
+  const [hue, setHue] = useState(262);
+  const [radius, setRadius] = useState<"sharp" | "soft" | "round">("soft");
+
+  const [r, g, b] = oklchToLinearSrgb(ACCENT_LIGHTNESS, ACCENT_CHROMA, hue);
+  const accentLuminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const onWhite = contrastRatio(accentLuminance, 1);
+  const onDark = contrastRatio(accentLuminance, INK_DARK_LUMINANCE);
+  const ink = onDark >= onWhite ? "#0b0b12" : "#ffffff";
+  const ratio = Math.max(onWhite, onDark);
+  const accent = `oklch(${ACCENT_LIGHTNESS * 100}% ${ACCENT_CHROMA} ${hue})`;
+  const corner = radius === "sharp" ? "4px" : radius === "soft" ? "14px" : "999px";
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
-      {/* Live Controlled Specimen Card */}
-      <motion.div
-        layout
-        className={`h-12 w-40 border flex items-center justify-center gap-2 transition-all duration-300 ${
-          radius === "sm" ? "rounded-md" : radius === "md" ? "rounded-xl" : "rounded-full"
-        } ${
-          glass
-            ? "bg-white/10 backdrop-blur-md border-white/20"
-            : "bg-[#0f1838] border-[var(--accent)]/60"
-        } ${
-          glow ? "shadow-[0_0_20px_rgba(91,143,255,0.4)]" : "shadow-none"
-        }`}
+    <div className="flex h-full w-full flex-col items-center justify-between gap-3">
+      <div
+        className="w-full max-w-[250px] border p-3 transition-[border-radius] duration-300"
+        style={{
+          borderRadius: radius === "round" ? "26px" : corner,
+          borderColor: `oklch(${ACCENT_LIGHTNESS * 100}% ${ACCENT_CHROMA} ${hue} / 0.45)`,
+          background: `linear-gradient(160deg, oklch(30% 0.06 ${hue} / 0.55), oklch(16% 0.03 ${hue} / 0.6))`,
+        }}
       >
-        <span className="size-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-        <span className="text-[0.7rem] font-mono text-white font-medium">--token-card</span>
-      </motion.div>
-
-      {/* Switchboard Toggles */}
-      <div className="flex flex-wrap gap-2 items-center justify-center">
-        {/* Radius controls */}
-        <div className="flex bg-white/5 p-0.5 rounded-md border border-white/10 text-[0.6rem] font-mono">
-          {(["sm", "md", "full"] as const).map((r) => (
-            <button
-              key={r}
-              type="button"
-              aria-pressed={radius === r}
-              onClick={(e) => {
-                e.stopPropagation();
-                setRadius(r);
-              }}
-              className={`px-2 py-1 rounded uppercase font-semibold ${
-                radius === r ? "bg-[var(--accent)] text-white" : "text-muted hover:text-white"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
+        <div className="flex items-center justify-between">
+          <span className="text-[0.7rem] font-medium text-white">Booking confirmed</span>
+          <span
+            className="px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"
+            style={{ background: `oklch(${ACCENT_LIGHTNESS * 100}% ${ACCENT_CHROMA} ${hue} / 0.18)`, color: accent, borderRadius: corner }}
+          >
+            Paid
+          </span>
         </div>
-
-        {/* Glow Toggle */}
-        <button
-          type="button"
-          aria-pressed={glow}
-          onClick={(e) => {
-            e.stopPropagation();
-            setGlow(!glow);
-          }}
-          className={`px-2.5 py-1.5 rounded-md border text-[0.6rem] font-mono font-semibold transition-all ${
-            glow
-              ? "border-[var(--accent)] bg-[var(--accent)]/20 text-white shadow-[0_0_8px_rgba(91,143,255,0.3)]"
-              : "border-white/10 bg-white/5 text-muted"
-          }`}
+        <p className="mt-1 text-[0.62rem] text-white/55">Marrakech · 2 nights · 2 guests</p>
+        <div
+          className="mt-3 py-2 text-center text-[0.7rem] font-semibold transition-colors"
+          style={{ background: accent, color: ink, borderRadius: corner }}
         >
-          GLOW: {glow ? "ON" : "OFF"}
-        </button>
-
-        {/* Glass Toggle */}
-        <button
-          type="button"
-          aria-pressed={glass}
-          onClick={(e) => {
-            e.stopPropagation();
-            setGlass(!glass);
-          }}
-          className={`px-2.5 py-1.5 rounded-md border text-[0.6rem] font-mono font-semibold transition-all ${
-            glass
-              ? "border-white/30 bg-white/15 text-white"
-              : "border-white/10 bg-white/5 text-muted"
-          }`}
-        >
-          {glass ? "GLASS" : "SOLID"}
-        </button>
+          View booking
+        </div>
       </div>
 
-      {/* Metrics */}
-      <span className="text-[0.6rem] font-mono text-muted/70">Click controls to mutate CSS variables</span>
+      <div className="w-full max-w-[250px]">
+        <input
+          type="range"
+          min={0}
+          max={360}
+          value={hue}
+          aria-label="Accent hue"
+          onChange={(event) => setHue(Number(event.target.value))}
+          className="hue-range h-3 w-full cursor-pointer appearance-none rounded-full"
+          style={{
+            touchAction: "pan-y",
+            background:
+              "linear-gradient(90deg, oklch(70% 0.16 0), oklch(70% 0.16 60), oklch(70% 0.16 120), oklch(70% 0.16 180), oklch(70% 0.16 240), oklch(70% 0.16 300), oklch(70% 0.16 360))",
+          }}
+        />
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
+            {(["sharp", "soft", "round"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={radius === option}
+                onClick={() => setRadius(option)}
+                className={`rounded-full px-2 py-0.5 text-[0.55rem] font-mono uppercase transition-colors ${
+                  radius === option ? "bg-white text-black" : "text-white/55 hover:text-white"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <span className={`text-[0.6rem] font-mono ${ratio >= 4.5 ? "text-emerald-300" : "text-amber-300"}`}>
+            {ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "AA large"} {ratio.toFixed(1)}:1
+          </span>
+        </div>
+        <p className="mt-2 truncate text-center text-[0.58rem] font-mono text-white/45">
+          --accent: oklch(70% 0.16 {hue})
+        </p>
+      </div>
     </div>
   );
 }
 
-/* ── 05. Tactile Gesture Confirmation Slider ── */
-function GestureSliderLab() {
-  const [complete, setComplete] = useState(false);
-  const [dragProgress, setDragProgress] = useState(0);
+/* ── 05. Slide to confirm ── */
 
-  const updateProgress = (nextProgress: number) => {
-    const progress = Math.max(0, Math.min(1, nextProgress));
-    setDragProgress(progress);
-    setComplete(progress >= 0.95);
+const KNOB = 40;
+const TRACK_PADDING = 4;
+
+function GestureSliderLab() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const [maxX, setMaxX] = useState(180);
+  const [complete, setComplete] = useState(false);
+  const drag = useRef<{ startX: number; startValue: number } | null>(null);
+  const fill = useTransform(x, (value) => value + KNOB + TRACK_PADDING);
+  const labelOpacity = useTransform(x, [0, maxX * 0.6], [1, 0]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const measure = () => setMaxX(Math.max(60, track.clientWidth - KNOB - TRACK_PADDING * 2));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
+
+  const confirm = useCallback(() => {
+    setComplete(true);
+    animate(x, maxX, { type: "spring", stiffness: 500, damping: 36 });
+    try {
+      navigator.vibrate?.(14);
+    } catch {
+      // Vibration is a nicety; some browsers refuse it.
+    }
+  }, [maxX, x]);
+
+  useEffect(() => {
+    if (!complete) return;
+    const timer = window.setTimeout(() => {
+      setComplete(false);
+      animate(x, 0, { type: "spring", stiffness: 260, damping: 26 });
+    }, 2600);
+    return () => window.clearTimeout(timer);
+  }, [complete, x]);
+
+  const release = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    if (x.get() >= maxX * 0.88) confirm();
+    else animate(x, 0, { type: "spring", stiffness: 520, damping: 22 });
   };
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between pointer-events-auto select-none">
-      {/* Top hint */}
-      <span className="text-[0.6rem] font-mono text-muted/70 tracking-wider uppercase">
-        {complete ? "Verified successfully" : "Slide knob right to verify"}
-      </span>
+    <div className="flex h-full w-full flex-col items-center justify-between">
+      <Hint>{complete ? "Payment sent" : "Slide right to pay"}</Hint>
 
-      {/* Interactive Drag Track */}
-      <div className="my-auto flex flex-col items-center justify-center w-full max-w-[240px] gap-2">
-        <div className="relative h-11 w-full rounded-full bg-white/5 border border-white/15 p-1 flex items-center overflow-hidden backdrop-blur-md touch-none">
-          {/* Progress fill */}
+      <div className="w-full max-w-[260px]">
+        <div className="mb-3 flex items-baseline justify-between px-1">
+          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/45">Total</span>
+          <span className="display text-2xl text-white">1 240 MAD</span>
+        </div>
+        <div
+          ref={trackRef}
+          className={`relative h-12 w-full overflow-hidden rounded-full border transition-colors duration-500 ${
+            complete ? "border-emerald-400/60 bg-emerald-400/10" : "border-white/15 bg-white/5"
+          }`}
+        >
           <motion.div
-            className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[var(--accent)]/30 to-[var(--accent)]/60 rounded-full pointer-events-none"
-            style={{ width: `${Math.max(12, dragProgress * 100)}%` }}
-          />
-
-          {/* Hint text */}
-          <span
-            className={`w-full text-center text-[0.65rem] font-mono tracking-wider transition-opacity duration-300 pointer-events-none ${
-              complete ? "text-[var(--accent)] font-semibold" : "text-muted/60"
+            aria-hidden="true"
+            className={`absolute inset-y-0 left-0 rounded-full ${
+              complete ? "bg-emerald-400/30" : "bg-gradient-to-r from-[var(--accent)]/15 to-[var(--accent)]/50"
             }`}
+            style={{ width: fill }}
+          />
+          <motion.span
+            aria-hidden="true"
+            style={{ opacity: complete ? 0 : labelOpacity }}
+            className="pointer-events-none absolute inset-0 flex items-center justify-center pl-8 text-[0.65rem] font-mono uppercase tracking-[0.2em] text-white/55"
           >
-            {complete ? "CONFIRMED ✓" : "SLIDE TO VERIFY ➔"}
-          </span>
-
-          {/* Draggable Knob */}
+            Slide to pay →
+          </motion.span>
+          {complete && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="pointer-events-none absolute inset-0 flex items-center justify-center pr-8 text-[0.7rem] font-mono font-semibold uppercase tracking-[0.2em] text-emerald-300"
+            >
+              Confirmed
+            </motion.span>
+          )}
           <motion.div
             role="slider"
             tabIndex={0}
-            aria-label="Slide to verify"
+            aria-label="Slide to pay"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={Math.round(dragProgress * 100)}
-            aria-valuetext={complete ? "Verified" : `${Math.round(dragProgress * 100)} percent`}
-            drag="x"
-            dragConstraints={{ left: 0, right: 180 }}
-            dragElastic={0.1}
-            style={{ touchAction: "none" }}
-            onDrag={(_, info) => {
-              const p = Math.min(1, Math.max(0, info.offset.x / 170));
-              updateProgress(p);
+            aria-valuenow={complete ? 100 : 0}
+            aria-valuetext={complete ? "Payment confirmed" : "Not confirmed. Press Enter to confirm."}
+            className={`absolute top-1 flex cursor-grab items-center justify-center rounded-full text-sm font-bold shadow-[0_0_18px_rgba(255,255,255,0.35)] active:cursor-grabbing ${
+              complete ? "bg-emerald-300 text-black" : "bg-white text-black"
+            }`}
+            style={{ x, left: TRACK_PADDING, width: KNOB, height: KNOB, touchAction: "pan-y" }}
+            onPointerDown={(event) => {
+              if (complete) return;
+              event.currentTarget.setPointerCapture(event.pointerId);
+              drag.current = { startX: event.clientX, startValue: x.get() };
             }}
-            onDragEnd={() => {
-              if (dragProgress < 0.95) {
-                setDragProgress(0);
-                setComplete(false);
+            onPointerMove={(event) => {
+              if (!drag.current) return;
+              const next = drag.current.startValue + event.clientX - drag.current.startX;
+              // Resistance past the end, so the track feels physical.
+              x.set(next > maxX ? maxX + (next - maxX) * 0.15 : Math.max(0, next));
+            }}
+            onPointerUp={release}
+            onPointerCancel={release}
+            onKeyDown={(event) => {
+              if (complete) return;
+              if (event.key === "Enter" || event.key === " " || event.key === "End") {
+                event.preventDefault();
+                confirm();
               }
             }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
-                e.preventDefault();
-                updateProgress(dragProgress - 0.1);
-              } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
-                e.preventDefault();
-                updateProgress(dragProgress + 0.1);
-              } else if (e.key === "Home") {
-                e.preventDefault();
-                updateProgress(0);
-              } else if (e.key === "End") {
-                e.preventDefault();
-                updateProgress(1);
-              }
-            }}
-            animate={{ x: dragProgress * 180 }}
-            className="absolute left-1 size-9 rounded-full bg-white text-black font-bold flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing z-20 text-xs touch-none"
           >
-            {complete ? "✓" : "➔"}
+            {complete ? "✓" : "→"}
           </motion.div>
         </div>
-
-        {complete && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setComplete(false);
-              setDragProgress(0);
-            }}
-            className="text-[0.55rem] font-mono text-muted hover:text-white underline uppercase tracking-wider py-1"
-          >
-            Reset Gesture
-          </button>
-        )}
       </div>
 
-      {/* Status indicator */}
-      <div className="flex items-center gap-2 text-[0.6rem] font-mono">
-        <span className={complete ? "text-emerald-400 font-semibold" : "text-muted/70"}>
-          Status: {complete ? "CONFIRMED" : "IDLE"}
-        </span>
-      </div>
+      <span className={`text-[0.6rem] font-mono ${complete ? "text-emerald-300" : "text-white/45"}`}>
+        {complete ? "Receipt sent · resets in a moment" : "Release early and it springs back"}
+      </span>
     </div>
   );
 }
@@ -552,39 +765,33 @@ function GestureSliderLab() {
 function Card({ slide }: { slide: Slide }) {
   return (
     <div
-      className="group relative flex h-[48vh] sm:h-[54vh] w-[80vw] sm:w-[48vw] lg:w-[38vw] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-2xl border border-[var(--hairline)] p-6 sm:p-7 transition-all duration-500 hover:border-[var(--accent)]/40 hover:shadow-[0_0_30px_rgba(91,143,255,0.06)]"
+      data-lab-card
+      className="group relative flex h-[30rem] w-[84vw] max-w-[24rem] shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-[var(--hairline)] p-5 transition-[border-color,box-shadow] duration-500 hover:border-[var(--accent)]/40 hover:shadow-[0_0_30px_rgba(91,143,255,0.06)] sm:h-[32rem] sm:w-[48vw] sm:max-w-none sm:p-7 lg:w-[34vw]"
       style={{ background: slide.tone }}
     >
       <Grain id={slide.index} />
 
-      {/* ── 1. CARD HEADER (Unified & Clean) ── */}
-      <div className="relative z-10 flex items-center justify-between border-b border-white/5 pb-3 pointer-events-none">
+      <div className="relative z-10 flex items-center justify-between border-b border-white/5 pb-3">
         <div className="flex items-center gap-3">
           <span className="serif accent text-lg italic">{slide.index}</span>
-          <span className="label-caps text-faint text-[0.65rem] tracking-[0.2em] uppercase">Fragment // Lab</span>
+          <span className="label-caps text-[0.62rem] tracking-[0.2em] text-faint">Fragment</span>
         </div>
-        <span className="label-caps text-[0.6rem] text-muted rounded-full border border-white/10 px-2.5 py-0.5 bg-white/5 backdrop-blur-md">
-          Interactive
+        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.58rem] font-mono uppercase tracking-wider text-white/60">
+          {slide.gesture}
         </span>
       </div>
 
-      {/* ── 2. CARD PLAYGROUND STAGE (Dedicated Middle Stage) ── */}
-      <div className="relative my-auto flex h-[55%] w-full items-center justify-center py-2 z-10">
+      <div className="relative z-10 flex min-h-0 flex-1 py-4">
         {slide.index === "01" && <TypeStudiesLab />}
-        {slide.index === "02" && <WaveFrequencyLab />}
+        {slide.index === "02" && <SignalFieldLab />}
         {slide.index === "03" && <SpringPhysicsLab />}
         {slide.index === "04" && <DesignTokensLab />}
         {slide.index === "05" && <GestureSliderLab />}
       </div>
 
-      {/* ── 3. CARD FOOTER (Clean Editorial Typography) ── */}
-      <div className="relative z-10 border-t border-white/5 pt-3 pointer-events-none">
-        <h3 className="display text-xl sm:text-2xl font-normal tracking-tight text-white transition-transform duration-500 group-hover:translate-x-1">
-          {slide.title}
-        </h3>
-        <p className="mt-0.5 text-xs text-muted leading-relaxed">
-          {slide.tag}
-        </p>
+      <div className="relative z-10 border-t border-white/5 pt-3">
+        <h3 className="display text-xl font-normal tracking-tight text-white sm:text-2xl">{slide.title}</h3>
+        <p className="mt-1 text-xs leading-relaxed text-white/55">{slide.tag}</p>
       </div>
     </div>
   );
@@ -620,29 +827,95 @@ function Pinned() {
   return (
     <div ref={wrapRef} style={{ height: height ?? "280vh" }}>
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
-        <motion.div
-          ref={trackRef}
-          style={{ x }}
-          className="flex w-max items-stretch gap-6 px-6 sm:px-12"
-        >
+        <motion.div ref={trackRef} style={{ x }} className="flex w-max items-stretch gap-6 px-6 sm:px-12">
           {SLIDES.map((slide) => (
             <Card key={slide.index} slide={slide} />
           ))}
         </motion.div>
-        <p className="label-caps mt-6 px-6 text-faint sm:px-12">
-          Scroll — the wall moves sideways
-        </p>
+        <p className="label-caps mt-6 px-6 text-faint sm:px-12">Scroll — the wall moves sideways</p>
       </div>
     </div>
   );
 }
 
 function Native() {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState(0);
+
+  const cards = () => Array.from(scrollerRef.current?.querySelectorAll<HTMLElement>("[data-lab-card]") ?? []);
+
+  const goTo = (index: number) => {
+    const scroller = scrollerRef.current;
+    const card = cards()[index];
+    if (!scroller || !card) return;
+    scroller.scrollTo({
+      left: card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-4 sm:px-12">
-      {SLIDES.map((slide) => (
-        <Card key={slide.index} slide={slide} />
-      ))}
+    <div>
+      <div
+        ref={scrollerRef}
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] sm:px-12 [&::-webkit-scrollbar]:hidden"
+        onScroll={(event) => {
+          const scroller = event.currentTarget;
+          const middle = scroller.scrollLeft + scroller.clientWidth / 2;
+          let nearest = 0;
+          cards().forEach((card, index) => {
+            const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - middle);
+            const best = Math.abs(cards()[nearest].offsetLeft + cards()[nearest].offsetWidth / 2 - middle);
+            if (distance < best) nearest = index;
+          });
+          if (nearest !== current) setCurrent(nearest);
+        }}
+      >
+        {SLIDES.map((slide) => (
+          <Card key={slide.index} slide={slide} />
+        ))}
+      </div>
+      <div className="mt-4 flex items-center justify-between px-6 sm:px-12">
+        <div className="flex gap-2" role="tablist" aria-label="Lab fragments">
+          {SLIDES.map((slide, index) => (
+            <button
+              key={slide.index}
+              type="button"
+              role="tab"
+              aria-selected={current === index}
+              aria-label={`Fragment ${slide.index}: ${slide.title}`}
+              onClick={() => goTo(index)}
+              className="flex h-6 items-center"
+            >
+              <span
+                className={`block h-1 rounded-full transition-all duration-300 ${
+                  current === index ? "w-6 bg-[var(--accent)]" : "w-2 bg-white/25"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            aria-label="Previous fragment"
+            disabled={current === 0}
+            onClick={() => goTo(current - 1)}
+            className="flex size-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-opacity disabled:opacity-30"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            aria-label="Next fragment"
+            disabled={current === SLIDES.length - 1}
+            onClick={() => goTo(current + 1)}
+            className="flex size-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-opacity disabled:opacity-30"
+          >
+            →
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -684,6 +957,11 @@ export default function Gallery() {
             the{" "}
             <em className="serif accent text-[1.06em] italic">lab.</em>
           </h2>
+        </Reveal>
+        <Reveal delay={0.12}>
+          <p className="mt-6 max-w-lg text-sm leading-relaxed text-white/60 sm:text-base">
+            Five small experiments in how an interface should feel: type, signal, physics, tokens and gesture. Every one is live. Touch them.
+          </p>
         </Reveal>
       </div>
 

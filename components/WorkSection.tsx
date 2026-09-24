@@ -403,65 +403,302 @@ function KachaniosShowcase({ brand }: { brand: Brand }) {
   );
 }
 
-/* ── 02 · FICAM — a live product, framed as the phone it lives on ────── */
+/* ── 02 · FICAM — scan a screening, earn the XP, level up ─────────────── */
+
+const FICAM_LEVELS = [
+  { name: "Spectateur", at: 0 },
+  { name: "Cinéphile", at: 100 },
+  { name: "Critique", at: 200 },
+  { name: "Juré", at: 300 },
+  { name: "Palme d'or", at: 400 },
+];
+
+const FICAM_SESSIONS = [
+  { title: "Court-métrage", room: "Salle Atlas", time: "14:30" },
+  { title: "Avant-première", room: "Grand Théâtre", time: "18:00" },
+  { title: "Masterclass", room: "Salle 2", time: "11:00" },
+  { title: "Film d'animation", room: "Salle 1", time: "16:15" },
+];
+
+const FICAM_START_XP = 130;
+const FICAM_REWARD = 50;
+const FICAM_GRADIENT = "linear-gradient(135deg, #9333ea 0%, #db2777 100%)";
+
+function ficamLevel(xp: number) {
+  let index = 0;
+  FICAM_LEVELS.forEach((level, levelIndex) => {
+    if (xp >= level.at) index = levelIndex;
+  });
+  return index;
+}
+
+/** A deterministic, QR-like matrix: three finder squares plus seeded modules. */
+function createTicketCode(seed: number) {
+  const size = 21;
+  let state = seed * 9301 + 49297;
+  const random = () => {
+    state = (state * 9301 + 49297) % 233280;
+    return state / 233280;
+  };
+  const inFinder = (x: number, y: number) =>
+    (x < 8 && y < 8) || (x >= size - 8 && y < 8) || (x < 8 && y >= size - 8);
+  const cells: [number, number][] = [];
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (inFinder(x, y)) continue;
+      if (random() > 0.52) cells.push([x, y]);
+    }
+  }
+  return { size, cells };
+}
+
+function FinderSquare({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <rect width={7} height={7} rx={1.2} fill="#0b0613" />
+      <rect x={1} y={1} width={5} height={5} rx={0.8} fill="#fff" />
+      <rect x={2} y={2} width={3} height={3} rx={0.6} fill="#0b0613" />
+    </g>
+  );
+}
+
+const SCAN_CORNERS = [
+  "left-1 top-1 border-l-2 border-t-2",
+  "right-1 top-1 border-r-2 border-t-2",
+  "bottom-1 left-1 border-b-2 border-l-2",
+  "bottom-1 right-1 border-b-2 border-r-2",
+];
 
 function FicamShowcase({ project }: { project: Project }) {
+  const reduceMotion = useReducedMotionPreference();
+  const [xp, setXp] = useState(FICAM_START_XP);
+  const [session, setSession] = useState(0);
+  const [phase, setPhase] = useState<"idle" | "scanning" | "rewarded">("idle");
+  const [levelUp, setLevelUp] = useState(false);
+  const code = createTicketCode(session + 3);
+  const levelIndex = ficamLevel(xp);
+  const level = FICAM_LEVELS[levelIndex];
+  const nextLevel = FICAM_LEVELS[levelIndex + 1];
+  const levelProgress = nextLevel ? (xp - level.at) / (nextLevel.at - level.at) : 1;
+  const current = FICAM_SESSIONS[session % FICAM_SESSIONS.length];
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
+    const timer = window.setTimeout(
+      () => {
+        setLevelUp(ficamLevel(xp + FICAM_REWARD) > ficamLevel(xp));
+        setXp(xp + FICAM_REWARD);
+        setPhase("rewarded");
+        try {
+          navigator.vibrate?.(12);
+        } catch {
+          // Vibration is a nicety; some browsers refuse it.
+        }
+      },
+      reduceMotion ? 150 : 1300,
+    );
+    return () => window.clearTimeout(timer);
+  }, [phase, reduceMotion, xp]);
+
+  const onAction = () => {
+    if (phase === "scanning") return;
+    if (phase === "rewarded") {
+      if (!nextLevel) setXp(FICAM_START_XP);
+      setSession((value) => value + 1);
+      setLevelUp(false);
+      setPhase("idle");
+      return;
+    }
+    setPhase("scanning");
+  };
+
+  let status = "Présentez votre billet à l'entrée";
+  if (phase === "scanning") status = "Lecture du billet…";
+  else if (phase === "rewarded") {
+    if (levelUp) status = `Niveau supérieur · ${level.name}`;
+    else if (!nextLevel) status = "Festival terminé · niveau max";
+    else status = `Encore ${nextLevel.at - xp} XP pour ${nextLevel.name}`;
+  }
+
+  let action = "Scanner la séance";
+  if (phase === "scanning") action = "Scan en cours…";
+  else if (phase === "rewarded") action = nextLevel ? "Séance suivante" : "Recommencer le festival";
+
   return (
-    <a
-      href={project.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      data-cursor="view"
-      aria-label="Open the live FICAM festival app"
-      className="group relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/10 sm:min-h-[600px]"
+    <div
+      className="relative overflow-hidden rounded-[1.75rem] border border-white/10 px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7"
       style={{ background: "linear-gradient(180deg, #120a24 0%, #08050f 100%)" }}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-90 transition-opacity duration-700 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 55%, rgba(168,85,247,0.35), transparent 40%), radial-gradient(circle at 20% 20%, rgba(219,39,119,0.18), transparent 35%)",
+            "radial-gradient(circle at 50% 52%, rgba(168,85,247,0.34), transparent 45%), radial-gradient(circle at 15% 12%, rgba(219,39,119,0.16), transparent 35%)",
         }}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white sm:left-8 sm:top-8"
-        style={{ background: "linear-gradient(90deg, #9333ea, #db2777)" }}
-      >
-        Live
-      </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-6 top-8 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-[0.62rem] font-semibold text-emerald-300 sm:right-10 sm:top-10"
-      >
-        +50 XP
+
+      <div className="relative flex items-center justify-between gap-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em]">
+        <span className="rounded-full px-3 py-1 text-white" style={{ background: FICAM_GRADIENT }}>
+          Live app
+        </span>
+        <span className="text-right text-white/45">Try the scan flow</span>
       </div>
 
-      <div className="relative w-[260px] transition-transform duration-700 ease-out group-hover:-translate-y-2 sm:w-[300px]">
+      {/* The phone: a native rebuild of the app's scan-and-reward flow. */}
+      <div className="relative mx-auto mt-6 w-full max-w-[272px]">
         <div
           aria-hidden="true"
-          className="absolute -inset-6 rounded-[3rem] opacity-60 blur-2xl transition-opacity duration-700 group-hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, rgba(147,51,234,0.5), rgba(219,39,119,0.35))" }}
+          className="absolute -inset-5 rounded-[3rem] opacity-60 blur-2xl"
+          style={{ background: "linear-gradient(135deg, rgba(147,51,234,0.5), rgba(219,39,119,0.3))" }}
         />
-        <div className="relative aspect-[9/19] overflow-hidden rounded-[2.6rem] border-[6px] border-[#1a1424] bg-black shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
-          <div className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
-          <iframe
-            src={project.href}
-            title="FICAM festival app, live"
-            loading="lazy"
-            tabIndex={-1}
+        <div className="relative overflow-hidden rounded-[2.4rem] border-[6px] border-[#1a1424] bg-[#0b0613] shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+          <div className="absolute left-1/2 top-2 z-20 h-4 w-20 -translate-x-1/2 rounded-full bg-black" />
+          <div
             aria-hidden="true"
-            className="pointer-events-none size-full border-0 opacity-90 transition-opacity duration-700 group-hover:opacity-100"
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(circle at 50% 30%, rgba(147,51,234,0.3), transparent 60%)" }}
           />
+
+          <div className="relative flex flex-col px-4 pb-5 pt-9">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-lg" style={{ background: FICAM_GRADIENT }}>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="white" strokeWidth={2}>
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+                  </svg>
+                </span>
+                <span className="text-sm font-extrabold tracking-tight text-white">FICAM</span>
+              </div>
+              <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.6rem] font-semibold text-white/85">
+                Niv. {levelIndex + 1}
+              </span>
+            </div>
+
+            <div className="mt-4">
+              <div className="flex items-baseline justify-between text-[0.62rem]">
+                <span className="font-semibold text-white">{level.name}</span>
+                <span className="font-mono text-white/55">
+                  {nextLevel ? `${xp} / ${nextLevel.at} XP` : `${xp} XP · max`}
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: FICAM_GRADIENT }}
+                  initial={false}
+                  animate={{ width: `${Math.max(4, levelProgress * 100)}%` }}
+                  transition={{ duration: reduceMotion ? 0 : 0.8, ease: EASE }}
+                />
+              </div>
+            </div>
+
+            <div className="relative mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[0.55rem] uppercase tracking-[0.18em] text-fuchsia-300/80">Séance · {current.time}</p>
+                  <p className="mt-0.5 text-[0.8rem] font-bold text-white">{current.title}</p>
+                  <p className="text-[0.6rem] text-white/50">{current.room}</p>
+                </div>
+                <span className="font-mono text-[0.55rem] text-white/35">#{String(session + 4).padStart(3, "0")}</span>
+              </div>
+
+              <div className="relative mx-auto mt-3 aspect-square w-[62%] overflow-hidden rounded-xl bg-white p-2">
+                <svg viewBox={`0 0 ${code.size} ${code.size}`} className="size-full" aria-label="Screening ticket code" role="img">
+                  {code.cells.map(([x, y]) => (
+                    <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill="#0b0613" />
+                  ))}
+                  <FinderSquare x={0} y={0} />
+                  <FinderSquare x={code.size - 7} y={0} />
+                  <FinderSquare x={0} y={code.size - 7} />
+                </svg>
+
+                {phase === "scanning" && (
+                  <div aria-hidden="true" className="absolute inset-0">
+                    {SCAN_CORNERS.map((corner) => (
+                      <span key={corner} className={`absolute size-4 rounded-sm border-fuchsia-500 ${corner}`} />
+                    ))}
+                    {!reduceMotion && (
+                      <motion.div
+                        className="absolute inset-x-1 h-0.5 rounded-full bg-fuchsia-500 shadow-[0_0_14px_4px_rgba(217,70,239,0.6)]"
+                        initial={{ top: "6%" }}
+                        animate={{ top: ["6%", "92%", "6%"] }}
+                        transition={{ duration: 1.3, ease: "easeInOut" }}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <AnimatePresence>
+                  {phase === "rewarded" && (
+                    <motion.div
+                      key="validated"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b0613]/85"
+                    >
+                      <motion.span
+                        initial={{ scale: 0.4 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 420, damping: 16 }}
+                        className="flex size-10 items-center justify-center rounded-full bg-emerald-400 text-lg font-bold text-black"
+                      >
+                        ✓
+                      </motion.span>
+                      <span className="mt-2 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+                        Séance validée
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <AnimatePresence>
+                {phase === "rewarded" && (
+                  <motion.span
+                    key={`xp-${xp}`}
+                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                    className="absolute -right-1 -top-2 rounded-lg border border-emerald-400/40 bg-[#062014] px-2 py-1 text-[0.62rem] font-bold text-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.35)]"
+                  >
+                    +{FICAM_REWARD} XP
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <p aria-live="polite" className="mt-3 min-h-4 text-center text-[0.62rem] font-semibold text-fuchsia-200">
+              {status}
+            </p>
+
+            <button
+              type="button"
+              onClick={onAction}
+              disabled={phase === "scanning"}
+              className="mt-3 w-full rounded-xl bg-white py-2.5 text-[0.72rem] font-bold text-[#12081f] shadow-[0_0_24px_rgba(217,70,239,0.35)] transition-transform active:scale-[0.97] disabled:opacity-70"
+            >
+              {action}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-6 text-[0.65rem] uppercase tracking-[0.2em] text-white/50 sm:px-8 sm:pb-8">
-        <span>ficam-festival · companion app</span>
-        <span className="text-white transition-transform duration-500 group-hover:translate-x-1">Open ↗</span>
+      <div className="relative mt-6 flex items-center justify-between gap-4 text-[0.62rem] uppercase tracking-[0.2em]">
+        <span className="text-white/45">QR validation · XP · levels</span>
+        <a
+          href={project.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 text-white transition-transform duration-300 hover:translate-x-0.5"
+        >
+          Open the real app ↗
+        </a>
       </div>
-    </a>
+    </div>
   );
 }
 
