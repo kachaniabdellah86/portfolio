@@ -158,6 +158,7 @@ const vertexShader = /* glsl */ `
   uniform float uEnergy;
   uniform float uSize;
   uniform float uPixelRatio;
+  uniform float uMaxSize;
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerStrength;
@@ -197,7 +198,7 @@ const vertexShader = /* glsl */ `
 
     float distance = max(1.0, -viewPosition.z);
     float size = uSize * uPixelRatio * (0.55 + aSeed * 0.95) * (1.0 + uEnergy * 0.9 + uScatter * 0.4);
-    gl_PointSize = clamp(size * (14.0 / distance), 0.0, 26.0);
+    gl_PointSize = clamp(size * (14.0 / distance), 0.0, uMaxSize);
 
     vAlpha = (0.3 + aSeed * 0.7) * (1.0 - uScatter * 0.3) * (1.0 - smoothstep(6.0, 60.0, distance));
     vSeed = aSeed;
@@ -227,8 +228,9 @@ const fragmentShader = /* glsl */ `
 `;
 
 export function createJourneyParticles(isCompact: boolean, random: () => number) {
-  const count = isCompact ? 1600 : 5200;
-  const opacityBoost = isCompact ? 1.2 : 1;
+  // Additive points are pure overdraw: phones get fewer, smaller ones.
+  const count = isCompact ? 1100 : 5200;
+  const opacityBoost = isCompact ? 1.35 : 1;
   const geometry = new THREE.BufferGeometry();
   const target = new THREE.Vector3();
 
@@ -257,6 +259,7 @@ export function createJourneyParticles(isCompact: boolean, random: () => number)
     uEnergy: { value: 0 },
     uOpacity: { value: SHAPE_OPACITY[0] * opacityBoost },
     uPhase: { value: 0 },
+    uMaxSize: { value: isCompact ? 14 : 26 },
     uPixelRatio: { value: 1 },
     uPointer: { value: new THREE.Vector2() },
     uPointerStrength: { value: 0 },

@@ -119,6 +119,21 @@ function createGlassMaterial(color: number, opacity = 0.42) {
   });
 }
 
+/**
+ * Materials sit in the opaque queue at full focus, for correct sorting, and
+ * move to the transparent queue while they fade. Each queue needs its own
+ * shader, so phones lock a single queue (userData.fixedQueue) and never
+ * compile the second one.
+ */
+function syncRenderQueue(material: THREE.Material) {
+  if (material.userData.fixedQueue === true) return;
+  const transparent = material.opacity < 1;
+  if (material.transparent !== transparent) {
+    material.transparent = transparent;
+    material.needsUpdate = true;
+  }
+}
+
 function createGlowMaterial(color: number, opacity = 1) {
   return new THREE.MeshBasicMaterial({
     blending: THREE.AdditiveBlending,
@@ -273,11 +288,7 @@ function createOriginWorld(isCompact: boolean): StoryWorld {
     tick(time, _delta, focus) {
       // Use the opaque queue at full focus; retain the existing smooth exit fade.
       for (const material of materials) {
-        const transparent = material.opacity < 1;
-        if (material.transparent !== transparent) {
-          material.transparent = transparent;
-          material.needsUpdate = true;
-        }
+        syncRenderQueue(material);
       }
       composition.rotation.y = -0.24 + Math.sin(time * 0.18) * 0.035;
       composition.rotation.x = -0.12 + Math.sin(time * 0.14) * 0.018;
@@ -672,11 +683,7 @@ function createFinanceWorld(isCompact: boolean): StoryWorld {
     materials,
     tick(time, delta, focus) {
       for (const material of [titaniumMaterial, cardEdgeMaterial, chipMaterial]) {
-        const transparent = material.opacity < 1;
-        if (material.transparent !== transparent) {
-          material.transparent = transparent;
-          material.needsUpdate = true;
-        }
+        syncRenderQueue(material);
       }
       vault.rotation.x = -0.18 + Math.sin(time * 0.2) * 0.04;
       vault.rotation.y = -0.42 + Math.sin(time * 0.25) * 0.12;
@@ -921,11 +928,7 @@ function createBridgeWorld(isCompact: boolean): StoryWorld {
     materials,
     tick(time, delta, focus) {
       for (const material of [gateRedMaterial, gateGoldMaterial]) {
-        const transparent = material.opacity < 1;
-        if (material.transparent !== transparent) {
-          material.transparent = transparent;
-          material.needsUpdate = true;
-        }
+        syncRenderQueue(material);
       }
       const at = (time * 0.09) % 1;
       routeCurve.getPointAt(at, traveller.position);
@@ -1122,6 +1125,8 @@ function createTerrain(isCompact: boolean) {
   return terrain;
 }
 
+const PACING_SAMPLE_FRAMES = 45;
+const PACING_SLOW_FRAME_MS = 19;
 const COMPACT_CAMERA_LIFT = 1.8;
 const COMPACT_CAMERA_DISTANCE = 1.3;
 
@@ -1142,7 +1147,19 @@ function chapterColor(progress: number, target: THREE.Color) {
     .lerp(CHAPTER_COLORS[Math.min(index + 1, CHAPTER_COLORS.length - 1)], scaled - index);
 }
 
-export function createScrollJourneyRenderer(
+/**
+ * Hands the main thread back to the browser between build steps, so a touch
+ * or scroll that lands while the scene is assembling is handled right away.
+ */
+function yieldToMain() {
+  return new Promise<void>((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => resolve();
+    channel.port2.postMessage(null);
+  });
+}
+
+export async function createScrollJourneyRenderer(
   canvas: HTMLCanvasElement,
   getOptions: () => ScrollJourneyOptions,
 ) {
@@ -1201,7 +1218,12 @@ export function createScrollJourneyRenderer(
     return pulse;
   });
 
-  const worlds = [createOriginWorld(isCompact), createNeuralWorld(isCompact), createFinanceWorld(isCompact), createBridgeWorld(isCompact), createHorizonWorld(isCompact)];
+  // Each world is a sizeable geometry build, so they are made one per task.
+  const worlds: StoryWorld[] = [];
+  for (const createWorld of [createOriginWorld, createNeuralWorld, createFinanceWorld, createBridgeWorld, createHorizonWorld]) {
+    await yieldToMain();
+    worlds.push(createWorld(isCompact));
+  }
   worlds.forEach((world) => {
     world.materials.forEach((material) => {
       material.userData.baseOpacity = material.opacity;
@@ -1213,35 +1235,53 @@ export function createScrollJourneyRenderer(
   // appears or disappears with its world forces every lit material to
   // recompile mid-scroll. World lights live on the scene instead and fade to
   // zero intensity when their world is out of range, keeping the count fixed.
+  // Phones drop them entirely: every point light is paid for by every lit
+  // pixel on screen, and the camera light already carries the chapter colour.
   scene.updateMatrixWorld(true);
   const worldLights = worlds.map((world) => {
     const lights: THREE.Light[] = [];
     world.group.traverse((object) => {
       if (object instanceof THREE.Light) lights.push(object);
     });
+    if (isCompact) {
+      lights.forEach((light) => light.removeFromParent());
+      return [];
+    }
     lights.forEach((light) => {
       scene.attach(light);
       light.intensity = 0;
     });
     return lights;
   });
-  // Transmission re-renders the scene into an extra target every frame, which
-  // phones cannot afford. Compact glass stays translucent without it.
   if (isCompact) {
-    worlds.forEach((world) =>
+    // A phone GPU also composites the page, so every millisecond spent here is
+    // taken from scrolling. Compact worlds keep their look but shed the
+    // expensive shading: no transmission pass, no clearcoat layer, one draw
+    // per double-sided surface, and a single render queue per material.
+    worlds.forEach((world) => {
+      world.materials.forEach((material) => {
+        material.userData.fixedQueue = true;
+        material.transparent = true;
+      });
       world.group.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return;
         const objectMaterials = Array.isArray(object.material) ? object.material : [object.material];
-        objectMaterials.forEach((material) => {
-          if (material instanceof THREE.MeshPhysicalMaterial) material.transmission = 0;
+        objectMaterials.forEach((material: THREE.Material) => {
+          material.forceSinglePass = true;
+          if (material instanceof THREE.MeshPhysicalMaterial) {
+            material.transmission = 0;
+            material.clearcoat = 0;
+          }
         });
-      }),
-    );
+      });
+    });
   }
   const random = createSeededRandom(20260829);
+  await yieldToMain();
   const dust = createDust(random, isCompact ? 300 : 1500);
   const terrain = createTerrain(isCompact);
   scene.add(dust, terrain);
+  await yieldToMain();
   const particles = createJourneyParticles(isCompact, createSeededRandom(20260920));
   scene.add(particles.points);
   const chapterAnchors = worlds.map((world) => world.at);
@@ -1296,6 +1336,11 @@ export function createScrollJourneyRenderer(
     slowFrames: 0,
   };
 
+  const frameIntervals: number[] = [];
+  let lastFrameCall = 0;
+  let halfRate = false;
+  let skipFrame = false;
+
   const applyRenderSize = (pixelRatio: number) => {
     const bloomResolutionScale = getBloomResolutionScale({
       quality: initialOptions.quality,
@@ -1341,21 +1386,38 @@ export function createScrollJourneyRenderer(
      * Uses parallel compilation where available, so the page stays responsive.
      */
     async warmup() {
-      const flippable = worlds.flatMap((world) =>
-        world.materials.filter((material) => material.userData.opaqueAtFullFocus === true),
-      );
-      for (const transparent of [true, false]) {
-        if (disposed) return;
-        flippable.forEach((material) => {
-          material.transparent = transparent;
-          material.needsUpdate = true;
-        });
-        // Desktop renders through the composer's target, which changes the
-        // tone-mapping and colour-space program variants.
+      // Desktop renders through the composer's target, which changes the
+      // tone-mapping and colour-space program variants.
+      const compileInto = (root: THREE.Object3D) => {
         renderer.setRenderTarget(composer ? composer.readBuffer : null);
-        const materials = renderer.compile(scene, camera);
+        const materials = renderer.compile(root, camera, scene);
         renderer.setRenderTarget(null);
-        await waitForPrograms(materials);
+        return materials;
+      };
+      // A phone GPU compiles and composites on the same thread, so one big
+      // batch freezes the page. Compile a world at a time and give the
+      // compositor a few frames between batches.
+      const breathe = () => new Promise<void>((resolve) => window.setTimeout(resolve, isCompact ? 60 : 0));
+      const flippable = worlds.flatMap((world) =>
+        world.materials.filter(
+          (material) => material.userData.opaqueAtFullFocus === true && material.userData.fixedQueue !== true,
+        ),
+      );
+      const queues = flippable.length > 0 ? [true, false] : [null];
+      for (const transparent of queues) {
+        if (transparent !== null) {
+          flippable.forEach((material) => {
+            material.transparent = transparent;
+            material.needsUpdate = true;
+          });
+        }
+        for (const world of worlds) {
+          if (disposed) return;
+          await waitForPrograms(compileInto(world.group));
+          await breathe();
+        }
+        if (disposed) return;
+        await waitForPrograms(compileInto(scene));
       }
     },
     resize(width: number, height: number) {
@@ -1384,15 +1446,31 @@ export function createScrollJourneyRenderer(
       targetPointerY = Number.isFinite(y) ? y : 0;
     },
     render(timestamp: number) {
-      const options = getOptions();
       const now = Number.isFinite(timestamp) ? timestamp : performance.now();
+      if (isCompact && !halfRate) {
+        // Watch the display's real frame pacing. When a phone cannot hold
+        // ~52fps, its GPU is also starving page scrolling, so the scene
+        // settles to a steady 30fps and gives the compositor its time back.
+        if (lastFrameCall) frameIntervals.push(now - lastFrameCall);
+        lastFrameCall = now;
+        if (frameIntervals.length >= PACING_SAMPLE_FRAMES) {
+          const sorted = [...frameIntervals].sort((a, b) => a - b);
+          halfRate = sorted[Math.floor(sorted.length / 2)] > PACING_SLOW_FRAME_MS;
+          frameIntervals.length = 0;
+        }
+      }
+      if (halfRate) {
+        skipFrame = !skipFrame;
+        if (skipFrame) return;
+      }
+      const options = getOptions();
       const delta = previousTimestamp
         ? THREE.MathUtils.clamp((now - previousTimestamp) / 1000, 0, 0.05)
         : 1 / 60;
       previousTimestamp = now;
       smoothedFrameTime = THREE.MathUtils.lerp(
         smoothedFrameTime,
-        delta * 1000,
+        (delta * 1000) / (halfRate ? 2 : 1),
         0.06,
       );
       const nextAdaptiveQuality = updateAdaptiveQuality(adaptiveQuality, {

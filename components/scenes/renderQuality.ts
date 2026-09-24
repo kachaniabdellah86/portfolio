@@ -77,11 +77,21 @@ export function getRenderQuality({
     };
   }
 
-  // Compact and narrow layouts stay bounded to protect mobile GPU and battery budgets.
+  // Phones render at CSS resolution: the GPU that draws this canvas also
+  // composites the page, and scrolling must never wait on the 3D.
+  if (quality === "compact") {
+    return {
+      antialias: true,
+      minPixelRatio: 0.8,
+      pixelRatio: 1,
+      samples: 0,
+    };
+  }
+
+  // Narrow full-quality layouts stay bounded to protect GPU and battery budgets.
   const isHighDensity = safePixelRatio > 2;
   const maxPixelRatio = isHighDensity ? 1.25 : 1.5;
-  const minBudget =
-    isHighDensity || quality === "compact" ? 1 : 1.15;
+  const minBudget = isHighDensity ? 1 : 1.15;
   const pixelRatio = Math.min(safePixelRatio, maxPixelRatio);
 
   return {

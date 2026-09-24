@@ -42,15 +42,10 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       quality: compact ? "compact" : "full",
     };
 
-    let journey: ReturnType<typeof createScrollJourneyRenderer>;
-    try {
-      journey = createScrollJourneyRenderer(canvas, () => options);
-    } catch {
-      setStatus("failed");
-      return;
-    }
+    let journey: Awaited<ReturnType<typeof createScrollJourneyRenderer>> | null = null;
 
     const resize = () => {
+      if (!journey) return;
       const bounds = host.getBoundingClientRect();
       journey.resize(bounds.width, bounds.height);
     };
@@ -63,7 +58,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       });
     const tick = (timestamp: number) => {
       animationFrame = 0;
-      if (!canRun()) return;
+      if (!canRun() || !journey) return;
       options.progress = scrollBus.journeyProgress;
       options.velocity = scrollBus.velocity;
       const phase = getScenePhase(options.progress);
@@ -84,7 +79,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     };
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
-      journey.setPointer(
+      journey?.setPointer(
         (event.clientX / window.innerWidth) * 2 - 1,
         (event.clientY / window.innerHeight) * 2 - 1,
       );
@@ -108,17 +103,26 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     document.addEventListener("visibilitychange", syncAnimationLoop);
     canvas.addEventListener("webglcontextlost", onContextLost);
     canvas.addEventListener("webglcontextrestored", onContextRestored);
-    resize();
-    // The static fallback stays up until every shader is compiled, so the
+
+    // The scene builds in small steps so the page keeps responding to touch,
+    // and the static fallback stays up until every shader is compiled, so the
     // first scroll through the chapters never stalls on a compile.
-    journey
-      .warmup()
-      .catch(() => {})
-      .then(() => {
+    createScrollJourneyRenderer(canvas, () => options)
+      .then(async (built) => {
+        if (disposed) {
+          built.dispose();
+          return;
+        }
+        journey = built;
+        resize();
+        await built.warmup().catch(() => {});
         if (disposed) return;
         ready = true;
         setStatus("active");
         syncAnimationLoop();
+      })
+      .catch(() => {
+        if (!disposed) setStatus("failed");
       });
 
     return () => {
@@ -130,7 +134,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
       document.removeEventListener("visibilitychange", syncAnimationLoop);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       canvas.removeEventListener("webglcontextrestored", onContextRestored);
-      journey.dispose();
+      journey?.dispose();
     };
   }, [setStatus]);
 

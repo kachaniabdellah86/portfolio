@@ -14,7 +14,7 @@ function JourneyFallback({ subdued }: { subdued: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className={`absolute inset-0 transition-opacity duration-700 ${subdued ? "opacity-25" : "opacity-100"}`}
+      className={`absolute inset-0 transition-[opacity,visibility] duration-700 ${subdued ? "invisible opacity-0" : "opacity-100"}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_42%_42%,rgba(91,143,255,0.16),transparent_20%),radial-gradient(circle_at_68%_58%,rgba(255,113,91,0.08),transparent_28%),#02040b]" />
       <svg
@@ -66,14 +66,17 @@ export default function SceneShell({
       aria-hidden="true"
       data-scene={name}
       data-scene-status={status}
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#030610]"
+      // Sized to the largest viewport so the phone address bar showing or
+      // hiding never resizes (and reallocates) the WebGL canvas mid-scroll.
+      className="pointer-events-none fixed inset-x-0 top-0 z-0 h-lvh overflow-hidden bg-[#030610]"
     >
       <JourneyFallback subdued={status === "active"} />
       {!reducedMotion && children(setRuntimeStatus)}
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_28%,rgba(3,6,16,0.18)_70%,rgba(3,6,16,0.65)_100%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#030610]/25 via-transparent to-[#030610]/85" />
-      <div className="absolute inset-0 opacity-[0.14] [background-image:radial-gradient(rgba(232,230,225,0.3)_0.55px,transparent_0.55px)] [background-size:5px_5px] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_72%,transparent)]" />
+      {/* Vignette and fade share one layer: every full-screen layer over a live
+          canvas is re-blended each frame, which phones pay for in scroll. */}
+      <div className="absolute inset-0 [background:radial-gradient(circle_at_center,transparent_28%,rgba(3,6,16,0.18)_70%,rgba(3,6,16,0.65)_100%),linear-gradient(to_bottom,rgba(3,6,16,0.25),transparent_50%,rgba(3,6,16,0.85))]" />
+      <div className="absolute inset-0 hidden opacity-[0.14] [background-image:radial-gradient(rgba(232,230,225,0.3)_0.55px,transparent_0.55px)] [background-size:5px_5px] [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_72%,transparent)] md:block" />
     </div>
   );
 }

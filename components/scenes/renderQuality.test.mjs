@@ -30,17 +30,17 @@ test("never exceeds the full desktop DPR cap", () => {
   );
 });
 
-test("keeps a conservative DPR on high-density compact displays", () => {
+test("renders phones at CSS resolution, whatever their density", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 3, quality: "compact", width: 390 }),
-    { antialias: true, minPixelRatio: 1, pixelRatio: 1.25, samples: 0 },
+    { antialias: true, minPixelRatio: 0.8, pixelRatio: 1, samples: 0 },
   );
 });
 
 test("does not supersample a standard-density compact display", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 1, quality: "compact", width: 390 }),
-    { antialias: true, minPixelRatio: 1, pixelRatio: 1, samples: 0 },
+    { antialias: true, minPixelRatio: 0.8, pixelRatio: 1, samples: 0 },
   );
 });
 
@@ -55,7 +55,7 @@ test("falls back safely for invalid reported pixel ratios", () => {
   for (const devicePixelRatio of [Number.NaN, Number.POSITIVE_INFINITY, 0, -2]) {
     assert.deepEqual(
       getRenderQuality({ devicePixelRatio, quality: "compact", width: 390 }),
-      { antialias: true, minPixelRatio: 1, pixelRatio: 1, samples: 0 },
+      { antialias: true, minPixelRatio: 0.8, pixelRatio: 1, samples: 0 },
     );
   }
 });
