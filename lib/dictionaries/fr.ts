@@ -313,4 +313,22 @@ export const fr: Dictionary = {
   floating: {
     whatsapp: "WhatsApp",
   },
+  caseStudy: {
+    back: "Tous les projets",
+    eyebrow: "Étude de cas",
+    role: "Rôle",
+    stack: "Technologies",
+    year: "Année",
+    live: "Site en ligne",
+    visit: "Visiter",
+    context: "Le contexte",
+    problem: "Le problème",
+    built: "Ce que j'ai construit",
+    results: "Le résultat",
+    similarTitle: "Un projet similaire ?",
+    similarText: "Dites-moi ce que vous voulez construire. Je vous réponds sur WhatsApp avec une première idée et une fourchette de prix.",
+    similarCta: "Discuter sur WhatsApp",
+    similarMessage: "Bonjour Abdellah, j'ai lu l'étude de cas {title} et j'ai un projet similaire.",
+    next: "Étude de cas suivante :",
+  },
 };

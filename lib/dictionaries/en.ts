@@ -297,6 +297,24 @@ export const en = {
   floating: {
     whatsapp: "WhatsApp",
   },
+  caseStudy: {
+    back: "All work",
+    eyebrow: "Case study",
+    role: "Role",
+    stack: "Stack",
+    year: "Year",
+    live: "Live site",
+    visit: "Visit",
+    context: "The context",
+    problem: "The problem",
+    built: "What I built",
+    results: "The result",
+    similarTitle: "A similar project?",
+    similarText: "Tell me what you're building. I'll reply on WhatsApp with a first idea and a price range.",
+    similarCta: "Talk on WhatsApp",
+    similarMessage: "Hi Abdellah, I read the {title} case study and I have a similar project.",
+    next: "Next case study:",
+  },
 };
 
 export type Dictionary = typeof en;
