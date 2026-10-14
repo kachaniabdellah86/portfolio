@@ -9,6 +9,8 @@
   --hairline: rgba(232, 230, 225, 0.12);
   --accent: #5b8fff;
   --accent-glow: rgba(91, 143, 255, 0.15);
+  /* Filled buttons: white text on this passes WCAG AA (4.6:1); --accent does not. */
+  --accent-strong: #3d6fe0;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -87,6 +89,11 @@ body {
   opacity: 0.045;
   pointer-events: none;
   user-select: none;
+}
+
+/* Drawn as generated content so the decorative numeral is not read as low-contrast text. */
+.ghost-numeral::before {
+  content: attr(data-numeral);
 }
 
 .edge-label {

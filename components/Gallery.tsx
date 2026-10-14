@@ -408,7 +408,7 @@ function SpringPhysicsLab() {
               kick(420, -160);
             }}
             className={`rounded-full px-3 py-1 text-[0.6rem] font-mono uppercase tracking-wider transition-colors ${
-              preset === key ? "bg-[var(--accent)] text-white" : "text-white/55 hover:text-white"
+              preset === key ? "bg-[var(--accent-strong)] text-white" : "text-white/55 hover:text-white"
             }`}
           >
             {SPRING_PRESETS[key].label}
@@ -923,9 +923,7 @@ export default function Gallery({ numeral }: { numeral: string }) {
 
   return (
     <section id="lab" aria-label={t.ariaLabel} className="relative py-24 sm:py-36">
-      <span aria-hidden="true" className="ghost-numeral">
-        {numeral}
-      </span>
+      <span aria-hidden="true" className="ghost-numeral" data-numeral={numeral} />
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"

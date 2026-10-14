@@ -173,7 +173,7 @@ function ChoiceRow({
             onClick={() => onChange(i)}
             className={`min-h-10 rounded-full border px-4 py-2 text-sm transition-colors ${
               value === i
-                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                ? "border-[var(--accent)] bg-[var(--accent-strong)] text-white"
                 : "border-white/15 bg-white/[0.03] text-white/75 hover:border-white/40"
             }`}
           >
@@ -213,7 +213,7 @@ function BriefBuilder() {
         rel="noopener noreferrer"
         data-track="whatsapp_click"
         data-track-label="brief"
-        className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
+        className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
       >
         <WhatsAppIcon />
         {t.send}
@@ -244,7 +244,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             data-track="whatsapp_click"
             data-track-label="footer"
-            className="inline-flex items-center gap-2.5 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
           >
             <WhatsAppIcon />
             {t.whatsapp}

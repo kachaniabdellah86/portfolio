@@ -181,7 +181,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/[lang]/work/
                 rel="noopener noreferrer"
                 data-track="whatsapp_click"
                 data-track-label={`case-${slug}`}
-                className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+                className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
               >
                 <WhatsAppIcon />
                 {t.similarCta}

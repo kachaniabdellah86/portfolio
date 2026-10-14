@@ -94,7 +94,7 @@ export default function Nav() {
               }
             }}
             className="display mr-1 px-2 text-lg tracking-tight text-[var(--ink)] sm:mr-2 sm:px-3"
-            aria-label={t.backToTop}
+            aria-label={`AK. ${t.backToTop}`}
           >
             AK<span className="accent">.</span>
           </a>

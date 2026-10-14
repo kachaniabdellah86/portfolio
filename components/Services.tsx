@@ -13,9 +13,7 @@ export default function Services({
 }) {
   return (
     <section id="services" className="relative px-6 py-24 sm:px-12 sm:py-36">
-      <span aria-hidden="true" className="ghost-numeral">
-        {numeral}
-      </span>
+      <span aria-hidden="true" className="ghost-numeral" data-numeral={numeral} />
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"
@@ -54,7 +52,7 @@ export default function Services({
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 {pkg.featured && (
-                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white">
+                  <span className="rounded-full bg-[var(--accent-strong)] px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white">
                     {t.featuredBadge}
                   </span>
                 )}
@@ -84,7 +82,7 @@ export default function Services({
                 data-track-label={pkg.name}
                 className={`flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
                   pkg.featured
-                    ? "bg-[var(--accent)] text-white"
+                    ? "bg-[var(--accent-strong)] text-white"
                     : "border border-white/20 text-white hover:border-[var(--accent)]"
                 }`}
               >

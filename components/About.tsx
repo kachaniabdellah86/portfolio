@@ -19,9 +19,7 @@ export default function About({
 }) {
   return (
     <section id="about" className="relative px-6 py-24 sm:px-12 sm:py-36">
-      <span aria-hidden="true" className="ghost-numeral">
-        {numeral}
-      </span>
+      <span aria-hidden="true" className="ghost-numeral" data-numeral={numeral} />
 
       <Reveal>
         <p className="label-caps accent">{t.label}</p>

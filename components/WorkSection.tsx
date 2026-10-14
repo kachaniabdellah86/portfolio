@@ -1123,9 +1123,7 @@ export default function WorkSection({
 
   return (
     <section id="work" className="relative px-6 pt-24 sm:px-12 sm:pt-36">
-      <span aria-hidden="true" className="ghost-numeral">
-        {numeral}
-      </span>
+      <span aria-hidden="true" className="ghost-numeral" data-numeral={numeral} />
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"

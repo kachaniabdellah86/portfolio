@@ -64,7 +64,7 @@ function HeroActions() {
         rel="noopener noreferrer"
         data-track="whatsapp_click"
         data-track-label="hero"
-        className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.35)] transition-transform hover:-translate-y-0.5"
+        className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.35)] transition-transform hover:-translate-y-0.5"
       >
         <WhatsAppIcon />
         {t.ctaPrimary}
