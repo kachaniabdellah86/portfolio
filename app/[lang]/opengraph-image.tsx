@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { hasLocale } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 export const alt = "Abdellah Kachani — Creative Developer";
 export const size = {
@@ -7,7 +9,10 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default function Image() {
+export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const tagline = getDictionary(hasLocale(lang) ? lang : "fr").meta.ogTagline;
+
   return new ImageResponse(
     (
       <div
@@ -69,7 +74,7 @@ export default function Image() {
               color: "rgba(232, 230, 225, 0.6)",
             }}
           >
-            Creative Developer — designing & building intelligent digital products
+            {tagline}
           </div>
         </div>
 

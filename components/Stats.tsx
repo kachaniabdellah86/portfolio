@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useInView } from "motion/react";
 import { Reveal } from "./Marquee";
 import { useReducedMotionPreference } from "./use-reduced-motion";
+import { useLocale } from "./LocaleProvider";
 
 type Stat = {
   value: number;
@@ -11,12 +12,7 @@ type Stat = {
   label: string;
 };
 
-// Only numbers a visitor can check for themselves.
-const STATS: Stat[] = [
-  { value: 2, suffix: "", label: "Live products in production" },
-  { value: 3, suffix: "", label: "Languages shipped — FR · EN · AR" },
-  { value: 96, suffix: "/100", label: "Lighthouse mobile score, client site" },
-];
+// Only numbers a visitor can check for themselves; the copy lives in the dictionaries.
 
 function Counter({ stat }: { stat: Stat }) {
   const reduce = useReducedMotionPreference();
@@ -66,10 +62,11 @@ function Counter({ stat }: { stat: Stat }) {
 }
 
 export default function Stats() {
+  const t = useLocale().dict.stats;
   return (
-    <section aria-label="By the numbers" className="px-6 pb-24 sm:px-12 sm:pb-32">
+    <section aria-label={t.ariaLabel} className="px-6 pb-24 sm:px-12 sm:pb-32">
       <div className="hairline-t grid gap-12 pt-14 sm:grid-cols-3 sm:gap-8">
-        {STATS.map((stat) => (
+        {t.items.map((stat: Stat) => (
           <Reveal key={stat.label}>
             <div>
               <Counter stat={stat} />

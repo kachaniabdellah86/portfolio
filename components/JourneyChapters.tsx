@@ -9,99 +9,79 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
+import { whatsappUrl } from "@/lib/site";
 import { scrollBus } from "./lenis-bridge";
+import { useLocale } from "./LocaleProvider";
+import Rich from "./Rich";
+import WhatsAppIcon from "./WhatsAppIcon";
 import { useReducedMotionPreference } from "./use-reduced-motion";
 
-type Chapter = {
-  id: string;
+type ChapterCopy = {
   eyebrow: string;
-  title: React.ReactNode;
+  title: string;
   description: string;
+};
+
+type Chapter = ChapterCopy & {
+  id: string;
   range: [number, number];
   align: "left" | "right";
   intro?: boolean;
 };
 
-const CHAPTERS: Chapter[] = [
-  {
-    id: "spark",
-    eyebrow: "Abdellah Kachani / Creative Developer & Computer Engineering Student",
-    title: (
-      <>
-        This is the line
-        <br />
-        that made <em className="serif accent italic">me.</em>
-      </>
-    ),
-    description:
-      "Not a gallery of screens. A living path through the questions, systems, and products that shaped how I design and build.",
-    range: [0, 0.2],
-    align: "left",
-    intro: true,
-  },
-  {
-    id: "kachanios",
-    eyebrow: "Chapter 01 / KachaniOS — The system",
-    title: (
-      <>
-        The interface learned
-        <br />
-        how to <em className="serif accent italic">think.</em>
-      </>
-    ),
-    description:
-      "KachaniOS turned an invisible agent loop into a world people can read: thought becomes nodes, memory becomes structure, and complexity becomes calm.",
-    range: [0.15, 0.44],
-    align: "right",
-  },
-  {
-    id: "aura-pay",
-    eyebrow: "Chapter 02 / Aura Pay — The feeling",
-    title: (
-      <>
-        Digital money found
-        <br />
-        a physical <em className="serif accent italic">weight.</em>
-      </>
-    ),
-    description:
-      "Aura Pay explored how trust can feel tactile—titanium surfaces, spatial data, and biometric moments designed to make finance immediate without making it loud.",
-    range: [0.39, 0.68],
-    align: "left",
-  },
-  {
-    id: "yalla-china",
-    eyebrow: "Chapter 03 / Yalla China — The bridge",
-    title: (
-      <>
-        Design crossed language,
-        <br />
-        distance, and <em className="serif accent italic">doubt.</em>
-      </>
-    ),
-    description:
-      "Yalla China connected students and families across French, English, Arabic, and a life-changing decision—using clarity as the bridge between ambition and trust.",
-    range: [0.63, 0.9],
-    align: "right",
-  },
-  {
-    id: "horizon",
-    eyebrow: "Chapter 04 / What comes next",
-    title: (
-      <>
-        The line is still
-        <br />
-        being <em className="serif accent italic">drawn.</em>
-      </>
-    ),
-    description:
-      "Every project below is another point on it. Scroll on to see the interfaces, prototypes, and decisions behind these worlds.",
-    range: [0.85, 1],
-    align: "left",
-  },
+// Layout only; the words come from the dictionary, in the same order.
+const CHAPTER_LAYOUT: Omit<Chapter, keyof ChapterCopy>[] = [
+  { id: "spark", range: [0, 0.2], align: "left", intro: true },
+  { id: "kachanios", range: [0.15, 0.44], align: "right" },
+  { id: "aura-pay", range: [0.39, 0.68], align: "left" },
+  { id: "yalla-china", range: [0.63, 0.9], align: "right" },
+  { id: "horizon", range: [0.85, 1], align: "left" },
 ];
 
-const CHAPTER_LABELS = ["Spark", "System", "Feeling", "Bridge", "Next"];
+function useChapters(): Chapter[] {
+  const { dict } = useLocale();
+  return CHAPTER_LAYOUT.map((layout, i) => ({ ...layout, ...dict.journey.chapters[i] }));
+}
+
+function scrollToWork(reduce: boolean) {
+  const target = document.querySelector<HTMLElement>("#work");
+  if (!target) return;
+  const lenis = window.__lenis;
+  if (lenis) lenis.scrollTo(target, { offset: -24, immediate: reduce });
+  else target.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+}
+
+// The two actions a visitor can take from the very first screen.
+function HeroActions() {
+  const { dict } = useLocale();
+  const reduce = useReducedMotionPreference();
+  const t = dict.journey;
+  return (
+    <div className="pointer-events-auto mt-8 flex flex-wrap items-center gap-3">
+      <a
+        href={whatsappUrl(t.whatsappMessage)}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-track="whatsapp_click"
+        data-track-label="hero"
+        className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.35)] transition-transform hover:-translate-y-0.5"
+      >
+        <WhatsAppIcon />
+        {t.ctaPrimary}
+      </a>
+      <a
+        href="#work"
+        onClick={(event) => {
+          event.preventDefault();
+          scrollToWork(Boolean(reduce));
+        }}
+        className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:border-white/50"
+      >
+        {t.ctaSecondary} <span aria-hidden="true">↓</span>
+      </a>
+    </div>
+  );
+}
 
 function ChapterPanel({
   chapter,
@@ -152,10 +132,10 @@ function ChapterPanel({
         <p className="label-caps accent">{chapter.eyebrow}</p>
         <Heading
           className={`display mt-6 text-[clamp(2.8rem,6.2vw,6.6rem)] leading-[0.98] tracking-[-0.025em] ${
-            chapter.intro ? "max-w-[12ch]" : ""
+            chapter.intro ? "max-w-[14ch]" : ""
           }`}
         >
-          {chapter.title}
+          <Rich text={chapter.title} />
         </Heading>
         <p
           className={`mt-7 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg ${
@@ -164,6 +144,7 @@ function ChapterPanel({
         >
           {chapter.description}
         </p>
+        {chapter.intro && <HeroActions />}
       </div>
     </motion.article>
   );
@@ -182,7 +163,7 @@ function StaticChapter({ chapter }: { chapter: Chapter }) {
       <div className="max-w-3xl">
         <p className="label-caps accent">{chapter.eyebrow}</p>
         <Heading className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] leading-[1] tracking-[-0.025em]">
-          {chapter.title}
+          <Rich text={chapter.title} />
         </Heading>
         <p
           className={`mt-7 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg ${
@@ -191,6 +172,7 @@ function StaticChapter({ chapter }: { chapter: Chapter }) {
         >
           {chapter.description}
         </p>
+        {chapter.intro && <HeroActions />}
       </div>
     </article>
   );
@@ -198,6 +180,9 @@ function StaticChapter({ chapter }: { chapter: Chapter }) {
 
 export default function JourneyChapters() {
   const reduceMotion = useReducedMotionPreference();
+  const chapters = useChapters();
+  const t = useLocale().dict.journey;
+  const chapterLabels = t.labels;
   const trackRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: trackRef,
@@ -239,8 +224,8 @@ export default function JourneyChapters() {
 
   if (reduceMotion) {
     return (
-      <section ref={trackRef} aria-label="Portfolio journey">
-        {CHAPTERS.map((chapter) => (
+      <section ref={trackRef} aria-label={t.ariaLabel}>
+        {chapters.map((chapter) => (
           <StaticChapter key={chapter.id} chapter={chapter} />
         ))}
       </section>
@@ -250,25 +235,25 @@ export default function JourneyChapters() {
   return (
     <section
       ref={trackRef}
-      aria-label="Scroll-driven portfolio journey"
-      className="relative h-[520vh]"
+      aria-label={t.ariaLabel}
+      className="relative h-[320vh]"
     >
       <div className="sticky top-0 h-screen overflow-hidden">
-        <div className="pointer-events-none absolute left-6 top-7 flex items-center gap-3 sm:left-12">
+        <div className="pointer-events-none absolute left-6 top-7 hidden items-center gap-3 sm:left-12 2xl:flex">
           <span className="size-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_14px_var(--accent)]" />
-          <span className="label-caps text-white/40">A life in making</span>
+          <span className="label-caps text-white/40">{t.railLabel}</span>
         </div>
 
-        {CHAPTERS.map((chapter) => (
+        {chapters.map((chapter) => (
           <ChapterPanel key={chapter.id} chapter={chapter} progress={progress} />
         ))}
 
         <div className="absolute bottom-7 left-6 right-6 sm:left-12 sm:right-12">
           <div className="mb-3 hidden grid-cols-5 text-[0.56rem] font-medium uppercase tracking-[0.2em] text-white/30 sm:grid">
-            {CHAPTER_LABELS.map((label, index) => (
+            {chapterLabels.map((label, index) => (
               <span
                 key={label}
-                className={index === CHAPTER_LABELS.length - 1 ? "text-right" : ""}
+                className={index === chapterLabels.length - 1 ? "text-right" : ""}
               >
                 {String(index).padStart(2, "0")} / {label}
               </span>
@@ -279,18 +264,27 @@ export default function JourneyChapters() {
               style={{ scaleX: progress }}
               className="absolute inset-y-0 left-0 right-0 origin-left bg-gradient-to-r from-[#5b8fff] via-[#9d7bff] to-[#ffb36b] shadow-[0_0_12px_rgba(91,143,255,0.65)]"
             />
-            {CHAPTER_LABELS.map((label, index) => (
+            {chapterLabels.map((label, index) => (
               <span
                 key={label}
                 aria-hidden="true"
                 className="absolute top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-[#030610]"
-                style={{ left: `${(index / (CHAPTER_LABELS.length - 1)) * 100}%` }}
+                style={{ left: `${(index / (chapterLabels.length - 1)) * 100}%` }}
               />
             ))}
           </div>
           <div className="mt-3 flex items-center justify-between">
-            <span className="label-caps text-white/30">Follow the signal</span>
-            <span className="label-caps text-white/30">Scroll to move ↓</span>
+            <span className="label-caps hidden text-white/50 sm:inline">{t.follow}</span>
+            <a
+              href="#work"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToWork(false);
+              }}
+              className="label-caps pointer-events-auto text-white/60 transition-colors hover:text-white"
+            >
+              {t.skip}
+            </a>
           </div>
         </div>
       </div>

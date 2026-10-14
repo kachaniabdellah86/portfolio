@@ -2,11 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useSpring } from "motion/react";
-import { whatsappUrl } from "@/lib/site";
+import { contactEmail, whatsappUrl } from "@/lib/site";
+import { fill } from "@/lib/i18n";
 import { Reveal } from "./Marquee";
+import { useLocale } from "./LocaleProvider";
+import Rich from "./Rich";
+import WhatsAppIcon from "./WhatsAppIcon";
 
 /* ── Split-hover effect using the already-installed split-type package ── */
 function SplitHoverLink() {
+  const t = useLocale().dict.contact;
   const ref = useRef<HTMLAnchorElement>(null);
   const magX = useSpring(0, { stiffness: 150, damping: 15 });
   const magY = useSpring(0, { stiffness: 150, damping: 15 });
@@ -74,23 +79,23 @@ function SplitHoverLink() {
   return (
     <motion.a
       ref={ref}
-      href="mailto:abdellah.kachani@e-polytechnique.ma"
-      aria-label="Email Abdellah Kachani"
+      href={`mailto:${contactEmail}`}
+      aria-label={t.emailAria}
       data-cursor="view"
+      data-track="email_click"
+      data-track-label="footer-heading"
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       style={{ x: magX, y: magY }}
       className="display mt-6 block overflow-hidden text-[clamp(2.6rem,8vw,7.5rem)] leading-none tracking-tight transition-colors hover:text-[var(--accent)]"
     >
-      Let&apos;s <span className="text-outline">create </span>
-      <br />
-      something{" "}
-      <em className="serif accent text-[1.05em] italic">together.</em>
+      <Rich text={t.heading} emClassName="serif accent text-[1.05em] italic" />
     </motion.a>
   );
 }
 
 function CopyEmailButton() {
+  const t = useLocale().dict.contact;
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const resetTimer = useRef<number | null>(null);
   const copyAttempt = useRef(0);
@@ -105,7 +110,7 @@ function CopyEmailButton() {
     if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
 
     try {
-      await navigator.clipboard.writeText("abdellah.kachani@e-polytechnique.ma");
+      await navigator.clipboard.writeText(contactEmail);
       if (attempt !== copyAttempt.current) return;
       setCopyState("copied");
     } catch {
@@ -123,32 +128,108 @@ function CopyEmailButton() {
     <button
       type="button"
       onClick={() => void handleCopy()}
-      className="group inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 backdrop-blur-md transition-all hover:border-[var(--accent)]/60 hover:bg-white/10 cursor-pointer"
+      data-track="email_copy"
+      className="group inline-flex max-w-full items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 backdrop-blur-md transition-all hover:border-[var(--accent)]/60 hover:bg-white/10 cursor-pointer"
     >
-      <span className="font-mono text-xs text-white/80 transition-colors group-hover:text-white">
-        abdellah.kachani@e-polytechnique.ma
+      <span className="truncate font-mono text-xs text-white/80 transition-colors group-hover:text-white">
+        {contactEmail}
       </span>
       <span
         aria-live="polite"
-        className={`rounded-full px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider transition-all ${
+        className={`shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider transition-all ${
           copyState === "copied"
             ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
             : copyState === "error"
               ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-            : "bg-white/10 text-muted group-hover:text-white"
+            : "bg-white/10 text-white/70 group-hover:text-white"
         }`}
       >
-        {copyState === "copied" ? "COPIED ✓" : copyState === "error" ? "RETRY" : "COPY"}
+        {copyState === "copied" ? t.copied : copyState === "error" ? t.retry : t.copy}
       </span>
     </button>
   );
 }
 
+function ChoiceRow({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: number;
+  onChange: (index: number) => void;
+}) {
+  return (
+    <fieldset>
+      <legend className="label-caps mb-3 text-white/60">{label}</legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option, i) => (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={value === i}
+            onClick={() => onChange(i)}
+            className={`min-h-10 rounded-full border px-4 py-2 text-sm transition-colors ${
+              value === i
+                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                : "border-white/15 bg-white/[0.03] text-white/75 hover:border-white/40"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+/* ── Brief builder: three taps, then WhatsApp opens with the brief written ── */
+function BriefBuilder() {
+  const t = useLocale().dict.contact.brief;
+  const [type, setType] = useState(0);
+  const [budget, setBudget] = useState(1);
+  const [deadline, setDeadline] = useState(1);
+
+  const message = fill(t.message, {
+    type: t.types[type],
+    budget: t.budgets[budget],
+    deadline: t.deadlines[deadline],
+  });
+
+  return (
+    <div className="mt-14 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-8">
+      <h3 className="display text-2xl tracking-tight sm:text-3xl">{t.title}</h3>
+      <p className="mt-2 text-sm text-white/65">{t.intro}</p>
+      <div className="mt-8 grid gap-7">
+        <ChoiceRow label={t.typeLabel} options={t.types} value={type} onChange={setType} />
+        <ChoiceRow label={t.budgetLabel} options={t.budgets} value={budget} onChange={setBudget} />
+        <ChoiceRow label={t.deadlineLabel} options={t.deadlines} value={deadline} onChange={setDeadline} />
+      </div>
+      <a
+        href={whatsappUrl(message)}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-track="whatsapp_click"
+        data-track-label="brief"
+        className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
+      >
+        <WhatsAppIcon />
+        {t.send}
+      </a>
+    </div>
+  );
+}
+
 export default function Footer() {
+  const { dict } = useLocale();
+  const t = dict.contact;
+
   return (
     <footer id="contact" className="hairline-t px-6 pb-12 pt-24 sm:px-12 sm:pt-36">
       <Reveal>
-        <p className="label-caps accent">Contact</p>
+        <p className="label-caps accent">{t.label}</p>
       </Reveal>
 
       <Reveal delay={0.08}>
@@ -158,18 +239,22 @@ export default function Footer() {
       <Reveal delay={0.16}>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
-            href={whatsappUrl()}
+            href={whatsappUrl(dict.journey.whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
+            data-track="whatsapp_click"
+            data-track-label="footer"
             className="inline-flex items-center gap-2.5 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
           >
-            <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">
-              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.8 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3Z" />
-            </svg>
-            WhatsApp me
+            <WhatsAppIcon />
+            {t.whatsapp}
           </a>
           <CopyEmailButton />
         </div>
+      </Reveal>
+
+      <Reveal delay={0.2}>
+        <BriefBuilder />
       </Reveal>
 
       <div className="hairline-t mt-20 flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">

@@ -1,91 +1,108 @@
+import type { Dictionary } from "@/lib/dictionaries/en";
+import { fill } from "@/lib/i18n";
+import { whatsappUrl } from "@/lib/site";
 import { Reveal } from "./Marquee";
+import Rich from "./Rich";
 
-const SERVICES = [
-  {
-    index: "01",
-    title: "Creative Development",
-    desc: "Full-stack development with motion and interaction at the core — building experiences that feel alive, not static.",
-  },
-  {
-    index: "02",
-    title: "Product Design & Engineering",
-    desc: "End-to-end product development — research, flows, high-fidelity interfaces, and the code that brings them to life.",
-  },
-  {
-    index: "03",
-    title: "Motion & Interaction",
-    desc: "Micro-interactions, WebGL scenes and page transitions with intent — motion that carries the story forward.",
-  },
-  {
-    index: "04",
-    title: "AI Interfaces & Agents",
-    desc: "Designing interfaces for complex AI systems — making invisible processes visible, translating computation into clarity.",
-  },
-];
-
-export default function Services() {
+export default function Services({
+  t,
+  numeral,
+}: {
+  t: Dictionary["services"];
+  numeral: string;
+}) {
   return (
     <section id="services" className="relative px-6 py-24 sm:px-12 sm:py-36">
       <span aria-hidden="true" className="ghost-numeral">
-        03
+        {numeral}
       </span>
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"
       >
-        Capabilities
+        {t.edge}
       </span>
 
       <Reveal>
-        <p className="label-caps accent">Services</p>
+        <p className="label-caps accent">{t.label}</p>
       </Reveal>
 
       <Reveal delay={0.08}>
         <h2 className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
-          What I <span className="text-outline">bring</span> to
-          <br />
-          the{" "}
-          <em className="serif accent text-[1.06em] italic">table.</em>
+          <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
         </h2>
       </Reveal>
 
       <Reveal delay={0.12}>
-        <p className="mt-8 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
-          I work where product design and front-end engineering meet — turning
-          complex ideas into clear, responsive experiences that feel considered
-          in both the interface and the implementation.
+        <p className="mt-8 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
+          {t.intro}
         </p>
       </Reveal>
 
-      <div className="mt-16">
-        {SERVICES.map((service, i) => (
-          <Reveal key={service.index} delay={i * 0.04}>
-            <div className="group hairline-t relative grid gap-4 overflow-hidden py-9 sm:grid-cols-[auto_1fr_auto] sm:items-baseline sm:gap-10">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -translate-x-[101%] bg-gradient-to-r from-transparent via-[rgba(91,143,255,0.07)] to-transparent transition-transform duration-700 ease-out group-hover:translate-x-0"
-              />
-              <span className="serif accent text-xl italic">{service.index}</span>
-
-              <div className="max-w-2xl">
-                <h3 className="display text-2xl tracking-tight transition-transform duration-500 ease-out group-hover:translate-x-2 sm:text-3xl">
-                  {service.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
-                  {service.desc}
-                </p>
+      <div className="mt-16 grid gap-5 lg:grid-cols-3">
+        {t.packages.map((pkg, i) => (
+          <Reveal key={pkg.name} delay={i * 0.06}>
+            <article
+              className={`relative flex h-full flex-col rounded-3xl border p-7 sm:p-8 ${
+                pkg.featured
+                  ? "border-[var(--accent)]/50 bg-[linear-gradient(180deg,rgba(91,143,255,0.12),rgba(91,143,255,0.02))] shadow-[0_24px_60px_rgba(91,143,255,0.12)]"
+                  : "border-white/10 bg-white/[0.025]"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="serif accent text-xl italic">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {pkg.featured && (
+                  <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-white">
+                    {t.featuredBadge}
+                  </span>
+                )}
               </div>
 
-              <span
-                aria-hidden="true"
-                className="hidden text-xl text-faint opacity-0 transition-all duration-500 group-hover:text-[var(--accent)] group-hover:opacity-100 sm:block"
+              <h3 className="display mt-6 text-3xl tracking-tight sm:text-4xl">{pkg.name}</h3>
+              <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{pkg.price}</p>
+              <p className="mt-4 text-sm leading-relaxed text-white/70 sm:text-base">{pkg.pitch}</p>
+
+              <ul className="mt-6 grid gap-2.5 border-t border-white/10 pt-6 text-sm text-white/80">
+                {pkg.features.map((feature) => (
+                  <li key={feature} className="flex gap-3">
+                    <span aria-hidden="true" className="accent">
+                      ✓
+                    </span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-auto pt-8">
+              <a
+                href={whatsappUrl(fill(t.ctaMessage, { name: pkg.name }))}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-track="package_cta"
+                data-track-label={pkg.name}
+                className={`flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
+                  pkg.featured
+                    ? "bg-[var(--accent)] text-white"
+                    : "border border-white/20 text-white hover:border-[var(--accent)]"
+                }`}
               >
-                ↗
-              </span>
-            </div>
+                {t.cta} <span aria-hidden="true">→</span>
+              </a>
+              </div>
+            </article>
           </Reveal>
         ))}
       </div>
+
+      <Reveal delay={0.1}>
+        <ul className="mt-8 grid gap-2 text-sm text-white/60">
+          {t.notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      </Reveal>
     </section>
   );
 }

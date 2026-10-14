@@ -12,6 +12,8 @@ import {
 } from "motion/react";
 import { Reveal } from "./Marquee";
 import { useReducedMotionPreference } from "./use-reduced-motion";
+import { useLocale } from "./LocaleProvider";
+import Rich from "./Rich";
 
 type Slide = {
   index: string;
@@ -21,43 +23,22 @@ type Slide = {
   tone: string;
 };
 
-const SLIDES: Slide[] = [
-  {
-    index: "01",
-    title: "Variable Type",
-    tag: "Each letter's weight follows your finger, from 100 to 900 on one variable axis.",
-    gesture: "Drag across",
-    tone: "linear-gradient(135deg, #0c1433 0%, #101a3f 55%, #070a16 100%)",
-  },
-  {
-    index: "02",
-    title: "Signal Field",
-    tag: "A live canvas of signal lines that bends around touch and carries pulses.",
-    gesture: "Tap · drag",
-    tone: "linear-gradient(135deg, #0e1428 0%, #16204a 50%, #080a14 100%)",
-  },
-  {
-    index: "03",
-    title: "Spring Physics",
-    tag: "A real damped spring. Fling it, change its character, watch the decay.",
-    gesture: "Pull & fling",
-    tone: "linear-gradient(135deg, #10131f 0%, #1a2342 60%, #090b12 100%)",
-  },
-  {
-    index: "04",
-    title: "Design Tokens",
-    tag: "One hue token re-themes a whole component, with the contrast checked live.",
-    gesture: "Turn the hue",
-    tone: "linear-gradient(135deg, #0b1024 0%, #141d44 55%, #070910 100%)",
-  },
-  {
-    index: "05",
-    title: "Slide to Confirm",
-    tag: "A payment gesture with resistance, snap-back and a haptic confirmation.",
-    gesture: "Slide right",
-    tone: "linear-gradient(135deg, #0d1120 0%, #182148 50%, #080a13 100%)",
-  },
+const TONES = [
+  "linear-gradient(135deg, #0c1433 0%, #101a3f 55%, #070a16 100%)",
+  "linear-gradient(135deg, #0e1428 0%, #16204a 50%, #080a14 100%)",
+  "linear-gradient(135deg, #10131f 0%, #1a2342 60%, #090b12 100%)",
+  "linear-gradient(135deg, #0b1024 0%, #141d44 55%, #070910 100%)",
+  "linear-gradient(135deg, #0d1120 0%, #182148 50%, #080a13 100%)",
 ];
+
+function useSlides(): Slide[] {
+  const { dict } = useLocale();
+  return dict.lab.slides.map((slide, i) => ({
+    ...slide,
+    index: String(i + 1).padStart(2, "0"),
+    tone: TONES[i % TONES.length],
+  }));
+}
 
 function Grain({ id }: { id: string }) {
   return (
@@ -763,6 +744,7 @@ function GestureSliderLab() {
 }
 
 function Card({ slide }: { slide: Slide }) {
+  const { dict } = useLocale();
   return (
     <div
       data-lab-card
@@ -774,7 +756,7 @@ function Card({ slide }: { slide: Slide }) {
       <div className="relative z-10 flex items-center justify-between border-b border-white/5 pb-3">
         <div className="flex items-center gap-3">
           <span className="serif accent text-lg italic">{slide.index}</span>
-          <span className="label-caps text-[0.62rem] tracking-[0.2em] text-faint">Fragment</span>
+          <span className="label-caps text-[0.62rem] tracking-[0.2em] text-faint">{dict.lab.fragment}</span>
         </div>
         <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.58rem] font-mono uppercase tracking-wider text-white/60">
           {slide.gesture}
@@ -798,6 +780,8 @@ function Card({ slide }: { slide: Slide }) {
 }
 
 function Pinned() {
+  const slides = useSlides();
+  const { dict } = useLocale();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [range, setRange] = useState(0);
@@ -828,17 +812,19 @@ function Pinned() {
     <div ref={wrapRef} style={{ height: height ?? "280vh" }}>
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
         <motion.div ref={trackRef} style={{ x }} className="flex w-max items-stretch gap-6 px-6 sm:px-12">
-          {SLIDES.map((slide) => (
+          {slides.map((slide) => (
             <Card key={slide.index} slide={slide} />
           ))}
         </motion.div>
-        <p className="label-caps mt-6 px-6 text-faint sm:px-12">Scroll — the wall moves sideways</p>
+        <p className="label-caps mt-6 px-6 text-faint sm:px-12">{dict.lab.scrollHint}</p>
       </div>
     </div>
   );
 }
 
 function Native() {
+  const slides = useSlides();
+  const { dict } = useLocale();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
 
@@ -871,21 +857,21 @@ function Native() {
           if (nearest !== current) setCurrent(nearest);
         }}
       >
-        {SLIDES.map((slide) => (
+        {slides.map((slide) => (
           <Card key={slide.index} slide={slide} />
         ))}
       </div>
       <div className="mt-4 flex items-center justify-between px-6 sm:px-12">
-        <div className="flex gap-2" role="tablist" aria-label="Lab fragments">
-          {SLIDES.map((slide, index) => (
+        <div className="flex gap-2" role="tablist" aria-label={dict.lab.tablist}>
+          {slides.map((slide, index) => (
             <button
               key={slide.index}
               type="button"
               role="tab"
               aria-selected={current === index}
-              aria-label={`Fragment ${slide.index}: ${slide.title}`}
+              aria-label={`${dict.lab.fragment} ${slide.index}: ${slide.title}`}
               onClick={() => goTo(index)}
-              className="flex h-6 items-center"
+              className="flex h-6 min-w-6 items-center justify-center"
             >
               <span
                 className={`block h-1 rounded-full transition-all duration-300 ${
@@ -898,7 +884,7 @@ function Native() {
         <div className="flex gap-2">
           <button
             type="button"
-            aria-label="Previous fragment"
+            aria-label={dict.lab.previous}
             disabled={current === 0}
             onClick={() => goTo(current - 1)}
             className="flex size-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-opacity disabled:opacity-30"
@@ -907,8 +893,8 @@ function Native() {
           </button>
           <button
             type="button"
-            aria-label="Next fragment"
-            disabled={current === SLIDES.length - 1}
+            aria-label={dict.lab.next}
+            disabled={current === slides.length - 1}
             onClick={() => goTo(current + 1)}
             className="flex size-10 items-center justify-center rounded-full border border-white/15 text-white/70 transition-opacity disabled:opacity-30"
           >
@@ -920,9 +906,10 @@ function Native() {
   );
 }
 
-export default function Gallery() {
+export default function Gallery({ numeral }: { numeral: string }) {
   const reduce = useReducedMotionPreference();
   const [desktop, setDesktop] = useState(false);
+  const t = useLocale().dict.lab;
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -935,32 +922,29 @@ export default function Gallery() {
   const pinned = desktop && !reduce;
 
   return (
-    <section id="lab" aria-label="Visual lab" className="relative py-24 sm:py-36">
+    <section id="lab" aria-label={t.ariaLabel} className="relative py-24 sm:py-36">
       <span aria-hidden="true" className="ghost-numeral">
-        02
+        {numeral}
       </span>
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"
       >
-        Visual Lab — Experiments
+        {t.edge}
       </span>
 
       <div className="mb-12 px-6 sm:px-12">
         <Reveal>
-          <p className="label-caps accent">Visual Lab</p>
+          <p className="label-caps accent">{t.label}</p>
         </Reveal>
         <Reveal delay={0.08}>
           <h2 className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
-            <span className="text-outline">Fragments</span> from
-            <br />
-            the{" "}
-            <em className="serif accent text-[1.06em] italic">lab.</em>
+            <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
           </h2>
         </Reveal>
         <Reveal delay={0.12}>
           <p className="mt-6 max-w-lg text-sm leading-relaxed text-white/60 sm:text-base">
-            Five small experiments in how an interface should feel: type, signal, physics, tokens and gesture. Every one is live. Touch them.
+            {t.intro}
           </p>
         </Reveal>
       </div>

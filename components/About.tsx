@@ -1,51 +1,60 @@
-import { whatsappUrl } from "@/lib/site";
+import type { Dictionary } from "@/lib/dictionaries/en";
+import { contactEmail, whatsappUrl } from "@/lib/site";
 import { Reveal } from "./Marquee";
+import Rich from "./Rich";
 
-export default function About() {
+const SOCIAL = [
+  { label: "GitHub", href: "https://github.com/kachaniabdellah86" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/abdellah-kachani-8284a5251/" },
+];
+
+export default function About({
+  t,
+  numeral,
+  whatsappMessage,
+}: {
+  t: Dictionary["about"];
+  numeral: string;
+  whatsappMessage: string;
+}) {
   return (
     <section id="about" className="relative px-6 py-24 sm:px-12 sm:py-36">
       <span aria-hidden="true" className="ghost-numeral">
-        04
+        {numeral}
       </span>
 
       <Reveal>
-        <p className="label-caps accent">About</p>
+        <p className="label-caps accent">{t.label}</p>
       </Reveal>
 
       <Reveal delay={0.08}>
         <h2 className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
-          Computer engineer <span className="text-outline">building</span> the next
-          <br />
-          <em className="serif accent text-[1.06em] italic">intersection.</em>
+          <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
         </h2>
       </Reveal>
 
-      <div className="mt-12 grid gap-8 max-w-3xl">
+      <div className="mt-12 grid max-w-3xl gap-8">
         <Reveal delay={0.12}>
           <div className="grid gap-3">
-            <p className="text-base sm:text-lg text-white/80 leading-relaxed">
-              I&apos;m a computer engineering student based in Morocco, working across creative development, AI systems, product design and full-stack development.
-            </p>
-            <p className="text-base sm:text-lg text-white/70 leading-relaxed">
-              I design and build intelligent digital products — from AI interfaces and full-stack platforms to cinematic experiences. I&apos;m drawn to problems where design and engineering collide: making invisible systems visible, translating complex ideas into clarity, and creating experiences that feel both thoughtful and alive.
-            </p>
+            {t.paragraphs.map((paragraph, i) => (
+              <p
+                key={i}
+                className={`text-base leading-relaxed sm:text-lg ${i === 0 ? "text-white/80" : "text-white/70"}`}
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
         </Reveal>
 
         <Reveal delay={0.14}>
           <div className="grid gap-3 border-t border-white/8 pt-8">
-            <p className="label-caps text-white/50">Interested in</p>
+            <p className="label-caps text-white/60">{t.interestsLabel}</p>
             <div className="flex flex-wrap gap-2">
-              {[
-                "Creative Development",
-                "Frontend Engineering",
-                "Full-Stack Development",
-                "AI Engineering",
-                "Product Design",
-              ].map((interest) => (
+              {t.interests.map((interest) => (
                 <span
                   key={interest}
-                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70"
+                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/75"
                 >
                   {interest}
                 </span>
@@ -56,35 +65,34 @@ export default function About() {
 
         <Reveal delay={0.16}>
           <div className="grid gap-3 border-t border-white/8 pt-8">
-            <p className="label-caps text-white/50">Connect</p>
+            <p className="label-caps text-white/60">{t.connectLabel}</p>
             <div className="flex flex-wrap gap-3 text-sm">
               <a
-                href={whatsappUrl()}
+                href={whatsappUrl(whatsappMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-track="whatsapp_click"
+                data-track-label="about"
                 className="text-[var(--accent)] transition-colors hover:text-white"
               >
                 WhatsApp →
               </a>
+              {SOCIAL.map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/65 transition-colors hover:text-[var(--accent)]"
+                >
+                  {label} →
+                </a>
+              ))}
               <a
-                href="https://github.com/kachaniabdellah86"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-[var(--accent)] transition-colors"
-              >
-                GitHub →
-              </a>
-              <a
-                href="https://www.linkedin.com/in/abdellah-kachani-8284a5251/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-[var(--accent)] transition-colors"
-              >
-                LinkedIn →
-              </a>
-              <a
-                href="mailto:abdellah.kachani@e-polytechnique.ma"
-                className="text-white/60 hover:text-[var(--accent)] transition-colors"
+                href={`mailto:${contactEmail}`}
+                data-track="email_click"
+                data-track-label="about"
+                className="text-white/65 transition-colors hover:text-[var(--accent)]"
               >
                 Email →
               </a>

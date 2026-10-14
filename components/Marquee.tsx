@@ -12,24 +12,7 @@ import {
 } from "motion/react";
 import { EASE_OUT as EASE } from "./tokens";
 import { useReducedMotionPreference } from "./use-reduced-motion";
-
-const ROW_A = [
-  "Creative Development",
-  "AI Interfaces",
-  "Product Design",
-  "Motion & Interaction",
-  "Web Experiences",
-  "Full-Stack Engineering",
-];
-
-const ROW_B = [
-  "React / Next.js",
-  "Figma",
-  "Three.js / WebGL",
-  "TypeScript",
-  "System Design",
-  "Cinematic Interfaces",
-];
+import { useLocale } from "./LocaleProvider";
 
 function wrapRange(min: number, max: number, v: number) {
   const range = max - min;
@@ -81,7 +64,7 @@ function VelocityRow({
           className="label-caps flex items-center gap-10"
           style={
             reverse
-              ? { color: "var(--accent)", opacity: 0.6 }
+              ? { color: "#8aa9f0" }
               : { color: "var(--muted)" }
           }
         >
@@ -100,12 +83,13 @@ function VelocityRow({
 }
 
 export default function Marquee() {
+  const { rowA, rowB } = useLocale().dict.marquee;
   return (
     <div className="hairline-t hairline-b overflow-hidden py-4 select-none">
       <div className="mb-3">
-        <VelocityRow items={ROW_A} />
+        <VelocityRow items={rowA} />
       </div>
-      <VelocityRow items={ROW_B} reverse />
+      <VelocityRow items={rowB} reverse />
     </div>
   );
 }

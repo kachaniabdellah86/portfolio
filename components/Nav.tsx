@@ -9,17 +9,15 @@ import {
 } from "motion/react";
 import { EASE_OUT } from "./tokens";
 import { useReducedMotionPreference } from "./use-reduced-motion";
-
-const LINKS = [
-  { label: "Work", href: "#work" },
-  { label: "Lab", href: "#lab" },
-  { label: "Services", href: "#services" },
-  { label: "Contact", href: "#contact" },
-];
+import { useLocale } from "./LocaleProvider";
 
 export default function Nav() {
   const reduce = useReducedMotionPreference();
-  const [visible, setVisible] = useState(false);
+  const { lang, dict } = useLocale();
+  const t = dict.nav;
+  const otherLang = lang === "fr" ? "en" : "fr";
+  // Visible from the first paint: a visitor should always see where to go.
+  const [visible, setVisible] = useState(true);
 
   const { scrollY, scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30 });
@@ -33,7 +31,7 @@ export default function Nav() {
         1
       );
       setTicks(
-        ["#work", "#lab", "#services", "#contact"].map((sel) => {
+        t.links.map(({ href: sel }) => {
           const el = document.querySelector<HTMLElement>(sel);
           if (!el) return 0;
           return (
@@ -48,19 +46,12 @@ export default function Nav() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", calc);
     };
-  }, []);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      setVisible(window.scrollY > window.innerHeight * 0.55);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [t.links]);
 
   useMotionValueEvent(scrollY, "change", (y) => {
     const goingDown = y > lastY.current;
     lastY.current = y;
-    setVisible(y > window.innerHeight * 0.55 && !goingDown);
+    setVisible(y < window.innerHeight * 0.55 || !goingDown);
   });
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -81,7 +72,7 @@ export default function Nav() {
   return (
     <div className="pointer-events-none fixed inset-x-0 top-5 z-[80] flex justify-center px-3 sm:px-4">
       <motion.nav
-        aria-label="Primary"
+        aria-label={t.label}
         initial={false}
         animate={{
           y: visible ? 0 : -72,
@@ -103,21 +94,21 @@ export default function Nav() {
               }
             }}
             className="display mr-1 px-2 text-lg tracking-tight text-[var(--ink)] sm:mr-2 sm:px-3"
-            aria-label="Back to top"
+            aria-label={t.backToTop}
           >
             AK<span className="accent">.</span>
           </a>
 
-          <span className="h-4 w-px bg-[var(--hairline)]" aria-hidden="true" />
+          <span className="hidden h-4 w-px bg-[var(--hairline)] sm:block" aria-hidden="true" />
 
-          {LINKS.map((link) => (
+          {t.links.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={(e) => onLinkClick(e, link.href)}
               // Phones get tighter padding and drop "Lab" so the pill fits a 360px screen.
               className={`label-caps rounded-full px-2 py-2 text-muted transition-colors hover:bg-[rgba(91,143,255,0.08)] hover:text-[var(--ink)] sm:px-4 ${
-                link.href === "#lab" ? "hidden sm:inline" : ""
+                link.phone ? "" : "hidden sm:inline"
               }`}
             >
               {link.label}
@@ -126,8 +117,18 @@ export default function Nav() {
 
           <span className="ml-1 hidden items-center gap-2 rounded-full border border-[var(--hairline)] px-3 py-2 sm:flex">
             <span className="size-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
-            <span className="label-caps text-muted">Open to work</span>
+            <span className="label-caps text-muted">{t.available}</span>
           </span>
+
+          <a
+            href={`/${otherLang}`}
+            hrefLang={otherLang}
+            lang={otherLang}
+            aria-label={t.switchLabel}
+            className="label-caps ml-0.5 rounded-full border border-[var(--hairline)] px-2.5 py-2 text-[var(--ink)] sm:ml-1 sm:px-3 transition-colors hover:border-[var(--accent)]"
+          >
+            {otherLang.toUpperCase()}
+          </a>
         </div>
 
         <motion.div

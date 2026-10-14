@@ -6,144 +6,9 @@ import { AnimatePresence, motion, useInView, useSpring } from "motion/react";
 import { Reveal } from "./Marquee";
 import { EASE_OUT as EASE } from "./tokens";
 import { useReducedMotionPreference } from "./use-reduced-motion";
-
-type Brand = {
-  accent: string;
-  accentSoft: string;
-  background: string;
-  ink: string;
-};
-
-type Project = {
-  id: "kachanios" | "ficam" | "yalla" | "aura";
-  index: string;
-  title: string;
-  meaning: string;
-  subtitle: string;
-  tags: string[];
-  year: string;
-  status: string;
-  brand: Brand;
-  href?: string;
-  sourceHref?: string;
-  details: {
-    role: string;
-    problem: string;
-    built: string;
-    stack: string[];
-  };
-};
-
-// Real client work first: it is what a business visiting this page needs to see.
-const PROJECTS: Project[] = [
-  {
-    id: "yalla",
-    index: "01",
-    title: "Yalla China",
-    meaning: "From Morocco to a campus in China, step by step.",
-    subtitle:
-      "A trust-first platform in French, English and Arabic that guides Moroccan students and their families through a seven-step journey to studying in China — and turns visitors into applications and WhatsApp conversations.",
-    tags: ["Client project", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
-    year: "2025",
-    status: "Client project · Live",
-    brand: {
-      accent: "#f0b64a",
-      accentSoft: "rgba(240,182,74,0.16)",
-      background:
-        "radial-gradient(ellipse at 74% 34%, rgba(240,182,74,0.16), transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(217,51,63,0.16), transparent 50%), linear-gradient(180deg, #1a0709 0%, #0d0405 100%)",
-      ink: "#fff1dc",
-    },
-    href: "https://go-china-site.vercel.app/fr",
-    details: {
-      role: "Full-stack developer — design, build and launch for a study-abroad agency",
-      problem:
-        "Families needed clarity and trust around studying abroad in China. Language and cultural distance created friction; reassurance was missing.",
-      built:
-        "Trilingual site (French, English, Arabic with right-to-left layout), a seven-step journey, two pricing packs, an application form with server-side validation and spam protection, an admin area to manage applications, and WhatsApp lead capture.",
-      stack: ["Next.js", "TypeScript", "Prisma + Supabase", "Tailwind CSS"],
-    },
-  },
-  {
-    id: "ficam",
-    index: "02",
-    title: "FICAM Festival Platform",
-    meaning: "Vivez le cinéma — in your pocket.",
-    subtitle:
-      "The official companion app for the FICAM film festival: student registration, QR-code session validation, gamified progression and live rewards.",
-    tags: ["Next.js", "Supabase", "Full-Stack"],
-    year: "2024",
-    status: "Live product",
-    brand: {
-      accent: "#e879f9",
-      accentSoft: "rgba(168,85,247,0.18)",
-      background:
-        "radial-gradient(ellipse at 28% 42%, rgba(168,85,247,0.24), transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(219,39,119,0.14), transparent 50%), linear-gradient(180deg, #0d0618 0%, #07040f 100%)",
-      ink: "#f5e9ff",
-    },
-    href: "https://ficam-festival-final.vercel.app",
-    sourceHref: "https://github.com/kachaniabdellah86/ficam-festival-app",
-    details: {
-      role: "Full-Stack Developer",
-      problem:
-        "Festival organizers needed to engage student participants, track attendance, validate screenings and reward engagement across multiple sessions.",
-      built:
-        "Registration and authentication. QR scanning for session validation. Gamified progression with badges and level unlocks. Real-time reward accumulation.",
-      stack: ["Next.js", "TypeScript", "Supabase (PostgreSQL)", "Realtime"],
-    },
-  },
-  {
-    id: "kachanios",
-    index: "03",
-    title: "KachaniOS",
-    meaning: "The interface that thinks.",
-    subtitle:
-      "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
-    tags: ["AI Interfaces", "Product UX", "Desktop OS"],
-    year: "2026",
-    status: "Interactive prototype",
-    brand: {
-      accent: "#7fa5ff",
-      accentSoft: "rgba(91,143,255,0.16)",
-      background:
-        "radial-gradient(ellipse at 72% 28%, rgba(91,143,255,0.2), transparent 55%), linear-gradient(180deg, #060b1c 0%, #04070f 100%)",
-      ink: "#e6edff",
-    },
-    details: {
-      role: "Designer & Developer",
-      problem:
-        "Autonomous agents operate as black boxes. Making invisible computation visible requires interfaces where thought becomes nodes, memory becomes structure, and complexity becomes clarity.",
-      built:
-        "Interactive graph of multi-agent routing. Real-time task pipeline with typed orchestration. Simulated telemetry that shows the architecture without exposing private context.",
-      stack: ["React 19", "TypeScript", "SVG / Canvas", "Motion"],
-    },
-  },
-  {
-    id: "aura",
-    index: "04",
-    title: "Aura Pay",
-    meaning: "Digital money with physical weight.",
-    subtitle:
-      "A spatial finance concept: a titanium card, biometric settlement in one gesture, and yield that routes itself — trust you can feel.",
-    tags: ["FinTech Concept", "Spatial UI", "Product Design"],
-    year: "2026",
-    status: "Interactive prototype",
-    brand: {
-      accent: "#a78bfa",
-      accentSoft: "rgba(167,139,250,0.16)",
-      background:
-        "radial-gradient(ellipse at 30% 62%, rgba(167,139,250,0.2), transparent 55%), linear-gradient(180deg, #0a0812 0%, #050408 100%)",
-      ink: "#efeaff",
-    },
-    details: {
-      role: "Product Designer",
-      problem:
-        "Digital finance feels weightless. How do you make trust tactile and make an instant transaction feel intentional?",
-      built:
-        "Interactive prototype of a spatial finance interface: a physical-feeling card, biometric settlement flow, dynamic currency switching and a spending model.",
-      stack: ["React 19", "TypeScript", "SVG", "Motion"],
-    },
-  },
-];
+import { useLocale } from "./LocaleProvider";
+import Rich from "./Rich";
+import type { Brand, Project } from "@/lib/projects";
 
 /* ── 01 · KachaniOS — ask the agent, watch it think ─────────────────── */
 
@@ -1105,6 +970,8 @@ function Showcase({ project }: { project: Project }) {
 
 function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
   const [showDetails, setShowDetails] = useState(false);
+  const { lang, dict } = useLocale();
+  const t = dict.work;
   const { brand } = project;
 
   return (
@@ -1161,7 +1028,7 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
                   className="inline-flex items-center gap-1.5 font-medium transition-transform duration-300 hover:translate-x-0.5"
                   style={{ color: brand.accent }}
                 >
-                  Visit live platform <span aria-hidden="true">↗</span>
+                  {t.visit} <span aria-hidden="true">↗</span>
                 </a>
               )}
               {project.sourceHref && (
@@ -1171,7 +1038,15 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-white/60 transition-colors hover:text-white"
                 >
-                  Source <span aria-hidden="true">↗</span>
+                  {t.source} <span aria-hidden="true">↗</span>
+                </a>
+              )}
+              {project.slug && (
+                <a
+                  href={`/${lang}/work/${project.slug}`}
+                  className="inline-flex items-center gap-1.5 font-medium text-white/80 transition-colors hover:text-white"
+                >
+                  {t.caseStudy} <span aria-hidden="true">→</span>
                 </a>
               )}
               <button
@@ -1181,7 +1056,7 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
                 aria-controls={`project-${project.id}-details`}
                 className="inline-flex items-center gap-1.5 text-white/60 transition-colors hover:text-white"
               >
-                {showDetails ? "Hide the story" : "Read the story"}
+                {showDetails ? t.hideStory : t.readStory}
                 <span aria-hidden="true" className={`transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}>↓</span>
               </button>
             </div>
@@ -1200,11 +1075,11 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
               >
                 <div className="mt-8 grid gap-5 border-t border-white/10 pt-7 sm:grid-cols-2">
                   <div>
-                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">My role</p>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">{t.role}</p>
                     <p className="mt-2 text-sm text-white/85">{project.details.role}</p>
                   </div>
                   <div>
-                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">Stack</p>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">{t.stack}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {project.details.stack.map((tech) => (
                         <span key={tech} className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.65rem] text-white/75">
@@ -1214,11 +1089,11 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
                     </div>
                   </div>
                   <div className="sm:col-span-2">
-                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">Problem</p>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">{t.problem}</p>
                     <p className="mt-2 text-sm leading-relaxed text-white/70">{project.details.problem}</p>
                   </div>
                   <div className="sm:col-span-2">
-                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">What I built</p>
+                    <p className="text-[0.62rem] uppercase tracking-[0.22em] text-white/45">{t.built}</p>
                     <p className="mt-2 text-sm leading-relaxed text-white/70">{project.details.built}</p>
                   </div>
                 </div>
@@ -1237,41 +1112,45 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
   );
 }
 
-export default function WorkSection() {
+export default function WorkSection({
+  projects,
+  numeral,
+}: {
+  projects: Project[];
+  numeral: string;
+}) {
+  const t = useLocale().dict.work;
+
   return (
     <section id="work" className="relative px-6 pt-24 sm:px-12 sm:pt-36">
       <span aria-hidden="true" className="ghost-numeral">
-        01
+        {numeral}
       </span>
       <span
         aria-hidden="true"
         className="edge-label label-caps absolute left-3 top-40 hidden text-faint lg:block"
       >
-        Selected Work — 2024 / 2026
+        {t.edge}
       </span>
 
       <Reveal>
-        <p className="label-caps accent">Selected Work</p>
+        <p className="label-caps accent">{t.label}</p>
       </Reveal>
 
       <Reveal delay={0.08}>
         <h2 className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
-          Work that <span className="text-outline">shipped,</span>
-          <br />
-          thinking that{" "}
-          <em className="serif accent text-[1.06em] italic">lasted.</em>
+          <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
         </h2>
       </Reveal>
 
       <Reveal delay={0.12}>
         <p className="mt-8 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-          Four products, four worlds. Each one keeps its own identity here — and
-          each one you can touch.
+          {t.intro}
         </p>
       </Reveal>
 
       <div className="mt-20">
-        {PROJECTS.map((project, index) => (
+        {projects.map((project, index) => (
           <ProjectBand key={project.id} project={project} flip={index % 2 === 1} />
         ))}
       </div>
