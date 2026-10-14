@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { contactEmail, siteUrl } from "@/lib/site";
 import { hasLocale, locales, type Locale } from "@/lib/i18n";
@@ -47,6 +48,15 @@ const instrumentSerif = localFont({
   ],
   variable: "--font-serif",
   display: "swap",
+});
+
+// Spec-sheet details: prices, steps, labels. Never above the fold, so no preload.
+const mono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500"],
+  variable: "--font-code",
+  display: "swap",
+  preload: false,
 });
 
 export const dynamicParams = false;
@@ -136,7 +146,7 @@ export default async function RootLayout({
   return (
     <html lang={lang} className="cursor-none-fine">
       <body
-        className={`${zodiak.variable} ${satoshi.variable} ${instrumentSerif.variable} min-h-screen antialiased`}
+        className={`${zodiak.variable} ${satoshi.variable} ${instrumentSerif.variable} ${mono.variable} min-h-screen antialiased`}
       >
         <script
           type="application/ld+json"

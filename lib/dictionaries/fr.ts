@@ -150,7 +150,7 @@ export const fr: Dictionary = {
     packages: [
       {
         name: "Vitrine",
-        price: "à partir de 3 500 MAD",
+        priceFrom: "à partir de", amount: "3 500", currency: "MAD",
         pitch: "Pour exister sérieusement sur Google et sur WhatsApp.",
         features: [
           "1 à 5 pages, en français et en anglais",
@@ -163,10 +163,9 @@ export const fr: Dictionary = {
       },
       {
         name: "Business",
-        price: "à partir de 6 500 MAD",
-        pitch: "Pour recevoir des réservations et des demandes, pas seulement des visites.",
+        priceFrom: "à partir de", amount: "6 500", currency: "MAD",
+        pitch: "Tout le forfait Vitrine, plus de quoi recevoir des réservations et des demandes — pas seulement des visites.",
         features: [
-          "Tout le forfait Vitrine, plus :",
           "Formulaire de réservation ou de demande",
           "Pages offres et tarifs",
           "Espace admin pour suivre vos demandes",
@@ -176,7 +175,7 @@ export const fr: Dictionary = {
       },
       {
         name: "Sur-mesure",
-        price: "à partir de 12 000 MAD",
+        priceFrom: "à partir de", amount: "12 000", currency: "MAD",
         pitch: "Pour une plateforme, une application ou une expérience 3D qui marque.",
         features: [
           "Application web ou plateforme",
@@ -247,6 +246,10 @@ export const fr: Dictionary = {
   faq: {
     label: "Questions fréquentes",
     heading: "Vos questions,\nmes *réponses.*",
+    moreTitle: "Une autre question ?",
+    moreText: "Posez-la directement, je réponds moi-même.",
+    moreCta: "Demander sur WhatsApp",
+    moreMessage: "Bonjour Abdellah, j'ai une question sur la création de mon site.",
     items: [
       {
         q: "Combien coûte un site ?",
@@ -291,23 +294,26 @@ export const fr: Dictionary = {
     copied: "Copié ✓",
     retry: "Réessayer",
     brief: {
-      title: "Décrivez votre projet",
-      intro: "Trois clics, et WhatsApp s'ouvre avec votre demande déjà rédigée.",
-      typeLabel: "Projet",
+      title: "Votre demande, en une phrase",
+      intro: "Touchez les mots soulignés pour les changer. WhatsApp s'ouvre avec le message déjà écrit.",
+      greeting: "Bonjour Abdellah, j'ai vu votre portfolio.",
+      sentence: "Je veux {type}, avec un budget de {budget}, à livrer {deadline}.",
+      typeLabel: "Type de projet",
       types: [
-        "Site vitrine",
-        "Réservations / rendez-vous",
-        "Boutique en ligne",
-        "Application web",
-        "Autre",
+        "un site vitrine",
+        "un système de réservation",
+        "une boutique en ligne",
+        "une application web",
+        "autre chose",
       ],
       budgetLabel: "Budget",
-      budgets: ["< 5 000 MAD", "5 000 – 10 000 MAD", "10 000 – 20 000 MAD", "> 20 000 MAD"],
+      budgets: ["moins de 5 000 MAD", "5 000 – 10 000 MAD", "10 000 – 20 000 MAD", "plus de 20 000 MAD"],
       deadlineLabel: "Délai",
-      deadlines: ["Le plus vite possible", "Ce mois-ci", "Pas pressé"],
+      deadlines: ["au plus vite", "ce mois-ci", "sans urgence"],
+      previewLabel: "Aperçu du message",
+      previewName: "Abdellah Kachani",
+      previewStatus: "Développeur web · Agadir",
       send: "Envoyer sur WhatsApp",
-      message:
-        "Bonjour Abdellah, j'ai vu votre portfolio. Projet : {type}. Budget : {budget}. Délai : {deadline}.",
     },
   },
   floating: {

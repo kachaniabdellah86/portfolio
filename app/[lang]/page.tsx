@@ -39,26 +39,26 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <div className="relative bg-[var(--bg)]">
           <Marquee />
           <WorkSection projects={projects} numeral="01" />
+          {/* Numbers right after the work they prove. */}
+          <Stats />
           {lang === "fr" ? (
-            // Businesses: offer, method and proof first; the lab is a bonus.
+            // Businesses: proof → price → how → who → craft bonus → doubts → contact.
             <>
               <Services t={dict.services} numeral="02" />
               <Process t={dict.process} />
               <Testimonial t={dict.testimonial} />
-              <Stats />
               <About t={dict.about} numeral="03" whatsappMessage={dict.journey.whatsappMessage} />
-              <Faq t={dict.faq} />
               <Gallery numeral="04" />
+              <Faq t={dict.faq} />
             </>
           ) : (
-            // Studios and startups: craft first, then how to work together.
+            // Studios and startups: proof → craft → ways to work → how → who.
             <>
               <Gallery numeral="02" />
               <Services t={dict.services} numeral="03" />
               <Process t={dict.process} />
               <Testimonial t={dict.testimonial} />
               <About t={dict.about} numeral="04" whatsappMessage={dict.journey.whatsappMessage} />
-              <Stats />
             </>
           )}
           <Footer />

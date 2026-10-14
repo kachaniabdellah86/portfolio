@@ -64,7 +64,7 @@ function Counter({ stat }: { stat: Stat }) {
 export default function Stats() {
   const t = useLocale().dict.stats;
   return (
-    <section aria-label={t.ariaLabel} className="px-6 pb-24 sm:px-12 sm:pb-32">
+    <section aria-label={t.ariaLabel} className="px-6 py-24 sm:px-12 sm:py-32">
       <div className="hairline-t grid gap-12 pt-14 sm:grid-cols-3 sm:gap-8">
         {t.items.map((stat: Stat) => (
           <Reveal key={stat.label}>

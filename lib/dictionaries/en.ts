@@ -149,7 +149,7 @@ export const en = {
     packages: [
       {
         name: "Landing page",
-        price: "from €500",
+        priceFrom: "from", amount: "500", currency: "€",
         pitch: "One fast, memorable page for a launch or a campaign.",
         features: [
           "Design and build",
@@ -161,10 +161,9 @@ export const en = {
       },
       {
         name: "Product site",
-        price: "from €1,200",
-        pitch: "A multi-page marketing site that explains the product and converts.",
+        priceFrom: "from", amount: "1,200", currency: "€",
+        pitch: "Everything in Landing page, grown into a multi-page site that explains the product and converts.",
         features: [
-          "Everything in Landing page, plus:",
           "Up to 8 pages, multilingual",
           "Forms, analytics and SEO",
           "Admin or CMS integration",
@@ -173,7 +172,7 @@ export const en = {
       },
       {
         name: "Creative build",
-        price: "from €2,500",
+        priceFrom: "from", amount: "2,500", currency: "€",
         pitch: "WebGL, scroll stories and interactive product demos — like this site.",
         features: [
           "Three.js / WebGL scenes",
@@ -243,6 +242,10 @@ export const en = {
   faq: {
     label: "FAQ",
     heading: "Questions,\n*answered.*",
+    moreTitle: "Another question?",
+    moreText: "Ask it directly — I answer myself.",
+    moreCta: "Ask on WhatsApp",
+    moreMessage: "Hi Abdellah, I have a question about working together.",
     items: [
       {
         q: "Do you work with studios white-label?",
@@ -275,23 +278,26 @@ export const en = {
     copied: "Copied ✓",
     retry: "Retry",
     brief: {
-      title: "Tell me about the project",
-      intro: "Three taps, and WhatsApp opens with your brief already written.",
-      typeLabel: "Project",
+      title: "Your brief, in one sentence",
+      intro: "Tap the underlined words to change them. WhatsApp opens with the message already written.",
+      greeting: "Hi Abdellah, I saw your portfolio.",
+      sentence: "I want {type}, with a budget of {budget}, delivered {deadline}.",
+      typeLabel: "Project type",
       types: [
-        "Landing page",
-        "Product site",
-        "WebGL / motion piece",
-        "Web app",
-        "Studio collaboration",
+        "a landing page",
+        "a product site",
+        "a WebGL / motion piece",
+        "a web app",
+        "a studio collaboration",
       ],
       budgetLabel: "Budget",
-      budgets: ["Under €1k", "€1k – 3k", "€3k – 8k", "€8k+"],
+      budgets: ["under €1k", "€1k – 3k", "€3k – 8k", "€8k+"],
       deadlineLabel: "Timing",
-      deadlines: ["As soon as possible", "This month", "Flexible"],
+      deadlines: ["as soon as possible", "this month", "whenever it's right"],
+      previewLabel: "Message preview",
+      previewName: "Abdellah Kachani",
+      previewStatus: "Creative developer · Morocco",
       send: "Send on WhatsApp",
-      message:
-        "Hi Abdellah, I saw your portfolio. Project: {type}. Budget: {budget}. Timing: {deadline}.",
     },
   },
   floating: {

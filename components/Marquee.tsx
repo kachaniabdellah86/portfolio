@@ -98,16 +98,19 @@ export function Reveal({
   children,
   delay = 0,
   y = 32,
+  className,
 }: {
   children: React.ReactNode;
   delay?: number;
   y?: number;
+  className?: string;
 }) {
   const reduce = useReducedMotionPreference();
-  if (reduce) return <>{children}</>;
+  if (reduce) return className ? <div className={className}>{children}</div> : <>{children}</>;
 
   return (
     <motion.div
+      className={className}
       initial={{ opacity: 0, y, filter: "blur(8px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount: 0.25 }}

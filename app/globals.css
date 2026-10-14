@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-mono: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 :root {
   --bg: #0e0e0c;
   --bg-soft: #13131a;

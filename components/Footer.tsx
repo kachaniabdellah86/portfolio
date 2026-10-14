@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useSpring } from "motion/react";
 import { contactEmail, whatsappUrl } from "@/lib/site";
 import { fill } from "@/lib/i18n";
@@ -150,7 +150,15 @@ function CopyEmailButton() {
   );
 }
 
-function ChoiceRow({
+const noopSubscribe = () => () => {};
+const clockTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+};
+
+// One editable word in the sentence: styled text, with a native <select>
+// laid over it so phones get their own picker and keyboards work as usual.
+function InlineChoice({
   label,
   options,
   value,
@@ -162,62 +170,121 @@ function ChoiceRow({
   onChange: (index: number) => void;
 }) {
   return (
-    <fieldset>
-      <legend className="label-caps mb-3 text-white/60">{label}</legend>
-      <div className="flex flex-wrap gap-2">
+    <span className="relative inline-flex items-baseline rounded-md outline-offset-4 focus-within:outline focus-within:outline-2 focus-within:outline-[var(--accent)]">
+      <span
+        aria-hidden="true"
+        className="serif accent italic underline decoration-[var(--accent)]/60 decoration-dashed decoration-1 underline-offset-[0.18em]"
+      >
+        {options[value]}
+      </span>
+      <span aria-hidden="true" className="ml-1 font-mono text-[0.45em] text-[var(--accent)]">
+        ▼
+      </span>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+      >
         {options.map((option, i) => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={value === i}
-            onClick={() => onChange(i)}
-            className={`min-h-10 rounded-full border px-4 py-2 text-sm transition-colors ${
-              value === i
-                ? "border-[var(--accent)] bg-[var(--accent-strong)] text-white"
-                : "border-white/15 bg-white/[0.03] text-white/75 hover:border-white/40"
-            }`}
-          >
+          <option key={option} value={i}>
             {option}
-          </button>
+          </option>
         ))}
-      </div>
-    </fieldset>
+      </select>
+    </span>
   );
 }
 
-/* ── Brief builder: three taps, then WhatsApp opens with the brief written ── */
+/* ── Brief builder: the request is one sentence you edit; WhatsApp opens with it ── */
 function BriefBuilder() {
   const t = useLocale().dict.contact.brief;
-  const [type, setType] = useState(0);
-  const [budget, setBudget] = useState(1);
-  const [deadline, setDeadline] = useState(1);
+  const [choice, setChoice] = useState({ type: 0, budget: 1, deadline: 1 });
+  // The visitor's clock, read only on the client (empty in the static HTML).
+  const time = useSyncExternalStore(noopSubscribe, clockTime, () => "");
 
-  const message = fill(t.message, {
-    type: t.types[type],
-    budget: t.budgets[budget],
-    deadline: t.deadlines[deadline],
-  });
+  const fields = {
+    type: { label: t.typeLabel, options: t.types },
+    budget: { label: t.budgetLabel, options: t.budgets },
+    deadline: { label: t.deadlineLabel, options: t.deadlines },
+  } as const;
+  type Field = keyof typeof fields;
+
+  const values = {
+    type: t.types[choice.type],
+    budget: t.budgets[choice.budget],
+    deadline: t.deadlines[choice.deadline],
+  };
+  const message = `${t.greeting} ${fill(t.sentence, values)}`;
+
+  // "Je veux {type}, avec…" → text, choice, text, choice…
+  const parts = t.sentence.split(/(\{\w+\})/).filter(Boolean);
 
   return (
-    <div className="mt-14 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-8">
-      <h3 className="display text-2xl tracking-tight sm:text-3xl">{t.title}</h3>
-      <p className="mt-2 text-sm text-white/65">{t.intro}</p>
-      <div className="mt-8 grid gap-7">
-        <ChoiceRow label={t.typeLabel} options={t.types} value={type} onChange={setType} />
-        <ChoiceRow label={t.budgetLabel} options={t.budgets} value={budget} onChange={setBudget} />
-        <ChoiceRow label={t.deadlineLabel} options={t.deadlines} value={deadline} onChange={setDeadline} />
+    <div className="mt-16 grid gap-10 rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 sm:p-10 lg:grid-cols-12 lg:gap-12">
+      <div className="lg:col-span-7">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent)]">{t.title}</p>
+        <p className="display mt-6 text-[clamp(1.9rem,3.6vw,3.2rem)] leading-[1.2] tracking-tight text-white/90">
+          {parts.map((part, i) => {
+            const key = part.match(/^\{(\w+)\}$/)?.[1] as Field | undefined;
+            if (!key || !(key in fields)) return <span key={i}>{part}</span>;
+            return (
+              <InlineChoice
+                key={i}
+                label={fields[key].label}
+                options={[...fields[key].options]}
+                value={choice[key]}
+                onChange={(index) => setChoice((current) => ({ ...current, [key]: index }))}
+              />
+            );
+          })}
+        </p>
+        <p className="mt-6 max-w-md text-sm leading-relaxed text-white/60">{t.intro}</p>
       </div>
-      <a
-        href={whatsappUrl(message)}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-track="whatsapp_click"
-        data-track-label="brief"
-        className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(91,143,255,0.3)] transition-transform hover:-translate-y-0.5"
-      >
-        <WhatsAppIcon />
-        {t.send}
-      </a>
+
+      <div className="lg:col-span-5">
+        <figure
+          aria-label={t.previewLabel}
+          className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0b141a] shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+        >
+          <figcaption className="flex items-center gap-3 bg-[#202c33] px-4 py-3">
+            <span className="display flex size-9 items-center justify-center rounded-full bg-[var(--accent-strong)] text-sm text-white">
+              AK
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-white">{t.previewName}</span>
+              <span className="block truncate text-xs text-white/60">{t.previewStatus}</span>
+            </span>
+          </figcaption>
+          <div className="flex min-h-48 flex-col justify-end bg-[radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] p-4 [background-size:14px_14px]">
+            <motion.p
+              key={message}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm bg-[#005c4b] px-3.5 py-2.5 text-[0.92rem] leading-snug text-[#e9edef]"
+            >
+              {message}
+              <span className="ml-2 inline-flex translate-y-1 items-center gap-1 text-[0.68rem] text-white/60">
+                {time}
+                <span className="text-[#53bdeb]">✓✓</span>
+              </span>
+            </motion.p>
+          </div>
+        </figure>
+
+        <a
+          href={whatsappUrl(message)}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-track="whatsapp_click"
+          data-track-label="brief"
+          className="mt-5 flex min-h-14 items-center justify-center gap-2.5 rounded-full bg-[#25d366] px-6 py-3 text-sm font-semibold text-[#05210f] shadow-[0_14px_36px_rgba(37,211,102,0.25)] transition-transform hover:-translate-y-0.5"
+        >
+          <WhatsAppIcon className="size-5" />
+          {t.send}
+        </a>
+      </div>
     </div>
   );
 }
