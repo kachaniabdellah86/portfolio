@@ -149,7 +149,7 @@ export const en = {
     packages: [
       {
         name: "Landing page",
-        priceFrom: "from", amount: "500", currency: "€",
+        priceFrom: "from", amount: "250", currency: "€",
         pitch: "One fast, memorable page for a launch or a campaign.",
         features: [
           "Design and build",
@@ -161,7 +161,7 @@ export const en = {
       },
       {
         name: "Product site",
-        priceFrom: "from", amount: "1,200", currency: "€",
+        priceFrom: "from", amount: "600", currency: "€",
         pitch: "Everything in Landing page, grown into a multi-page site that explains the product and converts.",
         features: [
           "Up to 8 pages, multilingual",
@@ -172,7 +172,7 @@ export const en = {
       },
       {
         name: "Creative build",
-        priceFrom: "from", amount: "2,500", currency: "€",
+        priceFrom: "from", amount: "1,200", currency: "€",
         pitch: "WebGL, scroll stories and interactive product demos — like this site.",
         features: [
           "Three.js / WebGL scenes",
@@ -229,6 +229,8 @@ export const en = {
       "I'm Abdellah Kachani, a creative developer based in Agadir, Morocco, and a third-year computer engineering student at Polytechnique Agadir.",
       "I design and build digital products end to end — from AI interfaces and full-stack platforms to cinematic WebGL experiences. I've shipped a trilingual platform for a study-abroad agency and a companion app for a film festival, and I'm drawn to problems where design and engineering collide.",
     ],
+    photoAlt: "Abdellah Kachani in a navy waistcoat and tie, standing among palm trees in Agadir",
+    photoCaption: "Agadir, Morocco",
     interestsLabel: "What I do",
     interests: [
       "Creative Development",
@@ -291,7 +293,7 @@ export const en = {
         "a studio collaboration",
       ],
       budgetLabel: "Budget",
-      budgets: ["under €1k", "€1k – 3k", "€3k – 8k", "€8k+"],
+      budgets: ["under €500", "€500 – 1k", "€1k – 3k", "€3k+"],
       deadlineLabel: "Timing",
       deadlines: ["as soon as possible", "this month", "whenever it's right"],
       previewLabel: "Message preview",

@@ -127,7 +127,7 @@ function structuredData(lang: Locale) {
           { "@type": "Country", name: "Morocco" },
         ],
         address: { "@type": "PostalAddress", addressLocality: "Agadir", addressCountry: "MA" },
-        priceRange: "3500–12000+ MAD",
+        priceRange: "1900–7500+ MAD",
         availableLanguage: ["fr", "en", "ar"],
         sameAs,
       },

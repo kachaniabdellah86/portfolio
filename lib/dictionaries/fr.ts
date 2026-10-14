@@ -5,7 +5,7 @@ export const fr: Dictionary = {
   meta: {
     title: "Abdellah Kachani — Création de sites web à Agadir",
     description:
-      "Sites web bilingues FR/EN pour hôtels, agences et commerces au Maroc. Réservation WhatsApp, rapides sur mobile, livrés en 7 jours. À partir de 3 500 MAD.",
+      "Sites web bilingues FR/EN pour hôtels, agences et commerces au Maroc. Réservation WhatsApp, rapides sur mobile, livrés en 7 jours. À partir de 1 900 MAD.",
     ogTagline: "Sites web qui transforment vos visiteurs en clients — Agadir, Maroc",
   },
   nav: {
@@ -150,7 +150,7 @@ export const fr: Dictionary = {
     packages: [
       {
         name: "Vitrine",
-        priceFrom: "à partir de", amount: "3 500", currency: "MAD",
+        priceFrom: "à partir de", amount: "1 900", currency: "MAD",
         pitch: "Pour exister sérieusement sur Google et sur WhatsApp.",
         features: [
           "1 à 5 pages, en français et en anglais",
@@ -163,7 +163,7 @@ export const fr: Dictionary = {
       },
       {
         name: "Business",
-        priceFrom: "à partir de", amount: "6 500", currency: "MAD",
+        priceFrom: "à partir de", amount: "3 900", currency: "MAD",
         pitch: "Tout le forfait Vitrine, plus de quoi recevoir des réservations et des demandes — pas seulement des visites.",
         features: [
           "Formulaire de réservation ou de demande",
@@ -175,7 +175,7 @@ export const fr: Dictionary = {
       },
       {
         name: "Sur-mesure",
-        priceFrom: "à partir de", amount: "12 000", currency: "MAD",
+        priceFrom: "à partir de", amount: "7 500", currency: "MAD",
         pitch: "Pour une plateforme, une application ou une expérience 3D qui marque.",
         features: [
           "Application web ou plateforme",
@@ -187,7 +187,7 @@ export const fr: Dictionary = {
       },
     ],
     notes: [
-      "Maintenance : 300–500 MAD / mois (mises à jour, sauvegardes, modifications).",
+      "Maintenance : 150–300 MAD / mois (mises à jour, sauvegardes, modifications).",
       "Paiement : 50 % à la commande, 50 % à la mise en ligne.",
     ],
   },
@@ -233,6 +233,8 @@ export const fr: Dictionary = {
       "Je suis Abdellah Kachani, développeur web freelance à Agadir et élève-ingénieur en informatique (3e année, Polytechnique Agadir).",
       "Je conçois et je code moi-même chaque site : pas d'agence, pas d'intermédiaire, un seul interlocuteur du premier appel à la mise en ligne. J'ai livré une plateforme trilingue pour une agence d'études à l'étranger et l'application d'un festival de cinéma — et je crée des expériences 3D que peu d'agences au Maroc proposent.",
     ],
+    photoAlt: "Abdellah Kachani en gilet bleu marine et cravate, debout parmi les palmiers à Agadir",
+    photoCaption: "Agadir, Maroc",
     interestsLabel: "Ce que je fais",
     interests: [
       "Sites vitrines",
@@ -253,7 +255,7 @@ export const fr: Dictionary = {
     items: [
       {
         q: "Combien coûte un site ?",
-        a: "Un site vitrine commence à 3 500 MAD. Le prix final dépend du nombre de pages, des langues et des fonctionnalités ; vous recevez un devis fixe avant de commencer.",
+        a: "Un site vitrine commence à 1 900 MAD. Le prix final dépend du nombre de pages, des langues et des fonctionnalités ; vous recevez un devis fixe avant de commencer.",
       },
       {
         q: "Combien de temps ça prend ?",
@@ -269,7 +271,7 @@ export const fr: Dictionary = {
       },
       {
         q: "Je pourrai modifier mon site après ?",
-        a: "Oui. Les petites modifications du premier mois sont offertes. Ensuite, la maintenance (300–500 MAD / mois) couvre mises à jour, sauvegardes et changements de contenu.",
+        a: "Oui. Les petites modifications du premier mois sont offertes. Ensuite, la maintenance (150–300 MAD / mois) couvre mises à jour, sauvegardes et changements de contenu.",
       },
       {
         q: "Vous faites aussi les sites en arabe ?",
@@ -307,7 +309,7 @@ export const fr: Dictionary = {
         "autre chose",
       ],
       budgetLabel: "Budget",
-      budgets: ["moins de 5 000 MAD", "5 000 – 10 000 MAD", "10 000 – 20 000 MAD", "plus de 20 000 MAD"],
+      budgets: ["moins de 2 000 MAD", "2 000 – 4 000 MAD", "4 000 – 8 000 MAD", "plus de 8 000 MAD"],
       deadlineLabel: "Délai",
       deadlines: ["au plus vite", "ce mois-ci", "sans urgence"],
       previewLabel: "Aperçu du message",

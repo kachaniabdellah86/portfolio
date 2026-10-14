@@ -47,7 +47,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               <Services t={dict.services} numeral="02" />
               <Process t={dict.process} />
               <Testimonial t={dict.testimonial} />
-              <About t={dict.about} numeral="03" whatsappMessage={dict.journey.whatsappMessage} />
+              <About
+                t={dict.about}
+                numeral="03"
+                whatsappMessage={dict.journey.whatsappMessage}
+                available={dict.nav.available}
+              />
               <Gallery numeral="04" />
               <Faq t={dict.faq} />
             </>
@@ -58,7 +63,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               <Services t={dict.services} numeral="03" />
               <Process t={dict.process} />
               <Testimonial t={dict.testimonial} />
-              <About t={dict.about} numeral="04" whatsappMessage={dict.journey.whatsappMessage} />
+              <About
+                t={dict.about}
+                numeral="04"
+                whatsappMessage={dict.journey.whatsappMessage}
+                available={dict.nav.available}
+              />
             </>
           )}
           <Footer />
