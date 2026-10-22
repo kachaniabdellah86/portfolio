@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
-import { contactEmail, siteUrl } from "@/lib/site";
-import { hasLocale, locales, type Locale } from "@/lib/i18n";
+import { siteUrl } from "@/lib/site";
+import { hasLocale, locales } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import Analytics from "@/components/Analytics";
@@ -95,46 +95,6 @@ export async function generateMetadata({
   };
 }
 
-function structuredData(lang: Locale) {
-  const { meta } = getDictionary(lang);
-  const sameAs = [
-    "https://www.linkedin.com/in/abdellah-kachani-8284a5251/",
-    "https://github.com/kachaniabdellah86",
-  ];
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "@id": `${siteUrl}/#person`,
-        name: "Abdellah Kachani",
-        jobTitle: lang === "fr" ? "Développeur web freelance" : "Creative developer",
-        url: `${siteUrl}/${lang}`,
-        email: `mailto:${contactEmail}`,
-        address: { "@type": "PostalAddress", addressLocality: "Agadir", addressCountry: "MA" },
-        knowsLanguage: ["fr", "en", "ar"],
-        sameAs,
-      },
-      {
-        "@type": "ProfessionalService",
-        "@id": `${siteUrl}/#service`,
-        name: "Abdellah Kachani — Web",
-        description: meta.description,
-        url: `${siteUrl}/${lang}`,
-        founder: { "@id": `${siteUrl}/#person` },
-        areaServed: [
-          { "@type": "City", name: "Agadir" },
-          { "@type": "Country", name: "Morocco" },
-        ],
-        address: { "@type": "PostalAddress", addressLocality: "Agadir", addressCountry: "MA" },
-        priceRange: "1900–7500+ MAD",
-        availableLanguage: ["fr", "en", "ar"],
-        sameAs,
-      },
-    ],
-  };
-}
-
 export default async function RootLayout({
   children,
   params,
@@ -148,12 +108,6 @@ export default async function RootLayout({
       <body
         className={`${zodiak.variable} ${satoshi.variable} ${instrumentSerif.variable} ${mono.variable} min-h-screen antialiased`}
       >
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData(lang)).replace(/</g, "\\u003c"),
-          }}
-        />
         <LocaleProvider lang={lang} dict={dict}>
           {children}
         </LocaleProvider>

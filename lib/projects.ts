@@ -11,6 +11,8 @@ export type ProjectId = "kachanios" | "ficam" | "yalla" | "aura";
 
 type ProjectText = {
   meaning: string;
+  /** Search snippet: ~150 characters, stands alone. */
+  seoDescription: string;
   subtitle: string;
   tags: string[];
   status: string;
@@ -43,6 +45,7 @@ type ProjectSource = {
 };
 
 export type Project = Omit<ProjectSource, "text" | "stack" | "preview" | "study"> & {
+  seoDescription: string;
   preview?: { src: string; width: number; height: number; alt: string };
   study?: CaseStudy;
   meaning: string;
@@ -103,6 +106,8 @@ const PROJECTS: ProjectSource[] = [
     text: {
       en: {
         meaning: "From Morocco to a campus in China, step by step.",
+        seoDescription:
+          "Case study: a trilingual FR/EN/AR Next.js platform with RTL Arabic, applications and an admin area, built by Abdellah Kachani for a Moroccan agency.",
         subtitle:
           "A trust-first platform in French, English and Arabic that guides Moroccan students and their families through a seven-step journey to studying in China — and turns visitors into applications and WhatsApp conversations.",
         tags: ["Client project", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
@@ -115,6 +120,8 @@ const PROJECTS: ProjectSource[] = [
       },
       fr: {
         meaning: "Du Maroc à un campus en Chine, étape par étape.",
+        seoDescription:
+          "Étude de cas : plateforme Next.js trilingue (FR, EN, arabe RTL) avec candidatures, espace admin et WhatsApp, réalisée à Agadir par Abdellah Kachani.",
         subtitle:
           "Une plateforme en français, anglais et arabe qui rassure les étudiants marocains et leurs familles, les guide en sept étapes vers les études en Chine — et transforme les visites en candidatures et en conversations WhatsApp.",
         tags: ["Projet client", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
@@ -177,6 +184,8 @@ const PROJECTS: ProjectSource[] = [
     text: {
       en: {
         meaning: "Vivez le cinéma — in your pocket.",
+        seoDescription:
+          "Case study: the FICAM film festival companion app — registration, QR session validation, levels and live rewards, built with Next.js and Supabase.",
         subtitle:
           "The official companion app for the FICAM film festival: student registration, QR-code session validation, gamified progression and live rewards.",
         tags: ["Next.js", "Supabase", "Full-Stack"],
@@ -189,6 +198,8 @@ const PROJECTS: ProjectSource[] = [
       },
       fr: {
         meaning: "Vivez le cinéma — dans votre poche.",
+        seoDescription:
+          "Étude de cas : l'application du festival FICAM — inscription, validation des séances par QR code, niveaux et récompenses en direct (Next.js, Supabase).",
         subtitle:
           "L'application officielle du festival de cinéma FICAM : inscription des étudiants, validation des séances par QR code, progression ludique et récompenses en direct.",
         tags: ["Next.js", "Supabase", "Full-stack"],
@@ -217,6 +228,8 @@ const PROJECTS: ProjectSource[] = [
     text: {
       en: {
         meaning: "The interface that thinks.",
+        seoDescription:
+          "KachaniOS, an interactive concept interface that makes an AI agent's routing, memory and verification visible.",
         subtitle:
           "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
         tags: ["AI Interfaces", "Product UX", "Desktop OS"],
@@ -229,6 +242,8 @@ const PROJECTS: ProjectSource[] = [
       },
       fr: {
         meaning: "L'interface qui pense.",
+        seoDescription:
+          "KachaniOS, un concept d'interface interactive qui rend visibles le routage, la mémoire et la vérification d'un agent IA.",
         subtitle:
           "Un système d'exploitation pour un agent IA : routage, mémoire et vérification rendus visibles, pour lire ce que la machine pense.",
         tags: ["Interfaces IA", "UX produit", "OS de bureau"],
@@ -257,6 +272,8 @@ const PROJECTS: ProjectSource[] = [
     text: {
       en: {
         meaning: "Digital money with physical weight.",
+        seoDescription:
+          "Aura Pay, a spatial fintech concept: a titanium card, one-gesture biometric payment and an interactive spending model.",
         subtitle:
           "A spatial finance concept: a titanium card, biometric settlement in one gesture, and yield that routes itself — trust you can feel.",
         tags: ["FinTech Concept", "Spatial UI", "Product Design"],
@@ -269,6 +286,8 @@ const PROJECTS: ProjectSource[] = [
       },
       fr: {
         meaning: "L'argent numérique, avec un vrai poids.",
+        seoDescription:
+          "Aura Pay, un concept fintech spatial : carte en titane, paiement biométrique en un geste et modèle de dépenses interactif.",
         subtitle:
           "Un concept de finance spatiale : une carte en titane, un paiement biométrique en un geste, et une épargne qui s'oriente seule — une confiance qui se ressent.",
         tags: ["Concept fintech", "UI spatiale", "Design produit"],
@@ -291,6 +310,7 @@ export function getProjects(lang: Locale): Project[] {
       preview: preview && { ...preview, alt: preview.alt[lang] },
       study: study?.[lang],
       meaning: t.meaning,
+      seoDescription: t.seoDescription,
       subtitle: t.subtitle,
       tags: t.tags,
       status: t.status,

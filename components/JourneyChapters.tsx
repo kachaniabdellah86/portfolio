@@ -90,7 +90,6 @@ function ChapterPanel({
   chapter: Chapter;
   progress: MotionValue<number>;
 }) {
-  const Heading = chapter.intro ? "h1" : "h2";
   const [start, end] = chapter.range;
   const fadeInEnd = start + Math.min(0.055, (end - start) * 0.32);
   const fadeOutStart = end - Math.min(0.055, (end - start) * 0.28);
@@ -129,14 +128,23 @@ function ChapterPanel({
           aria-hidden="true"
           className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_center,rgba(2,4,11,0.82)_0%,rgba(2,4,11,0.45)_42%,transparent_72%)] md:blur-xl sm:-inset-x-16 sm:-inset-y-12"
         />
-        <p className="label-caps accent">{chapter.eyebrow}</p>
-        <Heading
-          className={`display mt-6 text-[clamp(2.8rem,6.2vw,6.6rem)] leading-[0.98] tracking-[-0.025em] ${
-            chapter.intro ? "max-w-[14ch]" : ""
-          }`}
-        >
-          <Rich text={chapter.title} />
-        </Heading>
+        {chapter.intro ? (
+          // The page's h1 carries who and what (name, role, city) as well as
+          // the headline; both parts keep their exact original styling.
+          <h1>
+            <span className="label-caps accent block">{chapter.eyebrow}</span>
+            <span className="display mt-6 block max-w-[14ch] text-[clamp(2.8rem,6.2vw,6.6rem)] leading-[0.98] tracking-[-0.025em]">
+              <Rich text={chapter.title} />
+            </span>
+          </h1>
+        ) : (
+          <>
+            <p className="label-caps accent">{chapter.eyebrow}</p>
+            <h2 className="display mt-6 text-[clamp(2.8rem,6.2vw,6.6rem)] leading-[0.98] tracking-[-0.025em]">
+              <Rich text={chapter.title} />
+            </h2>
+          </>
+        )}
         <p
           className={`mt-7 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg ${
             chapter.align === "right" ? "ml-auto" : ""
@@ -151,7 +159,6 @@ function ChapterPanel({
 }
 
 function StaticChapter({ chapter }: { chapter: Chapter }) {
-  const Heading = chapter.intro ? "h1" : "h2";
 
   return (
     <article
@@ -161,10 +168,21 @@ function StaticChapter({ chapter }: { chapter: Chapter }) {
       }`}
     >
       <div className="max-w-3xl">
-        <p className="label-caps accent">{chapter.eyebrow}</p>
-        <Heading className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] leading-[1] tracking-[-0.025em]">
-          <Rich text={chapter.title} />
-        </Heading>
+        {chapter.intro ? (
+          <h1>
+            <span className="label-caps accent block">{chapter.eyebrow}</span>
+            <span className="display mt-6 block text-[clamp(2.6rem,6vw,6rem)] leading-[1] tracking-[-0.025em]">
+              <Rich text={chapter.title} />
+            </span>
+          </h1>
+        ) : (
+          <>
+            <p className="label-caps accent">{chapter.eyebrow}</p>
+            <h2 className="display mt-6 text-[clamp(2.6rem,6vw,6rem)] leading-[1] tracking-[-0.025em]">
+              <Rich text={chapter.title} />
+            </h2>
+          </>
+        )}
         <p
           className={`mt-7 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg ${
             chapter.align === "right" ? "ml-auto" : ""

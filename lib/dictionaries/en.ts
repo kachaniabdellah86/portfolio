@@ -307,6 +307,9 @@ export const en = {
   },
   caseStudy: {
     back: "All work",
+    breadcrumbLabel: "Breadcrumb",
+    breadcrumbHome: "Home",
+    breadcrumbWork: "Work",
     eyebrow: "Case study",
     role: "Role",
     stack: "Stack",

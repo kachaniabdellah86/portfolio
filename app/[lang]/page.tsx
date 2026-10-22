@@ -19,6 +19,7 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { hasLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { getProjects } from "@/lib/projects";
+import { homeGraph, jsonLd } from "@/lib/structured-data";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
@@ -28,6 +29,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   return (
     <SmoothScroll>
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(homeGraph(lang))} />
       <BackgroundScene />
       <Cursor />
       <GrainOverlay />

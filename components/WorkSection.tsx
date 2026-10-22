@@ -582,6 +582,7 @@ const YALLA_STEPS = [
 const YALLA_CITIES = ["Chongqing", "Nanchang", "Ningbo", "Harbin", "Xi'an", "Chengdu"];
 
 function YallaChinaShowcase({ project }: { project: Project }) {
+  const { dict } = useLocale();
   const reduceMotion = useReducedMotionPreference();
   const hostRef = useRef<HTMLDivElement>(null);
   const inView = useInView(hostRef, { amount: 0.3 });
@@ -612,12 +613,12 @@ function YallaChinaShowcase({ project }: { project: Project }) {
         target="_blank"
         rel="noopener noreferrer"
         data-cursor="view"
-        aria-label="Open the live Yalla China platform"
+        aria-label={`${dict.work.visit} — ${project.title}`}
         className="group relative block flex-1 overflow-hidden"
       >
         <Image
           src="/media/yallachina-preview.webp"
-          alt="Yalla China website hero"
+          alt={project.preview?.alt ?? project.title}
           fill
           sizes="(max-width: 1024px) 100vw, 60vw"
           className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.03]"

@@ -10,6 +10,7 @@ import { fill, hasLocale, locales } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { caseStudySlugs, getProject, getProjects } from "@/lib/projects";
 import { whatsappUrl } from "@/lib/site";
+import { caseStudyGraph, jsonLd } from "@/lib/structured-data";
 
 export const dynamicParams = false;
 
@@ -28,14 +29,14 @@ export async function generateMetadata({
 
   return {
     title,
-    description: project.subtitle,
+    description: project.seoDescription,
     alternates: {
       canonical: `/${lang}/work/${slug}`,
       languages: { fr: `/fr/work/${slug}`, en: `/en/work/${slug}`, "x-default": `/fr/work/${slug}` },
     },
     openGraph: {
       title,
-      description: project.subtitle,
+      description: project.seoDescription,
       type: "article",
       url: `/${lang}/work/${slug}`,
       images: project.preview ? [{ url: project.preview.src, alt: project.preview.alt }] : undefined,
@@ -69,17 +70,34 @@ export default async function CaseStudyPage({ params }: PageProps<"/[lang]/work/
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(caseStudyGraph(lang, project))} />
       <Cursor />
       <GrainOverlay />
 
       <main className="relative min-h-screen" style={{ background: brand.background, color: brand.ink }}>
         <header className="flex items-center justify-between px-6 pt-8 sm:px-12">
-          <a
-            href={`/${lang}#work`}
-            className="label-caps inline-flex min-h-10 items-center gap-2 text-white/70 transition-colors hover:text-white"
-          >
-            <span aria-hidden="true">←</span> {t.back}
-          </a>
+          <nav aria-label={t.breadcrumbLabel}>
+            <ol className="label-caps flex min-h-10 flex-wrap items-center gap-x-2 gap-y-1 text-white/70">
+              <li>
+                <a href={`/${lang}`} className="transition-colors hover:text-white">
+                  <span aria-hidden="true">← </span>
+                  {t.breadcrumbHome}
+                </a>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <a href={`/${lang}#work`} className="transition-colors hover:text-white">
+                  {t.breadcrumbWork}
+                </a>
+              </li>
+              <li aria-hidden="true" className="hidden sm:block">
+                /
+              </li>
+              <li aria-current="page" className="hidden text-white sm:block">
+                {project.title}
+              </li>
+            </ol>
+          </nav>
           <a
             href={`/${lang === "fr" ? "en" : "fr"}/work/${slug}`}
             hrefLang={lang === "fr" ? "en" : "fr"}

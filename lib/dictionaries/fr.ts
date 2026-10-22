@@ -323,6 +323,9 @@ export const fr: Dictionary = {
   },
   caseStudy: {
     back: "Tous les projets",
+    breadcrumbLabel: "Fil d'Ariane",
+    breadcrumbHome: "Accueil",
+    breadcrumbWork: "Projets",
     eyebrow: "Étude de cas",
     role: "Rôle",
     stack: "Technologies",
