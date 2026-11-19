@@ -9,24 +9,24 @@ import {
   updateAdaptiveQuality,
 } from "./renderQuality.ts";
 
-test("mildly supersamples a standard-density desktop", () => {
+test("renders a standard-density desktop at its native resolution", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 1, quality: "full", width: 1920 }),
-    { antialias: true, minPixelRatio: 1.25, pixelRatio: 1.4, samples: 0 },
+    { antialias: true, minPixelRatio: 0.75, pixelRatio: 1, samples: 0 },
   );
 });
 
-test("gives moderate-density desktops a bounded supersampling boost", () => {
+test("never supersamples a moderate-density desktop", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 1.25, quality: "full", width: 1440 }),
-    { antialias: true, minPixelRatio: 1.25, pixelRatio: 1.5, samples: 0 },
+    { antialias: true, minPixelRatio: 0.88, pixelRatio: 1.25, samples: 0 },
   );
 });
 
 test("never exceeds the full desktop DPR cap", () => {
   assert.deepEqual(
     getRenderQuality({ devicePixelRatio: 3, quality: "full", width: 1440 }),
-    { antialias: true, minPixelRatio: 1.25, pixelRatio: 1.8, samples: 0 },
+    { antialias: true, minPixelRatio: 1.05, pixelRatio: 1.5, samples: 0 },
   );
 });
 
@@ -62,7 +62,7 @@ test("falls back safely for invalid reported pixel ratios", () => {
 
 test("ignores a short burst of slow averaged frames", () => {
   let state = { fastFrames: 0, pixelRatio: 1.8, slowFrames: 0 };
-  for (let frame = 0; frame < 71; frame += 1) {
+  for (let frame = 0; frame < 23; frame += 1) {
     state = updateAdaptiveQuality(state, {
       frameTimeMs: 24,
       minPixelRatio: 1.25,
@@ -72,16 +72,16 @@ test("ignores a short burst of slow averaged frames", () => {
   assert.equal(state.pixelRatio, 1.8);
 });
 
-test("reduces resolution in a subtle step after sustained slow frames", () => {
+test("reduces resolution in one step after sustained slow frames", () => {
   let state = { fastFrames: 0, pixelRatio: 1.8, slowFrames: 0 };
-  for (let frame = 0; frame < 72; frame += 1) {
+  for (let frame = 0; frame < 24; frame += 1) {
     state = updateAdaptiveQuality(state, {
       frameTimeMs: 24,
       minPixelRatio: 1.25,
       targetPixelRatio: 1.8,
     });
   }
-  assert.equal(state.pixelRatio, 1.7);
+  assert.equal(state.pixelRatio, 1.65);
 });
 
 test("a brief spike interrupted by normal frames does not accumulate pressure", () => {
@@ -103,20 +103,20 @@ test("a brief spike interrupted by normal frames does not accumulate pressure", 
   assert.equal(state.pixelRatio, 1.8);
 });
 
-test("recovers quality after sustained smooth frames", () => {
+test("never climbs back up, so the render targets are not reallocated again", () => {
   let state = { fastFrames: 0, pixelRatio: 1.6, slowFrames: 0 };
-  for (let frame = 0; frame < 90; frame += 1) {
+  for (let frame = 0; frame < 1000; frame += 1) {
     state = updateAdaptiveQuality(state, {
       frameTimeMs: 16.7,
       minPixelRatio: 1.25,
       targetPixelRatio: 1.8,
     });
   }
-  assert.equal(state.pixelRatio, 1.7);
+  assert.equal(state.pixelRatio, 1.6);
 });
 
 test("never reduces below the configured minimum", () => {
-  let state = { fastFrames: 0, pixelRatio: 1.3, slowFrames: 71 };
+  let state = { fastFrames: 0, pixelRatio: 1.3, slowFrames: 23 };
   state = updateAdaptiveQuality(state, {
     frameTimeMs: 30,
     minPixelRatio: 1.25,
@@ -153,10 +153,10 @@ test("keeps the bloom core stable with only a modest motion contribution", () =>
   assert.equal(getBloomStrength(Number.NaN), 0.66);
 });
 
-test("raises bloom resolution only for full desktop mode", () => {
-  assert.equal(getBloomResolutionScale({ quality: "full", width: 1440 }), 0.7);
-  assert.equal(getBloomResolutionScale({ quality: "full", width: 640 }), 0.55);
-  assert.equal(getBloomResolutionScale({ quality: "compact", width: 390 }), 0.55);
+test("keeps bloom at half resolution or less", () => {
+  assert.equal(getBloomResolutionScale({ quality: "full", width: 1440 }), 0.5);
+  assert.equal(getBloomResolutionScale({ quality: "full", width: 640 }), 0.45);
+  assert.equal(getBloomResolutionScale({ quality: "compact", width: 390 }), 0.45);
 });
 
 test("stops the GPU loop when the journey or document is not visible", () => {

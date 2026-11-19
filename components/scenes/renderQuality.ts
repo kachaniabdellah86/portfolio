@@ -38,9 +38,10 @@ type JourneyRuntimeInput = {
 
 const SLOW_FRAME_TIME_MS = 22;
 const FAST_FRAME_TIME_MS = 18;
-const SLOW_FRAME_LIMIT = 72;
-const FAST_FRAME_LIMIT = 90;
-const PIXEL_RATIO_STEP = 0.1;
+// React to sustained slowness within ~0.5s, in a few large steps.
+const SLOW_FRAME_LIMIT = 24;
+const FAST_FRAME_LIMIT = 120;
+const PIXEL_RATIO_STEP = 0.15;
 
 function roundPixelRatio(pixelRatio: number) {
   return Math.round(pixelRatio * 100) / 100;
@@ -50,7 +51,7 @@ export function getBloomResolutionScale({
   quality,
   width,
 }: BloomResolutionInput) {
-  return quality === "full" && width >= 768 ? 0.7 : 0.55;
+  return quality === "full" && width >= 768 ? 0.5 : 0.45;
 }
 
 export function getBloomStrength(velocity: number) {
@@ -69,10 +70,14 @@ export function getRenderQuality({
     : 1;
   const isFullDesktop = width >= 768 && quality === "full";
   if (isFullDesktop) {
+    // Never above the screen's own density: supersampling a full-screen scene
+    // with bloom and post passes cost ~2x the pixels for an edge gain SMAA
+    // already gives. Under load it may drop below native; the bloom hides it.
+    const pixelRatio = Math.min(1.5, safePixelRatio);
     return {
       antialias: true,
-      minPixelRatio: 1.25,
-      pixelRatio: Math.min(1.8, Math.max(1.4, safePixelRatio + 0.25)),
+      minPixelRatio: roundPixelRatio(Math.max(0.75, pixelRatio * 0.7)),
+      pixelRatio,
       samples: 0,
     };
   }
@@ -121,17 +126,14 @@ export function updateAdaptiveQuality(
     };
   }
 
+  // Quality only ever steps down. Every step reallocates the canvas and every
+  // post-processing target, a stall that itself reads as slow frames, so
+  // climbing back up made the resolution oscillate and the scroll stutter.
   if (frameTimeMs < FAST_FRAME_TIME_MS) {
-    const fastFrames = state.fastFrames + 1;
-    if (fastFrames < FAST_FRAME_LIMIT) {
-      return { ...state, fastFrames, slowFrames: 0 };
-    }
     return {
-      fastFrames: 0,
-      pixelRatio: Math.min(
-        targetPixelRatio,
-        roundPixelRatio(state.pixelRatio + PIXEL_RATIO_STEP),
-      ),
+      ...state,
+      fastFrames: Math.min(state.fastFrames + 1, FAST_FRAME_LIMIT),
+      pixelRatio: Math.min(targetPixelRatio, state.pixelRatio),
       slowFrames: 0,
     };
   }

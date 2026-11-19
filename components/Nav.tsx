@@ -32,7 +32,8 @@ export default function Nav() {
       );
       setTicks(
         t.links.map(({ href: sel }) => {
-          const el = document.querySelector<HTMLElement>(sel);
+          // Only in-page anchors have a position on this page.
+          const el = sel.startsWith("#") ? document.querySelector<HTMLElement>(sel) : null;
           if (!el) return 0;
           return (
             ((el.getBoundingClientRect().top + window.scrollY) / dh) * 100
@@ -55,6 +56,8 @@ export default function Nav() {
   });
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    // Links to other pages (e.g. the lab) navigate normally.
+    if (!href.startsWith("#")) return;
     e.preventDefault();
     const target = document.querySelector<HTMLElement>(href);
     if (!target) return;

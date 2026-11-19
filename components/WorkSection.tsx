@@ -969,7 +969,8 @@ function Showcase({ project }: { project: Project }) {
   }
 }
 
-function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
+function ProjectBand({ project, flip, position, titleTag = "h3" }: { project: Project; flip: boolean; position: number; titleTag?: "h2" | "h3" }) {
+  const Title = titleTag;
   const [showDetails, setShowDetails] = useState(false);
   const { lang, dict } = useLocale();
   const t = dict.work;
@@ -986,7 +987,7 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
         <div className={`lg:col-span-5 ${flip ? "lg:order-2" : ""}`}>
           <Reveal>
             <div className="flex items-center gap-4 text-[0.65rem] uppercase tracking-[0.22em]" style={{ color: brand.accent }}>
-              <span className="serif text-xl italic normal-case tracking-normal">{project.index}</span>
+              <span className="serif text-xl italic normal-case tracking-normal">{String(position).padStart(2, "0")}</span>
               <span className="h-px w-8" style={{ background: brand.accent, opacity: 0.6 }} />
               <span>{project.year}</span>
               <span className="text-white/40">·</span>
@@ -994,9 +995,9 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
             </div>
           </Reveal>
           <Reveal delay={0.06}>
-            <h3 className="display mt-6 text-[clamp(2.6rem,5vw,4.6rem)] leading-[0.98] tracking-[-0.02em]">
+            <Title className="display mt-6 text-[clamp(2.6rem,5vw,4.6rem)] leading-[0.98] tracking-[-0.02em]">
               {project.title}
-            </h3>
+            </Title>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="serif mt-4 text-xl italic sm:text-2xl" style={{ color: brand.accent }}>
@@ -1113,14 +1114,48 @@ function ProjectBand({ project, flip }: { project: Project; flip: boolean }) {
   );
 }
 
+type SectionCopy = { label: string; edge: string; heading: string; intro: string };
+
+// A compact way into the lab from the homepage: the concepts live on their own page.
+function LabTeaser() {
+  const t = useLocale().dict.work.labTeaser;
+  return (
+    <Reveal>
+      <a
+        href={t.href}
+        className="group relative -mx-6 flex flex-col gap-6 border-t border-white/[0.06] px-6 py-14 transition-colors hover:bg-white/[0.02] sm:-mx-12 sm:flex-row sm:items-center sm:justify-between sm:px-12 sm:py-16"
+      >
+        <div className="max-w-2xl">
+          <p className="label-caps accent">{t.label}</p>
+          <p className="display mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.05] tracking-tight">{t.title}</p>
+          <p className="mt-4 text-base leading-relaxed text-white/65">{t.text}</p>
+        </div>
+        <span className="inline-flex min-h-12 shrink-0 items-center gap-2 self-start rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white/85 transition-colors group-hover:border-[var(--accent)] group-hover:text-white sm:self-center">
+          {t.cta} <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+        </span>
+      </a>
+    </Reveal>
+  );
+}
+
 export default function WorkSection({
   projects,
   numeral,
+  copy,
+  labTeaser = false,
+  asPageTitle = false,
 }: {
   projects: Project[];
   numeral: string;
+  /** Overrides the homepage "Selected work" heading, e.g. on the lab page. */
+  copy?: SectionCopy;
+  labTeaser?: boolean;
+  /** Render the section heading as the page's h1 (pages where this section leads). */
+  asPageTitle?: boolean;
 }) {
-  const t = useLocale().dict.work;
+  const Heading = asPageTitle ? "h1" : "h2";
+  const { dict } = useLocale();
+  const t = copy ?? dict.work;
 
   return (
     <section id="work" className="relative px-6 pt-24 sm:px-12 sm:pt-36">
@@ -1137,9 +1172,9 @@ export default function WorkSection({
       </Reveal>
 
       <Reveal delay={0.08}>
-        <h2 className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
+        <Heading className="display mt-5 max-w-3xl text-[clamp(2.2rem,5.5vw,4.8rem)] leading-[1.04]">
           <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
-        </h2>
+        </Heading>
       </Reveal>
 
       <Reveal delay={0.12}>
@@ -1150,8 +1185,9 @@ export default function WorkSection({
 
       <div className="mt-20">
         {projects.map((project, index) => (
-          <ProjectBand key={project.id} project={project} flip={index % 2 === 1} />
+          <ProjectBand key={project.id} project={project} flip={index % 2 === 1} position={index + 1} titleTag={asPageTitle ? "h2" : "h3"} />
         ))}
+        {labTeaser && <LabTeaser />}
       </div>
     </section>
   );

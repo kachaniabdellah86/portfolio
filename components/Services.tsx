@@ -160,6 +160,14 @@ export default function Services({
           {t.notes.map((note) => (
             <li key={note}>— {note}</li>
           ))}
+          <li>
+            <a
+              href={t.studiosLink.href}
+              className="accent underline-offset-4 transition-colors hover:text-white hover:underline"
+            >
+              — {t.studiosLink.label} <span aria-hidden="true">→</span>
+            </a>
+          </li>
         </ul>
       </Reveal>
     </section>

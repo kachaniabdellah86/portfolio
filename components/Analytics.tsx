@@ -18,5 +18,6 @@ export default function Analytics({ lang }: { lang: Locale }) {
     return () => document.removeEventListener("click", onClick, { capture: true });
   }, [lang]);
 
-  return <VercelAnalytics />;
+  // The insights script is served by Vercel only; elsewhere (local QA) it would 404.
+  return process.env.NEXT_PUBLIC_VERCEL_ENV ? <VercelAnalytics /> : null;
 }

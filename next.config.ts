@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // A designed 404 for unknown top-level URLs (the root layout lives under [lang]).
+  experimental: { globalNotFound: true },
   async headers() {
     return [
       {

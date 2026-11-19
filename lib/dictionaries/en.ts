@@ -4,7 +4,7 @@ export const en = {
   meta: {
     title: "Abdellah Kachani — Creative Developer",
     description:
-      "Creative developer in Morocco. WebGL, motion and full-stack products for studios and startups, from concept to production.",
+      "Creative developer in Morocco working remotely with clients worldwide. WebGL, motion and full-stack products for studios and startups, from concept to production.",
     ogTagline: "Creative developer — WebGL, motion and full-stack products",
   },
   nav: {
@@ -12,56 +12,29 @@ export const en = {
     backToTop: "Back to top",
     links: [
       { label: "Work", href: "#work", phone: true },
-      { label: "Lab", href: "#lab", phone: false },
+      { label: "Lab", href: "/en/lab", phone: false },
       { label: "Services", href: "#services", phone: true },
       { label: "Contact", href: "#contact", phone: true },
     ],
-    available: "Available — Nov 2026",
+    // {month} is filled at render time by getDictionary, so it never goes stale.
+    available: "Booking {month}",
     switchLabel: "Voir le site en français",
   },
   journey: {
-    railLabel: "A life in making",
-    follow: "Follow the signal",
-    scrollHint: "Scroll to move ↓",
-    skip: "Skip to work ↓",
-    ariaLabel: "Scroll-driven portfolio journey",
-    labels: ["Start", "System", "Feeling", "Bridge", "Next"],
+    ariaLabel: "Introduction",
+    eyebrow: "Abdellah Kachani — Creative & full-stack developer · Remote, worldwide",
+    title: "Your website,\nyour best *salesperson.*",
+    description:
+      "Fast, bilingual websites and interactive 3D for startups, studios and growing businesses — designed and built by one developer, live in weeks, not months.",
     ctaPrimary: "Start a project",
     ctaSecondary: "See the work",
     whatsappMessage:
       "Hi Abdellah, I saw your portfolio and I'd like to talk about a project.",
-    chapters: [
-      {
-        eyebrow: "Abdellah Kachani / Creative developer · Morocco",
-        title: "Interfaces that\nfeel *alive.*",
-        description:
-          "WebGL, motion and full-stack product work for studios and startups — designed, built and shipped by one developer, from first sketch to production.",
-      },
-      {
-        eyebrow: "Chapter 01 / KachaniOS — Concept · The system",
-        title: "The interface learned\nhow to *think.*",
-        description:
-          "A concept OS for an AI agent: thought becomes nodes, memory becomes structure, and complexity becomes calm.",
-      },
-      {
-        eyebrow: "Chapter 02 / Aura Pay — Concept · The feeling",
-        title: "Digital money found\na physical *weight.*",
-        description:
-          "A fintech concept about how trust can feel tactile — titanium surfaces, spatial data and biometric moments that make finance immediate without making it loud.",
-      },
-      {
-        eyebrow: "Chapter 03 / Yalla China — Client project · The bridge",
-        title: "Design crossed language,\ndistance, and *doubt.*",
-        description:
-          "A live platform in French, English and Arabic that guides Moroccan families toward studying in China — and turns visits into applications and WhatsApp conversations.",
-      },
-      {
-        eyebrow: "Chapter 04 / What comes next",
-        title: "The next line\nis *yours.*",
-        description:
-          "Scroll on for the work, the ways to work together, and how a project runs.",
-      },
-    ],
+    workCaption: "Live client site · Yalla China",
+    workAlt: "Yalla China, a live client website: studying in China with guidance that reassures the whole family",
+    steps: ["Your idea", "Designed & built", "Live — and selling"],
+    scrollHint: "Scroll — watch it come together",
+    secondaryWorkLabel: "FICAM festival app case study",
   },
   marquee: {
     rowA: [
@@ -86,7 +59,14 @@ export const en = {
     edge: "Selected Work — 2024 / 2026",
     heading: "Work that ~shipped,~\nthinking that *lasted.*",
     intro:
-      "Two products in production, two concepts. Each keeps its own identity here — and each one you can touch.",
+      "Two products live in production, for real clients and real users. Each keeps its own identity here — and each one you can touch.",
+    labTeaser: {
+      label: "From the lab",
+      title: "Concepts & experiments",
+      text: "An AI operating system, a spatial fintech card and five interaction studies, where I test ideas before they reach client work.",
+      cta: "Explore the lab",
+      href: "/en/lab",
+    },
     visit: "Visit live platform",
     source: "Source",
     readStory: "Read the story",
@@ -99,12 +79,12 @@ export const en = {
   },
   lab: {
     label: "Visual Lab",
-    edge: "Visual Lab — Experiments",
+    edge: "Visual Lab, Experiments",
     ariaLabel: "Visual lab",
     heading: "~Fragments~ from\nthe *lab.*",
     intro:
       "Five small experiments in how an interface should feel: type, signal, physics, tokens and gesture. Every one is live. Touch them.",
-    scrollHint: "Scroll — the wall moves sideways",
+    scrollHint: "Scroll, the wall moves sideways",
     fragment: "Fragment",
     tablist: "Lab fragments",
     previous: "Previous fragment",
@@ -155,7 +135,7 @@ export const en = {
           "Design and build",
           "Motion and micro-interactions",
           "90+ Lighthouse score on mobile",
-          "Delivered in 1–2 weeks",
+          "Delivered in 1 to 2 weeks",
         ],
         featured: false,
       },
@@ -173,7 +153,7 @@ export const en = {
       {
         name: "Creative build",
         priceFrom: "from", amount: "1,200", currency: "€",
-        pitch: "WebGL, scroll stories and interactive product demos — like this site.",
+        pitch: "WebGL, scroll stories and interactive product demos, like this site.",
         features: [
           "Three.js / WebGL scenes",
           "Scroll-driven storytelling",
@@ -185,8 +165,10 @@ export const en = {
     ],
     notes: [
       "Studios and agencies: white-label and day-rate work available.",
-      "Payment: 50% upfront, 50% on launch.",
+      "Remote from Morocco (GMT+1): full overlap with Europe, mornings with US East.",
+      "Payment: 50% upfront, 50% on launch. Quotes in € or US$; bank transfer, PayPal or Payoneer.",
     ],
+    studiosLink: { label: "How white-label works for studios", href: "/en/studios" },
   },
   process: {
     label: "Process",
@@ -205,7 +187,7 @@ export const en = {
       },
       {
         title: "Build",
-        time: "Weeks 1–3",
+        time: "Weeks 1 to 3",
         text: "The full site with motion, responsive down to small phones, tested on real devices.",
       },
       {
@@ -227,7 +209,7 @@ export const en = {
     heading: "Computer engineer ~building~ the next\n*intersection.*",
     paragraphs: [
       "I'm Abdellah Kachani, a creative developer based in Agadir, Morocco, and a third-year computer engineering student at Polytechnique Agadir.",
-      "I design and build digital products end to end — from AI interfaces and full-stack platforms to cinematic WebGL experiences. I've shipped a trilingual platform for a study-abroad agency and a companion app for a film festival, and I'm drawn to problems where design and engineering collide.",
+      "I design and build digital products end to end — from AI interfaces and full-stack platforms to cinematic WebGL experiences. I've shipped a trilingual platform for a study-abroad agency and a companion app for a film festival, and I work remotely with teams wherever they are — drawn to problems where design and engineering collide.",
     ],
     photoAlt: "Abdellah Kachani in a navy waistcoat and tie, standing among palm trees in Agadir",
     photoCaption: "Agadir, Morocco",
@@ -245,13 +227,17 @@ export const en = {
     label: "FAQ",
     heading: "Questions,\n*answered.*",
     moreTitle: "Another question?",
-    moreText: "Ask it directly — I answer myself.",
+    moreText: "Ask it directly. I answer myself.",
     moreCta: "Ask on WhatsApp",
     moreMessage: "Hi Abdellah, I have a question about working together.",
     items: [
       {
         q: "Do you work with studios white-label?",
-        a: "Yes. I can join a studio's project as the creative developer, under the studio's name, by the day or for a fixed scope.",
+        a: "Yes. I can join a studio's project as the creative developer, under the studio's name, by the day or for a fixed scope. NDA first; I never contact your client.",
+      },
+      {
+        q: "Can we work across time zones?",
+        a: "Yes. I'm on GMT+1 in Morocco: the same working day as Europe and the morning of US East. Updates are short and async, with a preview link you can open anytime.",
       },
       {
         q: "How long does a project take?",
@@ -259,7 +245,11 @@ export const en = {
       },
       {
         q: "How does payment work?",
-        a: "50% upfront and 50% on launch, with a fixed quote agreed before the work starts.",
+        a: "50% upfront and 50% on launch, with a fixed quote agreed before the work starts. I invoice in € or US$ and accept bank transfer, PayPal or Payoneer, with a short written agreement covering scope, timeline and ownership.",
+      },
+      {
+        q: "Who owns the code?",
+        a: "You do, once the final payment is in. Code, design files and accounts are handed over in your name.",
       },
     ],
   },
@@ -267,7 +257,7 @@ export const en = {
     ariaLabel: "By the numbers",
     items: [
       { value: 7, suffix: "", label: "Days to launch a business site" },
-      { value: 3, suffix: "", label: "Languages shipped — FR · EN · AR" },
+      { value: 3, suffix: "", label: "Languages shipped: FR, EN, AR" },
       { value: 96, suffix: "/100", label: "Lighthouse mobile score, client site" },
     ],
   },
@@ -293,7 +283,7 @@ export const en = {
         "a studio collaboration",
       ],
       budgetLabel: "Budget",
-      budgets: ["under €500", "€500 – 1k", "€1k – 3k", "€3k+"],
+      budgets: ["under €500", "€500 to 1k", "€1k to 3k", "€3k+"],
       deadlineLabel: "Timing",
       deadlines: ["as soon as possible", "this month", "whenever it's right"],
       previewLabel: "Message preview",
@@ -304,6 +294,155 @@ export const en = {
   },
   floating: {
     whatsapp: "WhatsApp",
+  },
+  labPage: {
+    metaTitle: "Lab, concepts and interaction experiments · Abdellah Kachani",
+    metaDescription:
+      "Interactive concepts (an AI agent OS, a spatial fintech card) and five live interaction experiments by creative developer Abdellah Kachani.",
+    breadcrumb: "Lab",
+    label: "Concepts",
+    edge: "Lab, Concepts",
+    heading: "Ideas, ~built~\nto be *touched.*",
+    intro: "Self-initiated concepts where I push interfaces further than a brief usually allows. Each one is a working prototype.",
+  },
+  studios: {
+    metaTitle: "White-label creative developer for studios, Abdellah Kachani",
+    metaDescription:
+      "WebGL, motion and Next.js builds for design studios and agencies, under your name. Remote from Morocco (GMT+1), NDA first, fixed scope or day rate.",
+    breadcrumb: "For studios",
+    eyebrow: "For studios & agencies · White-label",
+    heading: "The developer\nbehind *your brand.*",
+    intro:
+      "You win the project, I build the hard parts, WebGL scenes, scroll stories, motion and production Next.js, under your studio's name, on your timeline.",
+    ctaPrimary: "Send me a brief",
+    ctaMessage: "Hi Abdellah, I run a studio and I have a project we could use you on.",
+    ctaSecondary: "See the work",
+    handLabel: "What you can hand me",
+    handHeading: "Hand it over,\nget it *shipped.*",
+    hand: [
+      { title: "WebGL & Three.js scenes", text: "Hero scenes, product viewers and particle systems with a performance budget for phones." },
+      { title: "Scroll-driven storytelling", text: "Pinned chapters, camera paths and choreographed motion, like the journey on my own site." },
+      { title: "Figma to production Next.js", text: "Marketing sites built pixel-close from your designs, fast on mobile, SEO and analytics in place." },
+      { title: "Interactive product demos", text: "Clickable prototypes and live UI demos for pitches, launches and case studies." },
+      { title: "Multilingual and RTL builds", text: "French, English and Arabic with real right-to-left layouts, already shipped in production." },
+    ],
+    process: {
+      label: "How we work",
+      heading: "Plugged into\n*your process.*",
+      intro: "You keep the client relationship. I fit into your tools, your repo and your review rhythm.",
+      steps: [
+        { title: "Brief & NDA", time: "Day 1", text: "You share the scope and designs once the NDA is signed. I ask the questions that save a week later." },
+        { title: "Quote", time: "Within 24 h", text: "A fixed price for a defined scope, or a day rate for open-ended work. No surprises after." },
+        { title: "Build", time: "Sprints", text: "Work lands in your repo or mine, with short async updates and a preview link you can show your client." },
+        { title: "Handoff", time: "Delivery", text: "Clean, documented code and a walkthrough. Your name on it, I stay invisible to your client." },
+      ],
+    },
+    termsLabel: "The terms",
+    terms: [
+      { k: "Credit", v: "Yours. White-label by default; I never contact your client." },
+      { k: "Confidentiality", v: "NDA signed before you share anything." },
+      { k: "Hours", v: "GMT+1. Full overlap with Europe, mornings with US East." },
+      { k: "Pricing", v: "Fixed scope or day rate, quoted in € or US$." },
+      { k: "Payment", v: "50% upfront, 50% on delivery, or weekly for day-rate work. Bank transfer, PayPal or Payoneer." },
+      { k: "Stack", v: "Next.js, React, TypeScript, Three.js / WebGL, Motion, Supabase, Tailwind." },
+    ],
+    proofLabel: "Shipped work",
+    proofHeading: "Proof, not\n*promises.*",
+    proof: [
+      { title: "Yalla China", text: "Trilingual FR/EN/AR platform with RTL, applications and an admin area. Lighthouse 96 on mobile.", href: "/en/work/yalla-china" },
+      { title: "FICAM Festival Platform", text: "Festival companion app: registration, QR session validation, levels and live rewards.", href: "/en/work/ficam" },
+      { title: "This portfolio", text: "A scroll-driven WebGL journey that stays smooth on phones, a sample of the creative builds I deliver.", href: "/en" },
+    ],
+    open: "Open",
+  },
+  home: {
+    metaTitle: "Abdellah Kachani, web developer in Agadir | Websites that sell",
+    metaDescription:
+      "Independent web developer in Agadir, Morocco. Fast, bilingual websites and interactive builds for businesses, studios and startups, here and remotely.",
+    nav: { work: "Work", offers: "Offers", about: "About", contact: "Contact", menu: "Menu", close: "Close" },
+    skip: "Skip to content",
+    hero: {
+      role: "Web developer, Agadir",
+      line: "I design and build websites that sell.",
+      place: "Agadir, Morocco",
+      available: "Open to new projects",
+      glyphReading: "agadir, the granary",
+      clockLabel: "Local time in Agadir",
+      wallLabel: "The wall: each door is a project",
+      open: "Open",
+      freeTitle: "This cell is free",
+      freeText: "Your project, from €250",
+      freeCta: "Start a project",
+      labTitle: "The lab",
+      labText: "Concepts and experiments",
+    },
+    statement:
+      "In Tashelhit, an agadir is a granary: one wall built by a whole village, made of small cells, each one locking up what a family values most. My city is named after it. I build the same thing for businesses, online. One solid site that keeps your best work safe and opens it to the right people.",
+    work: {
+      title: "Selected work",
+      note: "Two products live in production, for real clients and real users.",
+      result: "Result",
+      read: "Read the case study",
+      visit: "Visit the live site",
+    },
+    register: {
+      title: "Offers",
+      note: "A fixed quote before anything starts. Payment 50% upfront, 50% on launch. Invoices in € or US$, by bank transfer, PayPal or Payoneer.",
+      from: "from",
+      ask: "Ask about this",
+      studios: "Studios and agencies: how white-label works",
+    },
+    process: { title: "How a site gets built" },
+    about: {
+      title: "The keeper",
+      body: [
+        "I'm Abdellah, a web developer in Agadir and a third-year computer engineering student at Polytechnique Agadir.",
+        "I design and code every site myself, from the first call to launch day, so you always talk to the person doing the work. I've shipped a trilingual platform for a study-abroad agency and the app of a film festival, and I work remotely with teams in Europe and North America.",
+      ],
+      facts: [
+        { k: "Based", v: "Agadir, Morocco. GMT+1" },
+        { k: "Languages", v: "French, English, Arabic" },
+        { k: "Stack", v: "Next.js, React, TypeScript, Three.js" },
+        { k: "Booking", v: "{month}" },
+      ],
+      photoAlt: "Abdellah Kachani standing among palm trees in Agadir",
+    },
+    questions: { title: "Questions" },
+    finale: {
+      title: "Let's talk",
+      text: "Tell me what you're building. I reply myself, usually within a day.",
+      whatsapp: "Write on WhatsApp",
+      email: "Email",
+      copy: "Copy",
+      copied: "Copied",
+      send: "Send on WhatsApp",
+      brief: "Your brief, in one sentence",
+      small: "Abdellah Kachani, web developer in Agadir, Morocco.",
+    },
+    notFound: {
+      title: "This cell was never built",
+      text: "The page you're looking for isn't in the wall. It may have moved, or the address has a typo.",
+      back: "Back to the wall",
+    },
+  },
+  robot: {
+    menuLabel: "Open the guide's shortcuts",
+    closeLabel: "Close the shortcuts",
+    hello: "Hi, I'm the guide. Scroll and I'll show you around, or click me.",
+    statement: "Fun fact: Agadir means granary.",
+    work1: "This one is live. Click the screen to open it.",
+    work2: "A real festival app. Try the scan flow.",
+    offers: "Fixed prices, a quote before anything starts.",
+    about: "That's Abdellah. He builds every site himself.",
+    finale: "Tell him in one sentence. He replies within a day.",
+    caseTop: "It's live. The link is right here.",
+    caseNext: "Want one like it? Ask on WhatsApp.",
+    hoverScreen: "Click it, it opens big.",
+    hoverOffer: "Ask about this one on WhatsApp.",
+    hoverCta: "Opens WhatsApp with a message ready.",
+    hoverBrief: "Pick three words, then send.",
+    hoverLab: "Concepts and experiments live in here.",
+    menu: { start: "Start a project", work: "See the work", prices: "Prices", top: "Back to top" },
   },
   caseStudy: {
     back: "All work",

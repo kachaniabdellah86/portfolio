@@ -229,8 +229,11 @@ const fragmentShader = /* glsl */ `
 
 export function createJourneyParticles(isCompact: boolean, random: () => number) {
   // Additive points are pure overdraw: phones get fewer, smaller ones.
-  const count = isCompact ? 1100 : 5200;
-  const opacityBoost = isCompact ? 1.35 : 1;
+  // Desktop was 5200 points up to 26px: when the camera flew through the cloud
+  // between chapters they stacked into millions of blended fragments a frame.
+  const count = isCompact ? 1100 : 3600;
+  // Fewer points read dimmer; a small boost keeps the cloud's brightness.
+  const opacityBoost = isCompact ? 1.35 : 1.15;
   const geometry = new THREE.BufferGeometry();
   const target = new THREE.Vector3();
 
@@ -259,7 +262,7 @@ export function createJourneyParticles(isCompact: boolean, random: () => number)
     uEnergy: { value: 0 },
     uOpacity: { value: SHAPE_OPACITY[0] * opacityBoost },
     uPhase: { value: 0 },
-    uMaxSize: { value: isCompact ? 14 : 26 },
+    uMaxSize: { value: isCompact ? 14 : 18 },
     uPixelRatio: { value: 1 },
     uPointer: { value: new THREE.Vector2() },
     uPointerStrength: { value: 0 },

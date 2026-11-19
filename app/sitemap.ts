@@ -3,7 +3,7 @@ import { siteUrl } from "@/lib/site";
 import { locales } from "@/lib/i18n";
 import { caseStudySlugs } from "@/lib/projects";
 
-const paths = ["", ...caseStudySlugs.map((slug) => `/work/${slug}`)];
+const paths = ["", "/studios", "/lab", ...caseStudySlugs.map((slug) => `/work/${slug}`)];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return paths.flatMap((path) =>

@@ -43,16 +43,25 @@ import {
 
 export type JourneyQuality = "compact" | "full";
 
+/**
+ * "hero" builds only the opening world: an ambient scene behind the first
+ * screen, cheap enough for integrated laptop GPUs. "journey" builds all five
+ * chapter worlds for the full scroll story.
+ */
+export type JourneyVariant = "hero" | "journey";
+
 export type ScrollJourneyOptions = {
   progress: number;
   velocity: number;
   quality: JourneyQuality;
+  variant: JourneyVariant;
 };
 
 export const SCROLL_JOURNEY_DEFAULTS: ScrollJourneyOptions = {
   progress: 0,
   velocity: 0,
   quality: "full",
+  variant: "journey",
 };
 
 type StoryWorld = {
@@ -1172,10 +1181,15 @@ export async function createScrollJourneyRenderer(
   });
   const renderer = new THREE.WebGLRenderer({
     alpha: false,
-    antialias: initialRenderQuality.antialias,
+    // Desktop renders through the composer, whose SMAA pass does the
+    // anti-aliasing; MSAA on the canvas would only multisample the final copy.
+    antialias: isCompact && initialRenderQuality.antialias,
     canvas,
     powerPreference: "high-performance",
   });
+  // Error checks read back each new program's status, a CPU-GPU sync that
+  // stalls the frame. Shaders here are fixed and tested, so skip them in production.
+  renderer.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -1220,7 +1234,11 @@ export async function createScrollJourneyRenderer(
 
   // Each world is a sizeable geometry build, so they are made one per task.
   const worlds: StoryWorld[] = [];
-  for (const createWorld of [createOriginWorld, createNeuralWorld, createFinanceWorld, createBridgeWorld, createHorizonWorld]) {
+  const worldBuilders =
+    initialOptions.variant === "hero"
+      ? [createOriginWorld]
+      : [createOriginWorld, createNeuralWorld, createFinanceWorld, createBridgeWorld, createHorizonWorld];
+  for (const createWorld of worldBuilders) {
     await yieldToMain();
     worlds.push(createWorld(isCompact));
   }
@@ -1252,6 +1270,18 @@ export async function createScrollJourneyRenderer(
       light.intensity = 0;
     });
     return lights;
+  });
+  // Transmission makes three.js render the whole scene a second time, into a
+  // refraction target, every frame. Translucent panes keep their look through
+  // opacity and clearcoat, so no device pays for that extra pass.
+  worlds.forEach((world) => {
+    world.group.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      const objectMaterials = Array.isArray(object.material) ? object.material : [object.material];
+      objectMaterials.forEach((material: THREE.Material) => {
+        if (material instanceof THREE.MeshPhysicalMaterial) material.transmission = 0;
+      });
+    });
   });
   if (isCompact) {
     // A phone GPU also composites the page, so every millisecond spent here is
@@ -1527,15 +1557,20 @@ export async function createScrollJourneyRenderer(
       const velocity = Number.isFinite(options.velocity) ? Math.abs(options.velocity) : 0;
       const energy = THREE.MathUtils.clamp(velocity / 1100, 0, 1);
 
-      const phase = chapterPhase(smoothProgress, chapterAnchors);
-      const phaseIndex = Math.min(worlds.length - 2, Math.floor(phase));
+      // A single (hero) world has no chapter to travel to: the cloud stays home.
+      const singleWorld = worlds.length < 2;
+      const phase = singleWorld ? 0 : chapterPhase(smoothProgress, chapterAnchors);
+      const phaseIndex = singleWorld ? 0 : Math.min(worlds.length - 2, Math.floor(phase));
       const phaseFraction = phase - phaseIndex;
-      const scatter = Math.pow(Math.sin(phaseFraction * Math.PI), 1.6);
-      cloudPosition.lerpVectors(
-        worlds[phaseIndex].group.position,
-        worlds[phaseIndex + 1].group.position,
-        THREE.MathUtils.smoothstep(phaseFraction, 0, 1),
-      );
+      const scatter = singleWorld ? 0 : Math.pow(Math.sin(phaseFraction * Math.PI), 1.6);
+      if (singleWorld) cloudPosition.copy(worlds[0].group.position);
+      else {
+        cloudPosition.lerpVectors(
+          worlds[phaseIndex].group.position,
+          worlds[phaseIndex + 1].group.position,
+          THREE.MathUtils.smoothstep(phaseFraction, 0, 1),
+        );
+      }
       particles.points.position.copy(cloudPosition);
       particles.points.rotation.y = Math.sin(time * 0.09) * 0.22;
       pointerStrength = THREE.MathUtils.damp(

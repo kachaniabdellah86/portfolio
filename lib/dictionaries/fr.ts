@@ -17,52 +17,24 @@ export const fr: Dictionary = {
       { label: "FAQ", href: "#faq", phone: false },
       { label: "Contact", href: "#contact", phone: true },
     ],
-    available: "Disponible — nov. 2026",
+    available: "Disponible {month}",
     switchLabel: "View the site in English",
   },
   journey: {
-    railLabel: "Développeur web · Agadir",
-    follow: "Suivez le signal",
-    scrollHint: "Faites défiler ↓",
-    skip: "Passer aux projets ↓",
-    ariaLabel: "Parcours du portfolio au défilement",
-    labels: ["Début", "Système", "Sensation", "Pont", "Suite"],
+    ariaLabel: "Introduction",
+    eyebrow: "Abdellah Kachani — Développeur web · Agadir, Maroc",
+    title: "Votre site,\nvotre meilleur\n*vendeur.*",
+    description:
+      "Sites web bilingues pour hôtels, agences et commerces au Maroc : réservation WhatsApp, rapides sur mobile, livrés en 7 jours.",
     ctaPrimary: "Discuter sur WhatsApp",
     ctaSecondary: "Voir les projets",
     whatsappMessage:
       "Bonjour Abdellah, j'ai vu votre portfolio et j'aimerais parler d'un projet de site web.",
-    chapters: [
-      {
-        eyebrow: "Abdellah Kachani / Développeur web · Agadir, Maroc",
-        title: "Votre site,\nvotre meilleur\n*vendeur.*",
-        description:
-          "Sites web bilingues pour hôtels, agences et commerces au Maroc : réservation WhatsApp, rapides sur mobile, livrés en 7 jours.",
-      },
-      {
-        eyebrow: "Chapitre 01 / KachaniOS — Concept · Le système",
-        title: "L'interface a appris\nà *penser.*",
-        description:
-          "Un concept d'OS pour agent IA : chaque pensée devient un nœud, la mémoire devient une structure, et la complexité devient lisible.",
-      },
-      {
-        eyebrow: "Chapitre 02 / Aura Pay — Concept · La sensation",
-        title: "L'argent numérique\ntrouve un *poids.*",
-        description:
-          "Un concept fintech : surfaces en titane, données spatiales et biométrie, pour que la confiance se ressente sans faire de bruit.",
-      },
-      {
-        eyebrow: "Chapitre 03 / Yalla China — Projet client · Le pont",
-        title: "Le design a franchi\nla langue et le *doute.*",
-        description:
-          "Un site en français, anglais et arabe qui guide les familles marocaines vers les études en Chine — et transforme les visites en candidatures et en conversations WhatsApp.",
-      },
-      {
-        eyebrow: "Chapitre 04 / La suite",
-        title: "Le prochain chapitre,\nc'est *votre projet.*",
-        description:
-          "Continuez pour voir les projets, les offres et la façon dont on travaille ensemble.",
-      },
-    ],
+    workCaption: "Site client en ligne · Yalla China",
+    workAlt: "Yalla China, un site client en ligne : étudier en Chine avec un accompagnement qui rassure toute la famille",
+    steps: ["Votre idée", "Conçu et développé", "En ligne — et il vend"],
+    scrollHint: "Faites défiler — regardez-le prendre forme",
+    secondaryWorkLabel: "Étude de cas de l'application du festival FICAM",
   },
   marquee: {
     rowA: [
@@ -87,7 +59,14 @@ export const fr: Dictionary = {
     edge: "Projets — 2024 / 2026",
     heading: "Des projets ~livrés,~\ndes résultats qui *durent.*",
     intro:
-      "Deux projets en production, deux concepts. Chacun garde son identité ici — et chacun est interactif.",
+      "Deux projets en production, pour de vrais clients et de vrais utilisateurs. Chacun garde son identité ici — et chacun est interactif.",
+    labTeaser: {
+      label: "Depuis le labo",
+      title: "Concepts & expériences",
+      text: "Un système d'exploitation pour IA, une carte fintech en 3D et cinq études d'interaction, là où je teste des idées avant de les proposer à mes clients.",
+      cta: "Voir le labo",
+      href: "/fr/lab",
+    },
     visit: "Voir le site en ligne",
     source: "Code source",
     readStory: "Lire l'histoire",
@@ -100,12 +79,12 @@ export const fr: Dictionary = {
   },
   lab: {
     label: "Labo",
-    edge: "Labo — Expériences",
+    edge: "Labo, Expériences",
     ariaLabel: "Labo visuel",
     heading: "~Fragments~ du\n*labo.*",
     intro:
       "Cinq petites expériences sur la façon dont une interface doit se ressentir : typographie, signal, physique, couleurs et geste. Toutes sont interactives. Touchez-les.",
-    scrollHint: "Faites défiler — le mur glisse de côté",
+    scrollHint: "Faites défiler, le mur glisse de côté",
     fragment: "Fragment",
     tablist: "Fragments du labo",
     previous: "Fragment précédent",
@@ -164,7 +143,7 @@ export const fr: Dictionary = {
       {
         name: "Business",
         priceFrom: "à partir de", amount: "3 900", currency: "MAD",
-        pitch: "Tout le forfait Vitrine, plus de quoi recevoir des réservations et des demandes — pas seulement des visites.",
+        pitch: "Tout le forfait Vitrine, plus de quoi recevoir des réservations et des demandes, pas seulement des visites.",
         features: [
           "Formulaire de réservation ou de demande",
           "Pages offres et tarifs",
@@ -187,9 +166,10 @@ export const fr: Dictionary = {
       },
     ],
     notes: [
-      "Maintenance : 150–300 MAD / mois (mises à jour, sauvegardes, modifications).",
+      "Maintenance : 150 à 300 MAD / mois (mises à jour, sauvegardes, modifications).",
       "Paiement : 50 % à la commande, 50 % à la mise en ligne.",
     ],
+    studiosLink: { label: "Agences : travail en marque blanche", href: "/fr/studios" },
   },
   process: {
     label: "Méthode",
@@ -204,12 +184,12 @@ export const fr: Dictionary = {
       },
       {
         title: "Maquette",
-        time: "Jours 2–3",
+        time: "Jours 2 et 3",
         text: "Une première version visuelle de la page d'accueil. Vous validez avant que je code.",
       },
       {
         title: "Développement",
-        time: "Jours 3–6",
+        time: "Jours 3 à 6",
         text: "Le site complet, en français et en anglais, rapide sur mobile, avec vos boutons WhatsApp et vos formulaires.",
       },
       {
@@ -271,7 +251,7 @@ export const fr: Dictionary = {
       },
       {
         q: "Je pourrai modifier mon site après ?",
-        a: "Oui. Les petites modifications du premier mois sont offertes. Ensuite, la maintenance (150–300 MAD / mois) couvre mises à jour, sauvegardes et changements de contenu.",
+        a: "Oui. Les petites modifications du premier mois sont offertes. Ensuite, la maintenance (150 à 300 MAD / mois) couvre mises à jour, sauvegardes et changements de contenu.",
       },
       {
         q: "Vous faites aussi les sites en arabe ?",
@@ -283,7 +263,7 @@ export const fr: Dictionary = {
     ariaLabel: "En chiffres",
     items: [
       { value: 7, suffix: "", label: "Jours pour livrer un site vitrine" },
-      { value: 3, suffix: "", label: "Langues livrées — FR · EN · AR" },
+      { value: 3, suffix: "", label: "Langues livrées : FR, EN, AR" },
       { value: 96, suffix: "/100", label: "Score Lighthouse mobile, site client" },
     ],
   },
@@ -309,7 +289,7 @@ export const fr: Dictionary = {
         "autre chose",
       ],
       budgetLabel: "Budget",
-      budgets: ["moins de 2 000 MAD", "2 000 – 4 000 MAD", "4 000 – 8 000 MAD", "plus de 8 000 MAD"],
+      budgets: ["moins de 2 000 MAD", "2 000 à 4 000 MAD", "4 000 à 8 000 MAD", "plus de 8 000 MAD"],
       deadlineLabel: "Délai",
       deadlines: ["au plus vite", "ce mois-ci", "sans urgence"],
       previewLabel: "Aperçu du message",
@@ -320,6 +300,155 @@ export const fr: Dictionary = {
   },
   floating: {
     whatsapp: "WhatsApp",
+  },
+  labPage: {
+    metaTitle: "Labo, concepts et expériences d'interaction · Abdellah Kachani",
+    metaDescription:
+      "Concepts interactifs (un OS pour agent IA, une carte fintech spatiale) et cinq expériences d'interaction en direct, par Abdellah Kachani.",
+    breadcrumb: "Labo",
+    label: "Concepts",
+    edge: "Labo, Concepts",
+    heading: "Des idées, ~construites~\npour être *touchées.*",
+    intro: "Des concepts personnels où je pousse les interfaces plus loin qu'un brief ne le permet. Chacun est un prototype fonctionnel.",
+  },
+  studios: {
+    metaTitle: "Développeur créatif en marque blanche pour agences, Abdellah Kachani",
+    metaDescription:
+      "WebGL, animation et sites Next.js pour studios et agences, sous votre nom. À distance depuis le Maroc (GMT+1), NDA d'abord, forfait ou tarif jour.",
+    breadcrumb: "Pour les agences",
+    eyebrow: "Pour les studios & agences · Marque blanche",
+    heading: "Le développeur\nderrière *votre marque.*",
+    intro:
+      "Vous signez le projet, je construis les parties difficiles, scènes WebGL, récits au défilement, animation et Next.js en production, sous le nom de votre studio, dans vos délais.",
+    ctaPrimary: "Envoyer un brief",
+    ctaMessage: "Bonjour Abdellah, je dirige une agence et j'ai un projet sur lequel vous pourriez intervenir.",
+    ctaSecondary: "Voir les projets",
+    handLabel: "Ce que vous pouvez me confier",
+    handHeading: "Vous confiez,\nje *livre.*",
+    hand: [
+      { title: "Scènes WebGL & Three.js", text: "Scènes d'accueil, visionneuses produit et particules, avec un budget de performance pour mobile." },
+      { title: "Récits au défilement", text: "Chapitres épinglés, trajectoires de caméra et animation chorégraphiée, comme le parcours de mon site." },
+      { title: "De Figma à Next.js en production", text: "Sites fidèles à vos maquettes, rapides sur mobile, avec SEO et analytics en place." },
+      { title: "Démos produit interactives", text: "Prototypes cliquables et démos d'interface pour pitchs, lancements et études de cas." },
+      { title: "Sites multilingues et RTL", text: "Français, anglais et arabe avec une vraie mise en page de droite à gauche, déjà en production." },
+    ],
+    process: {
+      label: "Méthode",
+      heading: "Intégré à\n*votre process.*",
+      intro: "Vous gardez la relation client. Je m'adapte à vos outils, votre dépôt et votre rythme de validation.",
+      steps: [
+        { title: "Brief & NDA", time: "Jour 1", text: "Vous partagez le périmètre et les maquettes une fois le NDA signé. Je pose les questions qui font gagner une semaine." },
+        { title: "Devis", time: "Sous 24 h", text: "Un prix fixe pour un périmètre défini, ou un tarif jour pour un besoin ouvert. Pas de surprise ensuite." },
+        { title: "Production", time: "Sprints", text: "Le travail arrive dans votre dépôt ou le mien, avec des points courts et un lien de prévisualisation à montrer au client." },
+        { title: "Livraison", time: "Fin", text: "Un code propre et documenté, et une passation. Votre nom dessus, je reste invisible pour votre client." },
+      ],
+    },
+    termsLabel: "Les conditions",
+    terms: [
+      { k: "Crédit", v: "Le vôtre. Marque blanche par défaut ; je ne contacte jamais votre client." },
+      { k: "Confidentialité", v: "NDA signé avant tout partage." },
+      { k: "Horaires", v: "GMT+1 : les mêmes heures que la France, à une heure près." },
+      { k: "Tarifs", v: "Forfait ou tarif jour, devis en €." },
+      { k: "Paiement", v: "50 % à la commande, 50 % à la livraison, ou à la semaine pour le tarif jour. Virement, PayPal ou Payoneer." },
+      { k: "Technologies", v: "Next.js, React, TypeScript, Three.js / WebGL, Motion, Supabase, Tailwind." },
+    ],
+    proofLabel: "Projets livrés",
+    proofHeading: "Des preuves,\npas des *promesses.*",
+    proof: [
+      { title: "Yalla China", text: "Plateforme trilingue FR/EN/AR avec RTL, candidatures et espace admin. Lighthouse 96 sur mobile.", href: "/fr/work/yalla-china" },
+      { title: "FICAM Festival Platform", text: "Application du festival : inscription, validation des séances par QR code, niveaux et récompenses en direct.", href: "/fr/work/ficam" },
+      { title: "Ce portfolio", text: "Un parcours WebGL au défilement, fluide sur mobile, un échantillon des créations que je livre.", href: "/fr" },
+    ],
+    open: "Ouvrir",
+  },
+  home: {
+    metaTitle: "Abdellah Kachani, développeur web à Agadir | Des sites qui vendent",
+    metaDescription:
+      "Développeur web indépendant à Agadir. Sites bilingues rapides pour hôtels, agences et commerces au Maroc, réservation WhatsApp, livrés en 7 jours. À partir de 1 900 MAD.",
+    nav: { work: "Projets", offers: "Offres", about: "À propos", contact: "Contact", menu: "Menu", close: "Fermer" },
+    skip: "Aller au contenu",
+    hero: {
+      role: "Développeur web, Agadir",
+      line: "Je conçois et je développe des sites qui vendent.",
+      place: "Agadir, Maroc",
+      available: "Disponible pour de nouveaux projets",
+      glyphReading: "agadir, le grenier",
+      clockLabel: "Heure locale à Agadir",
+      wallLabel: "Le mur : chaque porte est un projet",
+      open: "Ouvrir",
+      freeTitle: "Cette case est libre",
+      freeText: "Votre projet, dès 1 900 MAD",
+      freeCta: "Lancer un projet",
+      labTitle: "Le labo",
+      labText: "Concepts et expériences",
+    },
+    statement:
+      "En tachelhit, un agadir est un grenier collectif : un seul mur bâti par tout un village, fait de petites cases, chacune gardant ce qu'une famille a de plus précieux. Ma ville porte ce nom. Je construis la même chose pour les entreprises, en ligne. Un site solide qui protège ce que vous faites de mieux et l'ouvre aux bonnes personnes.",
+    work: {
+      title: "Projets",
+      note: "Deux projets en production, pour de vrais clients et de vrais utilisateurs.",
+      result: "Résultat",
+      read: "Lire l'étude de cas",
+      visit: "Voir le site en ligne",
+    },
+    register: {
+      title: "Offres",
+      note: "Un devis fixe avant de commencer. Paiement : 50 % à la commande, 50 % à la mise en ligne. Maintenance de 150 à 300 MAD par mois.",
+      from: "dès",
+      ask: "Demander ce forfait",
+      studios: "Agences : travail en marque blanche",
+    },
+    process: { title: "De l'appel au lancement" },
+    about: {
+      title: "Le gardien",
+      body: [
+        "Je suis Abdellah, développeur web à Agadir et élève-ingénieur en informatique (3e année, Polytechnique Agadir).",
+        "Je conçois et je code chaque site moi-même, du premier appel à la mise en ligne : pas d'agence, pas d'intermédiaire. J'ai livré une plateforme trilingue pour une agence d'études à l'étranger et l'application d'un festival de cinéma.",
+      ],
+      facts: [
+        { k: "Basé à", v: "Agadir, Maroc" },
+        { k: "Langues", v: "Français, anglais, arabe" },
+        { k: "Délai", v: "7 jours pour un site vitrine" },
+        { k: "Disponible", v: "{month}" },
+      ],
+      photoAlt: "Abdellah Kachani debout parmi les palmiers à Agadir",
+    },
+    questions: { title: "Questions fréquentes" },
+    finale: {
+      title: "Parlons-en",
+      text: "Dites-moi ce que vous voulez construire. Je réponds moi-même, en général dans la journée.",
+      whatsapp: "Écrire sur WhatsApp",
+      email: "E-mail",
+      copy: "Copier",
+      copied: "Copié",
+      send: "Envoyer sur WhatsApp",
+      brief: "Votre demande, en une phrase",
+      small: "Abdellah Kachani, développeur web à Agadir, Maroc.",
+    },
+    notFound: {
+      title: "Cette case n'a jamais été construite",
+      text: "La page que vous cherchez n'est pas dans le mur. Elle a peut-être changé d'adresse, ou le lien contient une faute.",
+      back: "Retour au mur",
+    },
+  },
+  robot: {
+    menuLabel: "Ouvrir les raccourcis du guide",
+    closeLabel: "Fermer les raccourcis",
+    hello: "Salut, je suis le guide. Faites défiler, je vous fais visiter. Ou cliquez sur moi.",
+    statement: "Le saviez-vous ? Agadir veut dire grenier.",
+    work1: "Celui-ci est en ligne. Cliquez sur l'écran pour l'ouvrir.",
+    work2: "Une vraie appli de festival. Essayez le scan.",
+    offers: "Des prix fixes, un devis avant de commencer.",
+    about: "C'est Abdellah. Il code chaque site lui-même.",
+    finale: "Dites-lui en une phrase. Il répond dans la journée.",
+    caseTop: "Il est en ligne. Le lien est juste ici.",
+    caseNext: "Vous voulez le même ? Demandez sur WhatsApp.",
+    hoverScreen: "Cliquez, il s'ouvre en grand.",
+    hoverOffer: "Demandez ce forfait sur WhatsApp.",
+    hoverCta: "WhatsApp s'ouvre avec le message prêt.",
+    hoverBrief: "Choisissez trois mots, puis envoyez.",
+    hoverLab: "Les concepts et expériences sont ici.",
+    menu: { start: "Lancer un projet", work: "Voir les projets", prices: "Les prix", top: "Retour en haut" },
   },
   caseStudy: {
     back: "Tous les projets",

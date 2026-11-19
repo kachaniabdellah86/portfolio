@@ -84,7 +84,7 @@ const PROJECTS: ProjectSource[] = [
     study: {
       en: {
         context:
-          "Yalla China is a Moroccan study-abroad agency that takes students from a first conversation to their arrival on a campus in one of six Chinese cities. Its clients are students and, just as much, their parents — people deciding on a big, expensive step in a country they don't know.",
+          "Yalla China is a Moroccan study-abroad agency that takes students from a first conversation to their arrival on a campus in one of six Chinese cities. Its clients are students and, just as much, their parents, people deciding on a big, expensive step in a country they don't know.",
         results: [
           { value: "3", label: "Languages, with right-to-left Arabic" },
           { value: "96", label: "Lighthouse mobile score" },
@@ -109,10 +109,10 @@ const PROJECTS: ProjectSource[] = [
         seoDescription:
           "Case study: a trilingual FR/EN/AR Next.js platform with RTL Arabic, applications and an admin area, built by Abdellah Kachani for a Moroccan agency.",
         subtitle:
-          "A trust-first platform in French, English and Arabic that guides Moroccan students and their families through a seven-step journey to studying in China — and turns visitors into applications and WhatsApp conversations.",
+          "A trust-first platform in French, English and Arabic that guides Moroccan students and their families through a seven-step journey to studying in China, and turns visitors into applications and WhatsApp conversations.",
         tags: ["Client project", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
         status: "Client project · Live",
-        role: "Full-stack developer — design, build and launch for a study-abroad agency",
+        role: "Full-stack developer, design, build and launch for a study-abroad agency",
         problem:
           "Families needed clarity and trust around studying abroad in China. Language and cultural distance created friction; reassurance was missing.",
         built:
@@ -123,10 +123,10 @@ const PROJECTS: ProjectSource[] = [
         seoDescription:
           "Étude de cas : plateforme Next.js trilingue (FR, EN, arabe RTL) avec candidatures, espace admin et WhatsApp, réalisée à Agadir par Abdellah Kachani.",
         subtitle:
-          "Une plateforme en français, anglais et arabe qui rassure les étudiants marocains et leurs familles, les guide en sept étapes vers les études en Chine — et transforme les visites en candidatures et en conversations WhatsApp.",
+          "Une plateforme en français, anglais et arabe qui rassure les étudiants marocains et leurs familles, les guide en sept étapes vers les études en Chine, et transforme les visites en candidatures et en conversations WhatsApp.",
         tags: ["Projet client", "FR · EN · AR + RTL", "Lighthouse 96 mobile"],
         status: "Projet client · En ligne",
-        role: "Développeur full-stack — conception, développement et lancement pour une agence d'études à l'étranger",
+        role: "Développeur full-stack, conception, développement et lancement pour une agence d'études à l'étranger",
         problem:
           "Les familles avaient besoin de clarté et de confiance avant d'envoyer leur enfant étudier en Chine. La langue et la distance créaient des doutes ; rien ne les rassurait.",
         built:
@@ -162,7 +162,7 @@ const PROJECTS: ProjectSource[] = [
     study: {
       en: {
         context:
-          "FICAM is a film festival that welcomes student audiences across many screenings. The organizers wanted those students to come back session after session — and needed a reliable way to know who actually attended.",
+          "FICAM is a film festival that welcomes student audiences across many screenings. The organizers wanted those students to come back session after session, and needed a reliable way to know who actually attended.",
         results: [
           { value: "QR", label: "Session validation at the door" },
           { value: "5", label: "Levels, from Spectateur to Palme d'or" },
@@ -172,7 +172,7 @@ const PROJECTS: ProjectSource[] = [
       },
       fr: {
         context:
-          "Le FICAM est un festival de cinéma qui accueille un public étudiant sur de nombreuses séances. Les organisateurs voulaient que ces étudiants reviennent séance après séance — et avaient besoin d'un moyen fiable de savoir qui était vraiment présent.",
+          "Le FICAM est un festival de cinéma qui accueille un public étudiant sur de nombreuses séances. Les organisateurs voulaient que ces étudiants reviennent séance après séance, et avaient besoin d'un moyen fiable de savoir qui était vraiment présent.",
         results: [
           { value: "QR", label: "Validation des séances à l'entrée" },
           { value: "5", label: "Niveaux, de Spectateur à Palme d'or" },
@@ -183,9 +183,9 @@ const PROJECTS: ProjectSource[] = [
     },
     text: {
       en: {
-        meaning: "Vivez le cinéma — in your pocket.",
+        meaning: "Vivez le cinéma, in your pocket.",
         seoDescription:
-          "Case study: the FICAM film festival companion app — registration, QR session validation, levels and live rewards, built with Next.js and Supabase.",
+          "Case study: the FICAM film festival companion app, registration, QR session validation, levels and live rewards, built with Next.js and Supabase.",
         subtitle:
           "The official companion app for the FICAM film festival: student registration, QR-code session validation, gamified progression and live rewards.",
         tags: ["Next.js", "Supabase", "Full-Stack"],
@@ -197,9 +197,9 @@ const PROJECTS: ProjectSource[] = [
           "Registration and authentication. QR scanning for session validation. Gamified progression with badges and level unlocks. Real-time reward accumulation.",
       },
       fr: {
-        meaning: "Vivez le cinéma — dans votre poche.",
+        meaning: "Vivez le cinéma, dans votre poche.",
         seoDescription:
-          "Étude de cas : l'application du festival FICAM — inscription, validation des séances par QR code, niveaux et récompenses en direct (Next.js, Supabase).",
+          "Étude de cas : l'application du festival FICAM, inscription, validation des séances par QR code, niveaux et récompenses en direct (Next.js, Supabase).",
         subtitle:
           "L'application officielle du festival de cinéma FICAM : inscription des étudiants, validation des séances par QR code, progression ludique et récompenses en direct.",
         tags: ["Next.js", "Supabase", "Full-stack"],
@@ -231,7 +231,7 @@ const PROJECTS: ProjectSource[] = [
         seoDescription:
           "KachaniOS, an interactive concept interface that makes an AI agent's routing, memory and verification visible.",
         subtitle:
-          "An operating system for a self-evolving AI agent — routing, memory and verification made visible so people can read what the machine is thinking.",
+          "An operating system for a self-evolving AI agent, routing, memory and verification made visible so people can read what the machine is thinking.",
         tags: ["AI Interfaces", "Product UX", "Desktop OS"],
         status: "Concept · Interactive prototype",
         role: "Designer & developer",
@@ -275,7 +275,7 @@ const PROJECTS: ProjectSource[] = [
         seoDescription:
           "Aura Pay, a spatial fintech concept: a titanium card, one-gesture biometric payment and an interactive spending model.",
         subtitle:
-          "A spatial finance concept: a titanium card, biometric settlement in one gesture, and yield that routes itself — trust you can feel.",
+          "A spatial finance concept: a titanium card, biometric settlement in one gesture, and yield that routes itself, trust you can feel.",
         tags: ["FinTech Concept", "Spatial UI", "Product Design"],
         status: "Concept · Interactive prototype",
         role: "Product designer",
@@ -289,7 +289,7 @@ const PROJECTS: ProjectSource[] = [
         seoDescription:
           "Aura Pay, un concept fintech spatial : carte en titane, paiement biométrique en un geste et modèle de dépenses interactif.",
         subtitle:
-          "Un concept de finance spatiale : une carte en titane, un paiement biométrique en un geste, et une épargne qui s'oriente seule — une confiance qui se ressent.",
+          "Un concept de finance spatiale : une carte en titane, un paiement biométrique en un geste, et une épargne qui s'oriente seule, une confiance qui se ressent.",
         tags: ["Concept fintech", "UI spatiale", "Design produit"],
         status: "Concept · Prototype interactif",
         role: "Designer produit",

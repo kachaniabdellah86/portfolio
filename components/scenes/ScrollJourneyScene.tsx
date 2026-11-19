@@ -14,6 +14,10 @@ type ScrollJourneySceneProps = {
   setStatus: Dispatch<SetStateAction<SceneStatus>>;
 };
 
+// The hero only uses the start of the camera path: scrolling the first screen
+// away eases the camera forward a little instead of travelling the full story.
+const HERO_PROGRESS_SPAN = 0.12;
+
 function getScenePhase(progress: number) {
   if (progress < 0.18) return "spark";
   if (progress < 0.4) return "kachanios";
@@ -40,6 +44,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     const options: ScrollJourneyOptions = {
       ...SCROLL_JOURNEY_DEFAULTS,
       quality: compact ? "compact" : "full",
+      variant: "hero",
     };
 
     let journey: Awaited<ReturnType<typeof createScrollJourneyRenderer>> | null = null;
@@ -59,7 +64,7 @@ export default function ScrollJourneyScene({ setStatus }: ScrollJourneySceneProp
     const tick = (timestamp: number) => {
       animationFrame = 0;
       if (!canRun() || !journey) return;
-      options.progress = scrollBus.journeyProgress;
+      options.progress = scrollBus.journeyProgress * HERO_PROGRESS_SPAN;
       options.velocity = scrollBus.velocity;
       const phase = getScenePhase(options.progress);
       if (phase !== lastPhase) {
