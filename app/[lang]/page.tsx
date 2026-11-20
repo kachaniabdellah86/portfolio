@@ -85,7 +85,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         {/* ── Statement ────────────────────────────────────────── */}
         <section className="k-statement g-wrap g-grid" data-ground="field" aria-label="Agadir">
           <p data-scrub-words>{t.statement}</p>
-          <span className="k-anchor k-anchor--statement" data-robot-anchor="stand" data-robot-say={dict.robot.statement} aria-hidden="true" />
+          <span className="k-anchor k-anchor--statement" data-robot-anchor="stand" data-robot-scene="read" data-robot-say={dict.robot.statement} aria-hidden="true" />
         </section>
 
         {/* ── Work ─────────────────────────────────────────────── */}
@@ -105,7 +105,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               {p.preview && (
                 <a href={`/${lang}/work/${p.slug}`} className="k-project__screen" data-bend data-robot-react={dict.robot.hoverScreen} aria-label={`${t.work.read}: ${p.title}`}>
                   <Image src={p.preview.src} alt={p.preview.alt} width={p.preview.width} height={p.preview.height} sizes="(min-width: 768px) 72vw, 100vw" />
-                  <span className="k-anchor k-anchor--screen" data-robot-anchor="stand" data-robot-say={i === 0 ? dict.robot.work1 : dict.robot.work2} aria-hidden="true" />
+                  <span className="k-anchor k-anchor--screen" data-robot-anchor="stand" data-robot-scene="surf" data-robot-say={i === 0 ? dict.robot.work1 : dict.robot.work2} aria-hidden="true" />
                   <span className="k-open" aria-hidden="true">
                     {t.hero.open} →
                   </span>
@@ -150,7 +150,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             <h2 id="offers-title" className="g-title" data-split="lines">{t.register.title}</h2>
             <p>{t.register.note}</p>
           </div>
-          <span className="k-anchor k-anchor--offers" data-robot-anchor="stand" data-robot-say={dict.robot.offers} aria-hidden="true" />
+          <span className="k-anchor k-anchor--offers" data-robot-anchor="stand" data-robot-scene="rows" data-robot-span="next" data-robot-say={dict.robot.offers} aria-hidden="true" />
           <ul className="k-rows">
             {dict.services.packages.map((pkg) => (
               <li key={pkg.name} className="k-row" data-robot-react={dict.robot.hoverOffer}>
@@ -200,7 +200,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <section id="about" className="k-about g-wrap g-grid" data-ground="night" aria-labelledby="about-title">
           <div className="k-about__photo" data-reveal="up">
             <Image src="/media/abdellah-kachani.jpg" alt={t.about.photoAlt} width={1500} height={2000} sizes="(min-width: 768px) 40vw, 100vw" />
-            <span className="k-anchor k-anchor--about" data-robot-anchor="stand" data-robot-say={dict.robot.about} aria-hidden="true" />
+            <span className="k-anchor k-anchor--about" data-robot-anchor="sit" data-robot-say={dict.robot.about} aria-hidden="true" />
           </div>
           <div className="k-about__text">
             <h2 id="about-title" className="g-title" data-split="lines">{t.about.title}</h2>
@@ -246,10 +246,11 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             </h2>
           </HeatWord>
           <p className="g-finale__lead">{t.finale.text}</p>
-          <span className="k-anchor k-anchor--finale" data-robot-anchor="wave" data-robot-say={dict.robot.finale} aria-hidden="true" />
+          <span className="k-anchor k-anchor--finale" data-robot-anchor="perch" data-robot-ground="glyph-last" data-robot-say={dict.robot.finale} aria-hidden="true" />
           <Brief />
         </div>
         <div className="g-small">
+          <span className="k-anchor k-anchor--small" data-robot-anchor="wave" data-robot-thin data-robot-say={dict.robot.footer} aria-hidden="true" />
           <p>
             © {new Date().getFullYear()} {t.finale.small}
           </p>

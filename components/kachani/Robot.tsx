@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import type { BufferGeometry, Material, Mesh, Object3D } from "three";
-import { onPage, prefersReducedMotion, isTouch, scrollToTarget } from "@/engine";
+import { onPage, prefersReducedMotion, isTouch, scrollState, scrollToTarget } from "@/engine";
 import { whatsappUrl } from "@/lib/site";
+import { buildRoute, sampleRoute, wordGeometry, wordOpenness, type Band, type Ledge, type Route, type Sample, type Waypoint, type Word } from "./robotRoute";
 import { useLocale } from "../LocaleProvider";
 
 /**
@@ -236,66 +237,293 @@ export default function Robot() {
       let anchors: { el: HTMLElement; pose: string; say: string }[] = [];
       let word: HTMLElement | null = null;
       let texts: HTMLElement[] = [];
+      let timelines: HTMLElement[] = [];
+      let steppers: HTMLElement[] = [];
       const offPage = onPage(() => {
         anchors = [...document.querySelectorAll<HTMLElement>("[data-robot-anchor]")].map((el) => ({
           el,
           pose: el.dataset.robotAnchor || "stand",
           say: el.dataset.robotSay || "",
         }));
-        word = document.querySelector<HTMLElement>("[data-heat-text]");
+        word = document.querySelector<HTMLElement>(".k-hero [data-heat-text]");
+        timelines = [...document.querySelectorAll<HTMLElement>(".k-steps, .g-case__facts")];
+        steppers = [...document.querySelectorAll<HTMLElement>(".k-lab, .k-rows, .k-row, .k-steps, .k-facts, .g-qa, .g-qa details, .g-small, .g-case__label, .g-case__next")];
         texts = [...document.querySelectorAll<HTMLElement>(".ag :is(p, h1, h2, h3, h4, li, dt, dd, label, summary, figcaption, blockquote, .g-btn, .g-link)")].filter(
           (el) => !el.querySelector("[data-heat-text]"),
         );
       });
-      const measure = document.createElement("canvas").getContext("2d")!;
-      const glyphTop = (el: HTMLElement) => {
+      const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+      // ── Scenes and ledges ──────────────────────────────────────────
+      // Scenes (an anchor's `data-robot-scene`) give a section its own way of moving:
+      //   read  (statement)  hops word to word as each word lights up
+      //   surf  (work)       rides the screen's top edge across, leaning with the scroll
+      //   rows  (offers)     hops down the price rows, pointing at each price
+      // `.k-steps` / `.g-case__facts` are a timeline it walks as the steps light up, and
+      // `data-robot-ground="glyph-last"` perches on the last letter of the wordmark beside it.
+      // Everything in between comes from the page itself (titles, screens, photos, images,
+      // hairlines), so every page, even one without anchors, gets a path.
+      const vh = () => innerHeight;
+      // Page position from the layout itself (offsetTop chain): reveal and scroll animations on the
+      // element or any parent never move it, so the path does not shift while the visitor scrolls.
+      const restY = (el: Element) => {
+        let y = 0;
+        let e = el as HTMLElement | null;
+        if (!(e instanceof HTMLElement)) return el.getBoundingClientRect().top + scrollY;
+        while (e) {
+          y += e.offsetTop;
+          e = e.offsetParent as HTMLElement | null;
+        }
+        return y;
+      };
+      const blockLedge = (el: Element, id: string): Ledge => {
+        const r = el.getBoundingClientRect();
+        const y = restY(el);
+        const h = el instanceof HTMLElement ? el.offsetHeight : r.height;
+        return { id, y, bottom: y + h, left: r.left, right: r.right };
+      };
+      const textLedge = (el: Element, id: string): Ledge | null => {
         const range = document.createRange();
         range.selectNodeContents(el);
-        const r = range.getBoundingClientRect();
-        const st = getComputedStyle(el);
-        measure.font = `${st.fontWeight} ${parseFloat(st.fontSize)}px ${st.fontFamily}`;
-        const m = measure.measureText((el.textContent ?? "").toUpperCase());
-        return { left: r.left, width: r.width, top: r.top + r.height / 2 - (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 2 };
+        const rects = [...range.getClientRects()].filter((q) => q.width > 2);
+        if (!rects.length) return null;
+        const top = Math.min(...rects.map((q) => q.top));
+        const line = rects.filter((q) => Math.abs(q.top - top) < 4);
+        // Height from the heading's own layout box: its lines may be sliding in (split reveals).
+        const size = parseFloat(getComputedStyle(el).fontSize) || 16;
+        return { id, y: restY(el) + size * 0.12, left: Math.min(...line.map((q) => q.left)), right: Math.max(...line.map((q) => q.right)), thin: true };
       };
-      type Key = { s: number; x: number; y: number; pose: string; say: string; spot: number };
-      const keys = (): Key[] => {
-        const line = innerHeight * 0.62;
-        const dwell = innerHeight * 0.16;
-        const spots: { x: number; y: number; pose: string; say: string }[] = [];
-        if (word && word.getClientRects().length) {
-          const g = glyphTop(word);
-          if (g.width) spots.push({ x: g.left + g.width * 0.055, y: g.top + scrollY + 2, pose: "sit", say: helloRef.current });
+      const idleOf = (pose: string) => (pose === "sit" || pose === "perch" || pose === "wave" ? pose : undefined);
+
+      const sceneOf = (a: (typeof anchors)[number], n: number): Waypoint[] => {
+        const el = a.el;
+        if (!el.getClientRects().length) return [];
+        const sy = scrollY;
+        const kind = el.dataset.robotScene;
+
+        if (kind === "read") {
+          const p = el.parentElement?.querySelector<HTMLElement>("p");
+          if (!p) return [];
+          const words = [...p.querySelectorAll<HTMLElement>(".k-word-scrub")];
+          const sA = restY(p) - vh() * 0.82;
+          const sB = restY(p) + p.offsetHeight - vh() * 0.5;
+          const ledges = (words.length ? words : [p]).map((w, i) => {
+            const r = w.getBoundingClientRect();
+            return { w: { id: `w${i}`, y: restY(w) + r.height * 0.2, left: r.left, right: r.right, thin: true }, cx: r.left + r.width / 2, top: r.top, i };
+          });
+          // A staircase down the right side of the paragraph: it stands on the last word of each
+          // line as that line finishes lighting up, one small hop per line (so the movement keeps
+          // pace with the scroll). A short last line is skipped.
+          const lines: (typeof ledges)[] = [];
+          for (const l of ledges) {
+            const line = lines[lines.length - 1];
+            if (line && Math.abs(line[0].top - l.top) < 4) line.push(l);
+            else lines.push([l]);
+          }
+          const pr = p.getBoundingClientRect();
+          const picks = lines.map((line) => line[line.length - 1]).filter((l, j, all) => j < all.length - 1 || l.w.right > pr.left + pr.width * 0.6);
+          const count = Math.max(1, ledges.length - 1);
+          return picks.map((l, j) => ({
+            x: l.cx,
+            ledge: l.w,
+            s: sA + Math.min(1, (l.i * 0.08 + 0.6) / (count * 0.08 + 1)) * (sB - sA),
+            say: j === 0 ? a.say : undefined,
+          }));
         }
-        for (const a of anchors) {
-          if (!a.el.getClientRects().length) continue;
-          const r = a.el.getBoundingClientRect();
-          spots.push({ x: r.left, y: r.top + scrollY, pose: a.pose, say: a.say });
+
+        if (kind === "rows") {
+          const list = el.nextElementSibling as HTMLElement | null;
+          const rows = list ? [...list.querySelectorAll<HTMLElement>(".k-row")] : [];
+          return rows.map((row, j) => {
+            const price = row.querySelector<HTMLElement>(".k-row__price");
+            const range = document.createRange();
+            range.selectNodeContents(price ?? row);
+            const pr = range.getBoundingClientRect();
+            const rr = row.getBoundingClientRect();
+            const y = restY(row);
+            return {
+              x: Math.max(rr.left + robotH * 0.4, pr.left - robotH * 0.55),
+              ledge: { id: `row${j}`, y, left: rr.left, right: rr.right, thin: true },
+              say: j === 0 ? a.say : undefined,
+              point: price,
+              s: y - vh() * 0.55,
+            };
+          });
         }
-        spots.sort((p, q) => p.y - q.y);
-        const out: Key[] = [];
-        let last = -Infinity;
-        spots.forEach((p, i) => {
-          const arrive = Math.max(0, p.y - line, last + 1);
-          out.push({ s: arrive, ...p, spot: i });
-          last = arrive + (i === 0 && p.pose === "sit" ? dwell * 0.6 : dwell);
-          out.push({ s: last, ...p, spot: i });
+
+        if (el.dataset.robotGround === "glyph-last") {
+          const t = el.parentElement?.querySelector<HTMLElement>("[data-heat-text]");
+          const g = t && wordGeometry(t);
+          if (!g) return [];
+          const last = g.chars[g.chars.length - 1];
+          return [{ x: last.left + (last.right - last.left) * 0.3, ledge: { id: `glyph${n}`, y: g.top + sy, left: last.left, right: last.right }, idle: idleOf(a.pose) ?? "perch", say: a.say }];
+        }
+
+        const r = el.getBoundingClientRect();
+        const parent = el.offsetParent as HTMLElement | null;
+        const spanEl = el.dataset.robotSpan === "next" ? (el.nextElementSibling as HTMLElement | null) : parent;
+        const span = spanEl?.getBoundingClientRect() ?? r;
+        const thin = el.hasAttribute("data-robot-thin");
+        const isBlock = !thin && parent?.matches(".k-project__screen, .k-about__photo");
+        const ledge: Ledge = isBlock && parent ? blockLedge(parent, `a${n}`) : { id: `a${n}`, y: restY(el), left: Math.min(span.left, r.left), right: Math.max(span.right, r.left), thin };
+        const x = clamp(r.left, ledge.left + robotH * 0.3, ledge.right - robotH * 0.3);
+        const here: Waypoint = { x, ledge, idle: idleOf(a.pose), say: a.say };
+        if (kind === "surf") {
+          const toRight = x < (ledge.left + ledge.right) / 2 + 4;
+          return [here, { x: toRight ? ledge.right - robotH * 0.45 : ledge.left + robotH * 0.45, ledge, move: "surf" }];
+        }
+        return [here];
+      };
+      // A timeline: the line above the process steps (or a case study's facts), walked as each
+      // step lights up. Stacked (phones): it hops down the steps instead.
+      const timelineOf = (list: HTMLElement, n: number): Waypoint[] => {
+        const items = [...list.children].filter((c): c is HTMLElement => c instanceof HTMLElement && c.getClientRects().length > 0);
+        if (!items.length) return [];
+        const lr = list.getBoundingClientRect();
+        const top = restY(list);
+        const sA = top - vh() * 0.85;
+        const sB = top + list.offsetHeight - vh() * 0.6;
+        const tops = items.map((c) => restY(c));
+        const stacked = Math.max(...tops) - Math.min(...tops) > 8;
+        return items.map((c, j) => {
+          const cr = c.getBoundingClientRect();
+          return {
+            x: Math.max(cr.left + robotH * 0.4, cr.right - robotH * 0.45),
+            ledge: stacked ? { id: `tl${n}-${j}`, y: tops[j], left: cr.left, right: cr.right, thin: true } : { id: `tl${n}`, y: top, left: lr.left, right: lr.right, thin: true },
+            // Only the process steps light up with the scroll; keep pace with them there.
+            s: list.matches(".k-steps") ? sA + ((0.35 * j + 1) / (0.35 * (items.length - 1) + 1)) * (sB - sA) : undefined,
+          };
+        });
+      };
+      // Everything else it can stand on or climb, read from the page.
+      const pageLedges = (): Ledge[] => {
+        const out: Ledge[] = [];
+        // Sticky or fixed things move with the scroll: never stand on them.
+        const pinned = (el: Element) => {
+          for (let e: Element | null = el, i = 0; e && i < 8; e = e.parentElement, i++) {
+            const p = getComputedStyle(e).position;
+            if (p === "sticky" || p === "fixed") return true;
+          }
+          return false;
+        };
+        const skip = (el: Element) => el.closest(".k-guide, .g-header, .g-menu, header, nav, #loader, #curtain") || !el.getClientRects().length || pinned(el);
+        document.querySelectorAll("h1, h2, h3").forEach((el, i) => {
+          if (skip(el) || el.querySelector("[data-heat-text]")) return;
+          const l = textLedge(el, `h${i}`);
+          if (l && l.right - l.left > 40) out.push(l);
+        });
+        document.querySelectorAll(".k-project__screen, .k-about__photo, main img, .ag img, main video").forEach((el, i) => {
+          if (skip(el) || (el.tagName === "IMG" && el.closest(".k-project__screen, .k-about__photo"))) return;
+          const r = el.getBoundingClientRect();
+          if (r.width >= 160 && r.height >= 100) out.push(blockLedge(el, `b${i}`));
+        });
+        steppers.forEach((el, i) => {
+          if (skip(el)) return;
+          const r = el.getBoundingClientRect();
+          if (r.width < innerWidth * 0.3) return;
+          const st = getComputedStyle(el);
+          const y = restY(el);
+          if (parseFloat(st.borderTopWidth) >= 1) out.push({ id: `t${i}`, y, left: r.left, right: r.right, thin: true });
+          if (parseFloat(st.borderBottomWidth) >= 1) out.push({ id: `u${i}`, y: y + r.height, left: r.left, right: r.right, thin: true });
         });
         return out;
       };
-      const routeAt = (scroll: number) => {
-        const k = keys();
-        // No spots (mid page change, or a page without any): the guide steps out of view.
-        if (!k.length) return { x: screen.x, y: screen.y + scroll, pose: "stand", say: "", resting: true, spot: -1, none: true };
-        if (scroll <= k[0].s) return { ...k[0], resting: true };
-        const end = k[k.length - 1];
-        if (scroll >= end.s) return { ...end, resting: true };
-        let j = 0;
-        while (j < k.length - 2 && scroll >= k[j + 1].s) j++;
-        const a = k[j];
-        const b = k[j + 1];
-        const f = (scroll - a.s) / Math.max(1, b.s - a.s);
-        const resting = a.spot === b.spot;
-        return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, pose: resting ? a.pose : "walk", say: resting ? a.say : "", resting, spot: resting ? a.spot : -1 };
+      const bandNow = (): Band => ({
+        top: Math.max(vh() * 0.2, robotH * 1.15 + 72), // its head stays clear of the header
+        bottom: vh() - Math.max(24, vh() * 0.06),
+        aim: vh() * 0.58,
+      });
+
+      let route: Route = { legs: [], says: [], marks: [] };
+      let routeSig = "";
+      let blendX = 0;
+      let blendY = 0;
+      let openKey = "";
+      let openFn: (x: number) => number = () => 1;
+      const refreshRoute = () => {
+        const band = bandNow();
+        let w: Word | null = null;
+        const g = word && word.getClientRects().length ? wordGeometry(word) : null;
+        if (g) {
+          const sy = scrollY;
+          const key = `${Math.round(g.left)},${Math.round(g.right)},${Math.round(g.size)},${robotH}`;
+          if (key !== openKey) {
+            openKey = key;
+            openFn = wordOpenness(g, robotH * 0.85);
+          }
+          const perchX = g.left + (g.right - g.left) * 0.055;
+          w = { top: g.top + sy, baseline: g.baseline + sy, left: g.left, right: g.right, perchX, open: openFn };
+        }
+        const points: Waypoint[] = [];
+        // Timelines first: a stop on the same line (a case study's "it's live") comes after the walk.
+        timelines.forEach((list, n) => points.push(...timelineOf(list, n)));
+        anchors.forEach((a, n) => points.push(...sceneOf(a, n)));
+        const ledges = pageLedges();
+        points.forEach((p, i) => ((p as Waypoint & { i?: number }).i = i));
+        points.sort((p, q) => p.ledge.y - q.ledge.y || ((p as Waypoint & { i: number }).i - (q as Waypoint & { i: number }).i));
+        if (!w) {
+          // No wordmark: start sitting on the first title that is on screen at the top of the page.
+          const startLedge = [...ledges].sort((p, q) => p.y - q.y).find((l) => l.y >= band.top - 40 && l.y <= band.bottom && l.id.startsWith("h"));
+          if (startLedge && (!points.length || points[0].ledge.y > startLedge.y))
+            points.unshift({ x: startLedge.left + Math.min(robotH * 0.6, (startLedge.right - startLedge.left) / 2), ledge: startLedge, idle: "sit" });
+        }
+        // The end: the lowest thing on the page; and if even that would be above the visitor's
+        // screen at the very bottom, the bottom of the page itself (a floor), so it is always in view.
+        const docH = document.documentElement.scrollHeight;
+        const bottomScroll = Math.max(0, docH - innerHeight);
+        const floor: Ledge = { id: "floor", y: bottomScroll + band.bottom - 8, left: 24, right: innerWidth - 24, thin: true };
+        ledges.push(floor);
+        const lowest = ledges.filter((l) => l !== floor).sort((p, q) => q.y - p.y)[0];
+        let last = points[points.length - 1];
+        if (lowest && (!last || lowest.y > last.ledge.y + vh() * 0.1)) {
+          points.push({ x: clamp(lowest.left + (lowest.right - lowest.left) * 0.8, lowest.left + 20, lowest.right - 20), ledge: lowest, idle: "wave" });
+          last = points[points.length - 1];
+        }
+        if (!last || last.ledge.y - bottomScroll < band.top) points.push({ x: clamp(last ? last.x : innerWidth * 0.7, 40, innerWidth - 40), ledge: floor, idle: "wave" });
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+        const sig =
+          `${innerWidth}x${innerHeight}|${robotH}|${Math.round(maxScroll)}|${w ? Math.round(w.baseline) : 0}|` +
+          points.map((p) => `${Math.round(p.x / 4)},${Math.round(p.ledge.y / 4)},${Math.round((p.s ?? -1) / 4)}`).join(";") +
+          "|" +
+          ledges.map((l) => `${Math.round(l.y / 4)},${Math.round(l.left / 4)}`).join(";");
+        if (sig === routeSig) return;
+        routeSig = sig;
+        const before = route.legs.length ? sampleRoute(route, scrollY, innerHeight) : null;
+        route = buildRoute(points, ledges, w, { vh: innerHeight, robotW: robotH * 0.55, maxScroll, band });
+        const after = before ? sampleRoute(route, scrollY, innerHeight) : null;
+        if (before && after) {
+          blendX += before.x - after.x;
+          blendY += before.y - after.y;
+        }
+        // ?guide-debug in the URL exposes the computed path (for tuning, never on by default).
+        if (location.search.includes("guide-debug"))
+          (window as unknown as { __guide?: unknown }).__guide = {
+            band,
+            points: points.map((p) => ({ x: Math.round(p.x), y: Math.round(p.ledge.y), id: p.ledge.id, s: p.s === undefined ? null : Math.round(p.s) })),
+            legs: route.legs.map((l) => {
+              const m = l.at(0.5);
+              return [Math.round(l.s0), Math.round(l.s1), m.pose, Math.round(m.x), Math.round(m.y)];
+            }),
+          };
+      };
+      const routeAt = (scroll: number): Sample => {
+        if (frame % 30 === 0 || !route.legs.length) refreshRoute();
+        const s = sampleRoute(route, scroll, innerHeight);
+        // Its whole body stays inside the window sideways too (a wall at the window's edge is
+        // climbed on its front edge instead of outside it).
+        if (s) {
+          const half = robotH * 0.34;
+          const viewW = document.documentElement.clientWidth || innerWidth;
+          s.x = clamp(s.x, half + 6, viewW - half - 6);
+        }
+        if (s && (blendX || blendY)) {
+          s.x += blendX;
+          s.y += blendY;
+          const fade = Math.pow(0.86, gsap.ticker.deltaRatio());
+          blendX = Math.abs(blendX) < 0.5 ? 0 : blendX * fade;
+          blendY = Math.abs(blendY) < 0.5 ? 0 : blendY * fade;
+        }
+        // No path (mid page change): the guide steps out of view.
+        return s ?? { x: screen.x, y: screen.y + scroll, pose: "stand", side: 0, behind: false, peek: 0, say: "", sayId: 0, point: null, idle: "", none: true };
       };
 
       // ── What the visitor points at ───────────────────────────────
@@ -344,6 +572,13 @@ export default function Robot() {
       let restFor = 0;
       let lastSpot = -2;
       let shownGuide = false;
+      let isBehind = false;
+      let jump = 0;
+      let surf = 0;
+      let climb = 0;
+      let prevPageX = 0;
+      let prevPageY = -1e9;
+      let peek = 0;
       let loadedAt = -1;
       let frame = 0;
       let shown = "";
@@ -432,7 +667,7 @@ export default function Robot() {
         const r = gsap.ticker.deltaRatio();
         const k = (x: number) => 1 - Math.pow(1 - x, r);
 
-        const goal: ReturnType<typeof routeAt> & { none?: boolean } = routeAt(scrollY);
+        const goal = routeAt(scrollY);
         // First visit: arrive just after the loader, once the wordmark has condensed.
         if (loadedAt < 0 && document.documentElement.classList.contains("is-loaded")) loadedAt = time;
         const present = !goal.none && loadedAt >= 0 && (reduce || time - loadedAt > 0.9);
@@ -447,15 +682,25 @@ export default function Robot() {
         screen.y = goal.y - scrollY;
         const first = prevX < -900;
         const dx = first ? 0 : screen.x - prevX;
-        const dy = first ? 0 : screen.y - prevY;
-        const moved = Math.hypot(dx, goal.resting ? 0 : dy * 0.35);
+        void prevY;
+        // Movement along its path (page space): a climb moves it even when it holds still on screen.
+        const moved = first || prevPageY < -1e8 ? 0 : Math.hypot(goal.x - prevPageX, goal.y - prevPageY);
+        prevPageX = goal.x;
+        prevPageY = goal.y;
         travel = lerp(travel, moved, k(0.3));
-        const walking = !goal.resting && travel > 0.15;
-        restFor = walking ? 0 : restFor + r / 60;
-        if (goal.spot !== lastSpot) {
-          // A new spot (or a jump straight to one) starts its own line, even without a walk.
-          lastSpot = goal.spot;
-          restFor = 0;
+        const moving = travel > 0.15;
+        const walking = moving && goal.pose === "walk";
+        const idle = moving ? "" : goal.idle;
+        // Behind the wordmark while it weaves through the letters (never with the shortcuts open).
+        const behind = goal.behind && !openRef.current;
+        if (behind !== isBehind) {
+          isBehind = behind;
+          wrap.classList.toggle("is-behind", behind);
+        }
+        restFor = moving ? 0 : restFor + r / 60;
+        if (goal.sayId !== lastSpot) {
+          // A new section: its line can be said (once), the next time the visitor stops.
+          lastSpot = goal.sayId;
           quiet = "";
         }
         wrap.style.transform = `translate3d(${Math.round(screen.x - cw / 2)}px, ${Math.round(screen.y - ch * FEET)}px, 0)`;
@@ -469,10 +714,10 @@ export default function Robot() {
         const reactVisible = Boolean(reactBox && reactBox.bottom > 0 && reactBox.top < innerHeight);
         // A spot's line is said once per visit, then the guide goes quiet so it never parks a
         // bubble over what the visitor is reading. Pointing at something always gets an answer.
-        if (walking) quiet = "";
-        else if (goal.say && goal.say !== quiet && restFor > sayFor) quiet = goal.say;
-        const spotLine = !walking && restFor > 0.35 && goal.say !== quiet ? goal.say : "";
-        const line = menuOpen ? "" : reactVisible && react ? react.text : spotLine;
+        // (Once per section: moving on within the section does not repeat it.)
+        if (goal.say && goal.say !== quiet && restFor > sayFor) quiet = goal.say;
+        const spotLine = !moving && restFor > 0.35 && goal.say !== quiet ? goal.say : "";
+        const line = menuOpen || behind ? "" : reactVisible && react ? react.text : spotLine;
         const wantSide = screen.x > innerWidth - 320 ? "left" : "right";
         if (wantSide !== side) {
           side = wantSide;
@@ -485,7 +730,7 @@ export default function Robot() {
             placeBubble();
           }
           bubble.classList.toggle("is-on", Boolean(line));
-        } else if (line && !walking && frame % 30 === 0) placeBubble();
+        } else if (line && !moving && frame % 30 === 0) placeBubble();
         const wantLow = screen.y > innerHeight - 190;
         if (wantLow !== low) {
           low = wantLow;
@@ -493,18 +738,29 @@ export default function Robot() {
         }
 
         if (!reduce) {
-          sit = lerp(sit, goal.pose === "sit" ? 1 : 0, k(0.12));
+          sit = lerp(sit, goal.pose === "sit" || idle === "sit" || idle === "perch" ? 1 : 0, k(0.12));
+          climb = lerp(climb, goal.pose === "climb" ? 1 : 0, k(0.2));
+          jump = lerp(jump, goal.pose === "jump" ? 1 : 0, k(0.25));
+          surf = lerp(surf, goal.pose === "surf" ? 1 : 0, k(0.15));
+          peek = lerp(peek, walking ? goal.peek : 0, k(0.15));
           const stride = Math.max(18, robotH * 0.33);
-          walkPhase += (walking ? moved / stride : 0) * Math.PI;
+          walkPhase += (walking || (moving && goal.pose === "climb") ? moved / stride : 0) * Math.PI;
           const amp = walking ? Math.min(1, travel / 2) : 0;
           const swing = Math.sin(walkPhase) * 0.75 * amp;
           const dangle = Math.sin(time * 1.6) * 0.12 * sit;
-          legs[0].rotation.x = lerp(swing, -1.45 + dangle, sit);
-          legs[1].rotation.x = lerp(-swing, -1.45 - dangle, sit);
+          // Hops: knees tucked, arms up.
+          // Surfing: knees bent, one foot forward.
+          // Climbing: hand over hand, feet stepping down the wall.
+          const reachStep = Math.sin(walkPhase) * 0.5 * Math.min(1, travel / 1.5);
+          legs[0].rotation.x = lerp(lerp(lerp(lerp(swing, -1.45 + dangle, sit), -0.45, surf), -0.85, jump), -0.5 + reachStep, climb);
+          legs[1].rotation.x = lerp(lerp(lerp(lerp(-swing, -1.45 - dangle, sit), 0.2, surf), -0.55, jump), -0.5 - reachStep, climb);
           body.position.y = lerp(Math.abs(Math.sin(walkPhase)) * 0.05 * amp, -HIP + 0.1, sit) + Math.sin(time * 2.1) * 0.01;
 
           // Pointing at what the visitor is looking at.
-          const target = reactVisible && reactBox ? { x: reactBox.left + reactBox.width / 2, y: reactBox.top + reactBox.height / 2 } : null;
+          // What the visitor points at wins; otherwise what this stop is about (a price).
+          const stopBox = !moving && goal.point ? goal.point.getBoundingClientRect() : null;
+          const box = reactVisible && reactBox ? reactBox : stopBox;
+          const target = box ? { x: box.left + box.width / 2, y: box.top + box.height / 2 } : null;
           point = lerp(point, target && !walking ? 1 : 0, k(0.12));
           const tx = target ? target.x - screen.x : 0;
           const ty = target ? target.y - (screen.y - robotH * 0.55) : 0;
@@ -513,10 +769,22 @@ export default function Robot() {
           const ang = Math.atan2(tx / len, ty / len);
 
           // Walk in profile; when resting, turn a little toward the target.
-          const facing = walking && Math.abs(dx) > 0.2 ? Math.sign(dx) * 1.25 : target ? Math.sign(tx) * 0.35 * point : 0;
+          // Between letters it turns to the visitor for a moment (a peek), then walks on.
+          const facing =
+            climb > 0.3
+              ? goal.side * 1.45 // turned to the wall it climbs
+              : (jump > 0.3 || surf > 0.3) && Math.abs(dx) > 0.2
+              ? Math.sign(dx) * (surf > 0.3 ? 0.7 : 0.9)
+              : walking && Math.abs(dx) > 0.2
+                ? Math.sign(dx) * 1.25 * (1 - 0.8 * peek)
+                : target
+                  ? Math.sign(tx) * 0.35 * point
+                  : 0;
           face = lerp(face, facing, k(0.12));
           root.rotation.y = face;
-          body.rotation.z = lerp(body.rotation.z, -dx * 0.01, k(0.1));
+          // Surfing: lean into the scroll and wobble to keep balance.
+          const lean = gsap.utils.clamp(-0.35, 0.35, -scrollState().velocity * 0.012) + Math.sin(time * 2.4) * 0.07;
+          body.rotation.z = lerp(body.rotation.z, -dx * 0.01 + surf * lean, k(0.1));
 
           chest.scale.y = 1 + Math.sin(time * 2.1) * 0.016;
           bulb.scale.setScalar(1 + Math.sin(time * 3) * 0.15);
@@ -527,7 +795,7 @@ export default function Robot() {
           const hx = (lookX - screen.x) / innerWidth;
           const hy = (lookY - (screen.y - robotH * 0.8)) / innerHeight;
           const around = sit > 0.5 && !pointer.active ? Math.sin(time * 0.7) * 0.5 : 0;
-          const yawGoal = walking ? 0 : gsap.utils.clamp(-0.7, 0.7, hx * 1.8) - face * 0.6 + around;
+          const yawGoal = walking ? -face * 0.5 * peek : gsap.utils.clamp(-0.7, 0.7, hx * 1.8) - face * 0.6 + around;
           head.rotation.y = lerp(head.rotation.y, yawGoal, k(0.1));
           head.rotation.x = lerp(head.rotation.x, gsap.utils.clamp(-0.35, 0.3, hy * 1.2), k(0.1));
 
@@ -547,16 +815,16 @@ export default function Robot() {
 
           // Arms: swing when walking; wave on a greeting spot, when near, or with the shortcuts
           // open; otherwise the arm on the target's side points at it.
-          const greet = (goal.pose === "wave" && !walking) || near || menuOpen ? 1 : 0;
+          const greet = idle === "wave" || idle === "perch" || near || menuOpen ? 1 : 0;
           wave = lerp(wave, greet && point < 0.5 ? 1 : 0, k(0.1));
           const [left, right] = arms;
           const pointRight = tx >= 0;
           const pr = pointRight ? point : 0;
           const pl = pointRight ? 0 : point;
           left.arm.rotation.x = swing * (1 - sit) * (1 - pl);
-          left.arm.rotation.z = lerp(-0.1 - sit * 0.3, gsap.utils.clamp(-2.9, -0.2, ang), pl);
+          left.arm.rotation.z = lerp(lerp(lerp(lerp(-0.1 - sit * 0.3, gsap.utils.clamp(-2.9, -0.2, ang), pl), -1.35, surf), -2.3, jump), -2.5 + Math.sin(walkPhase) * 0.45, climb);
           right.arm.rotation.x = -swing * (1 - wave) * (1 - sit) * (1 - pr);
-          right.arm.rotation.z = lerp(lerp(0.1 + sit * 0.3, 2.5, wave), gsap.utils.clamp(0.2, 2.9, ang), pr);
+          right.arm.rotation.z = lerp(lerp(lerp(lerp(lerp(0.1 + sit * 0.3, 2.5, wave), gsap.utils.clamp(0.2, 2.9, ang), pr), 1.35, surf), 2.3, jump), 2.5 + Math.sin(walkPhase) * 0.45, climb);
           right.fore.rotation.z = wave * Math.sin(time * 9) * 0.5;
 
           tail.rotation.x = lerp(tail.rotation.x, -0.25 - Math.min(1, Math.abs(dx) / 4) * 0.9, k(0.15));
@@ -568,7 +836,7 @@ export default function Robot() {
           pos.needsUpdate = true;
         }
 
-        const busy = reduce || walking || wave > 0.02 || point > 0.02 || happy > 0.02 || blink > 0 || sit > 0.02;
+        const busy = reduce || moving || jump > 0.02 || surf > 0.02 || climb > 0.02 || wave > 0.02 || point > 0.02 || happy > 0.02 || blink > 0 || sit > 0.02;
         frame++;
         if (busy || frame % 2 === 0) renderer.render(scene, camera);
       };

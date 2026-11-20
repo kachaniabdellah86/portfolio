@@ -85,7 +85,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/[lang]/work/
           <h1 className="g-case__title" data-split="lines" data-intro>{project.title}</h1>
           <p className="g-case__meaning" data-split="lines" data-intro data-delay="0.15">{project.meaning}</p>
           <div className="k-anchor-row" aria-hidden="true">
-            <span className="k-anchor k-anchor--case" data-robot-anchor="wave" data-robot-say={dict.robot.caseTop} />
+            <span className="k-anchor k-anchor--case" data-robot-anchor="wave" data-robot-thin data-robot-say={dict.robot.caseTop} />
           </div>
           <dl className="g-case__facts">
             {facts.map((fact) => (
@@ -146,7 +146,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/[lang]/work/
         {project.id === "yalla" && <Testimonial t={dict.testimonial} />}
 
         <section className="g-case__next g-wrap">
-          <span className="k-anchor k-anchor--next" data-robot-anchor="stand" data-robot-say={dict.robot.caseNext} aria-hidden="true" />
+          <span className="k-anchor k-anchor--next" data-robot-anchor="stand" data-robot-thin data-robot-say={dict.robot.caseNext} aria-hidden="true" />
           <div>
             <h2 className="g-title">{t.similarTitle}</h2>
             <p>{t.similarText}</p>

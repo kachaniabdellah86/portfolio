@@ -437,6 +437,7 @@ export const en = {
     finale: "Tell him in one sentence. He replies within a day.",
     caseTop: "It's live. The link is right here.",
     caseNext: "Want one like it? Ask on WhatsApp.",
+    footer: "That was the whole tour. Click me to jump back up.",
     hoverScreen: "Click it, it opens big.",
     hoverOffer: "Ask about this one on WhatsApp.",
     hoverCta: "Opens WhatsApp with a message ready.",

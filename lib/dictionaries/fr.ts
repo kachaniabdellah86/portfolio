@@ -443,6 +443,7 @@ export const fr: Dictionary = {
     finale: "Dites-lui en une phrase. Il répond dans la journée.",
     caseTop: "Il est en ligne. Le lien est juste ici.",
     caseNext: "Vous voulez le même ? Demandez sur WhatsApp.",
+    footer: "Fin de la visite. Cliquez sur moi pour remonter.",
     hoverScreen: "Cliquez, il s'ouvre en grand.",
     hoverOffer: "Demandez ce forfait sur WhatsApp.",
     hoverCta: "WhatsApp s'ouvre avec le message prêt.",
