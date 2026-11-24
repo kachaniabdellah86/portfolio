@@ -117,9 +117,11 @@
   display: flex; justify-content: space-between; align-items: center; gap: var(--gutter);
   padding: calc(var(--u) * 1.5) var(--gutter);
   color: var(--c-ink); pointer-events: none; font: 500 var(--t-s) / 1 var(--f-body);
-  transition: translate 0.6s var(--e-out);
+  transition: translate 0.6s var(--e-out), background-color 0.4s var(--e-out);
 }
 .g-header.is-hidden { translate: 0 -120%; }
+.g-header.is-solid { background: var(--page, var(--c-field)); }
+.ag .g-header.is-solid { background: var(--page); }
 .g-header a, .g-header button { pointer-events: auto; }
 .g-header__name { font-family: var(--f-display); font-size: 1.55rem; line-height: 1; text-transform: uppercase; letter-spacing: 0.01em; padding-block: 0.3em; }
 .g-header__nav { display: flex; align-items: center; gap: calc(var(--u) * 2.2); }
@@ -191,6 +193,8 @@
 .k-work { padding-block: calc(var(--u) * 10) calc(var(--u) * 8); }
 .k-head { display: flex; justify-content: space-between; align-items: end; gap: var(--gutter); margin-bottom: calc(var(--u) * 6); }
 .k-head p { max-width: 30ch; color: var(--c-muted); font-size: var(--t-s); }
+/* Phones: the title takes the full width and the note sits under it (no one-word lines). */
+@media (max-width: 767px) { .k-head { flex-direction: column; align-items: start; gap: 1rem; } .k-head p { max-width: 40ch; } }
 .k-project { align-items: start; margin-bottom: calc(var(--u) * 10); }
 .k-project__label { grid-column: 1 / span 3; position: sticky; top: calc(var(--u) * 8); }
 .k-project__label h3 { font-family: var(--f-display); font-size: var(--t-l); text-transform: uppercase; line-height: 0.92; letter-spacing: 0.01em; }
@@ -297,9 +301,63 @@
 .g-small a { display: inline-block; padding-block: 0.45em; transition: color 0.3s; }
 @media (hover: hover) { .g-small a:hover { color: var(--c-ink); } }
 
+/* ── Secondary pages (/lab, /studios): same poster system as the home ── */
+.k-page { position: relative; padding-top: calc(var(--u) * 10); padding-bottom: calc(var(--u) * 8); }
+.k-page__eyebrow { margin-top: calc(var(--u) * 5); }
+.k-page__title { font-family: var(--f-display); font-size: clamp(4.5rem, 1rem + 15vw, 17rem); line-height: 0.8; text-transform: uppercase; margin-top: 0.6rem; }
+.k-page__eyebrow + .k-page__title { margin-top: 1rem; }
+.g-case__crumbs + .k-page__title { margin-top: calc(var(--u) * 5); }
+.k-page__title--long { font-size: clamp(3.4rem, 1rem + 8.4vw, 10.5rem); line-height: 0.86; max-width: 14ch; }
+.k-page__lead { font-size: var(--t-m); line-height: 1.35; margin-top: 1.6rem; max-width: 40ch; }
+.k-page .k-hero__cta { margin-top: 2rem; }
+
+.k-concepts, .k-lab-exps, .k-terms, .k-proof { padding-block: calc(var(--u) * 10); }
+.k-concept { align-items: start; margin-bottom: calc(var(--u) * 10); }
+.k-concept__label { grid-column: 1 / span 3; }
+.k-concept__label h3 { font-family: var(--f-display); font-size: var(--t-l); text-transform: uppercase; line-height: 0.92; }
+.k-concept__label p { color: var(--c-muted); margin-top: 0.4rem; }
+.k-concept__stage { grid-column: 4 / span 9; border-radius: var(--radius); overflow: clip; padding: clamp(1rem, 3vw, 2.5rem); min-height: 22rem; }
+.k-concept__body { grid-column: 4 / span 6; margin-top: 1.6rem; display: grid; gap: 0.8rem; }
+.k-concept__body p { color: var(--c-muted); max-width: 56ch; }
+.k-concept__body .k-concept__lead { color: var(--c-ink); font-size: var(--t-m); line-height: 1.35; }
+
+.k-exps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); }
+.k-exp { display: flex; flex-direction: column; border-top: 1px solid var(--c-line); padding-top: 1rem; }
+.k-exp__top { display: flex; justify-content: space-between; gap: 1rem; color: var(--c-muted); }
+.k-exp__stage { position: relative; display: flex; min-height: 20rem; margin-top: 1rem; border-radius: var(--radius); background: #15141c; padding: 1rem; overflow: clip; }
+.k-exp h3 { font-family: var(--f-display); font-size: 2.2rem; line-height: 0.95; text-transform: uppercase; margin-top: 1.2rem; }
+.k-exp p { color: var(--c-muted); font-size: var(--t-s); margin-top: 0.4rem; max-width: 40ch; }
+@media (max-width: 1023px) { .k-exps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.k-rows--plain .k-row__name { grid-column: 1 / span 5; }
+.k-rows--plain .k-row__pitch { grid-column: 6 / span 7; font-size: var(--t-body); }
+
+.k-facts--terms { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 0; }
+.k-facts--terms dd { font-weight: 400; color: var(--c-ink); max-width: 36ch; }
+
+.k-proof__list { list-style: none; margin: 0; padding: 0; }
+.k-proof__list li:last-child .k-lab { border-bottom: 1px solid var(--c-line); }
+
+.k-close { padding-block: calc(var(--u) * 10) calc(var(--u) * 2.5); display: flex; flex-direction: column; gap: calc(var(--u) * 8); }
+.k-close p { font-size: var(--t-m); max-width: 36ch; margin-block: 1.2rem 1.8rem; color: var(--c-muted); }
+
+@media (max-width: 767px) {
+  .k-concept__label, .k-concept__stage, .k-concept__body { grid-column: 1 / -1; }
+  .k-concept__stage { margin-top: 1.2rem; min-height: 0; }
+  .k-exps, .k-facts--terms { grid-template-columns: 1fr; }
+  .k-rows--plain .k-row__name, .k-rows--plain .k-row__pitch { grid-column: 1 / -1; }
+  .k-rows--plain .k-row__pitch { margin-top: 0.6rem; }
+}
+
 /* ── 404 ─────────────────────────────────────────────────────────────── */
-.g-404 { min-height: 100svh; display: grid; place-items: center; padding: var(--gutter); }
-.g-404__cell { width: min(30rem, 80vw); aspect-ratio: 4 / 3; border: 1.5px dashed var(--c-muted); border-radius: var(--radius); margin-bottom: 2rem; display: grid; place-items: center; color: var(--c-muted); font-family: var(--f-tifinagh); font-size: 2rem; }
+/* The global 404 renders outside the app layout, without the CSS reset: zero the defaults here. */
+body.ag { margin: 0; }
+.g-404 { min-height: 100svh; display: grid; align-items: center; padding-block: calc(var(--u) * 10) var(--gutter); }
+.g-404 :is(p, h1) { margin: 0; }
+.g-404 .g-404__num { font-family: var(--f-display); font-size: clamp(8rem, 2rem + 24vw, 24rem); line-height: 0.78; }
+.g-404 .g-title { margin-top: 1.6rem; }
+.g-404 .g-404__text { max-width: 44ch; margin-block: 1.2rem 2rem; color: var(--c-muted); }
+.g-404 .g-404__actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
 @media (hover: hover) {
   .g-404 .g-btn:not([data-fill]):hover { background: var(--c-saffron); }
   .g-404 .g-btn:not([data-fill]):hover span { translate: 4px 0; }
@@ -351,7 +409,10 @@
 
 /* ── Loader: the field, the name, a counter ──────────────────────────── */
 #loader { position: fixed; inset: 0; z-index: var(--z-loader); background: var(--c-night); color: var(--c-ink); display: grid; align-content: end; padding: var(--gutter); clip-path: inset(0 0 0 0); }
-#loader[hidden], html:not(.js) #loader { display: none; }
+#loader[hidden], html:not(.js) #loader, html.no-loader #loader { display: none; }
+/* Safety net: if the scripts are slow to arrive, the page never stays hidden behind the loader. */
+html.js:not(.is-loaded) #loader { animation: k-loader-failsafe 0.5s 3s forwards; }
+@keyframes k-loader-failsafe { to { opacity: 0; visibility: hidden; } }
 .l-row { display: flex; justify-content: space-between; align-items: end; overflow: hidden; }
 .l-row .g-tifinagh { font-size: clamp(1.6rem, 3vw, 2.4rem); }
 .l-count { font-family: var(--f-display); font-size: clamp(5rem, 16vw, 15rem); line-height: 0.8; font-variant-numeric: tabular-nums; }

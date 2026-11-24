@@ -310,6 +310,12 @@ export const fr: Dictionary = {
     edge: "Labo, Concepts",
     heading: "Des idées, ~construites~\npour être *touchées.*",
     intro: "Des concepts personnels où je pousse les interfaces plus loin qu'un brief ne le permet. Chacun est un prototype fonctionnel.",
+    title: "Labo",
+    conceptsNote: "Des concepts, pas des projets clients : chacun est un prototype que vous pouvez utiliser ici.",
+    closeTitle: "Une idée de ce genre ?",
+    closeText: "Les interfaces qui bougent, réagissent et s'expliquent, c'est ce que je préfère construire. Parlez-moi de la vôtre.",
+    closeCta: "Parler d'une idée",
+    closeMessage: "Bonjour Abdellah, j'ai vu votre labo et j'ai une idée de projet interactif.",
   },
   studios: {
     metaTitle: "Développeur créatif en marque blanche pour agences, Abdellah Kachani",
@@ -327,7 +333,7 @@ export const fr: Dictionary = {
     handHeading: "Vous confiez,\nje *livre.*",
     hand: [
       { title: "Scènes WebGL & Three.js", text: "Scènes d'accueil, visionneuses produit et particules, avec un budget de performance pour mobile." },
-      { title: "Récits au défilement", text: "Chapitres épinglés, trajectoires de caméra et animation chorégraphiée, comme le parcours de mon site." },
+      { title: "Récits au défilement", text: "Chapitres épinglés, trajectoires de caméra et animation chorégraphiée, comme la façon dont ce site bouge." },
       { title: "De Figma à Next.js en production", text: "Sites fidèles à vos maquettes, rapides sur mobile, avec SEO et analytics en place." },
       { title: "Démos produit interactives", text: "Prototypes cliquables et démos d'interface pour pitchs, lancements et études de cas." },
       { title: "Sites multilingues et RTL", text: "Français, anglais et arabe avec une vraie mise en page de droite à gauche, déjà en production." },
@@ -357,9 +363,12 @@ export const fr: Dictionary = {
     proof: [
       { title: "Yalla China", text: "Plateforme trilingue FR/EN/AR avec RTL, candidatures et espace admin. Lighthouse 96 sur mobile.", href: "/fr/work/yalla-china" },
       { title: "FICAM Festival Platform", text: "Application du festival : inscription, validation des séances par QR code, niveaux et récompenses en direct.", href: "/fr/work/ficam" },
-      { title: "Ce portfolio", text: "Un parcours WebGL au défilement, fluide sur mobile, un échantillon des créations que je livre.", href: "/fr" },
+      { title: "Ce portfolio", text: "Typographie WebGL dans la chaleur, transitions de film et un guide qui parcourt la page, fluide sur mobile.", href: "/fr" },
     ],
     open: "Ouvrir",
+    title: "Le développeur derrière votre marque",
+    closeTitle: "Un projet à me confier ?",
+    closeText: "Envoyez le brief ou les maquettes. Vous recevez un forfait ou un tarif jour sous 24 heures.",
   },
   home: {
     metaTitle: "Abdellah Kachani, développeur web à Agadir | Des sites qui vendent",
@@ -393,7 +402,7 @@ export const fr: Dictionary = {
     },
     register: {
       title: "Offres",
-      note: "Un devis fixe avant de commencer. Paiement : 50 % à la commande, 50 % à la mise en ligne. Maintenance de 150 à 300 MAD par mois.",
+      note: "Tarifs pour les entreprises au Maroc. Un devis fixe avant de commencer. Paiement : 50 % à la commande, 50 % à la mise en ligne. Maintenance de 150 à 300 MAD par mois.",
       from: "dès",
       ask: "Demander ce forfait",
       studios: "Agences : travail en marque blanche",
@@ -426,9 +435,9 @@ export const fr: Dictionary = {
       small: "Abdellah Kachani, développeur web à Agadir, Maroc.",
     },
     notFound: {
-      title: "Cette case n'a jamais été construite",
-      text: "La page que vous cherchez n'est pas dans le mur. Elle a peut-être changé d'adresse, ou le lien contient une faute.",
-      back: "Retour au mur",
+      title: "Rien ici",
+      text: "Cette page n'existe pas. Elle a peut-être changé d'adresse, ou le lien contient une faute.",
+      back: "Retour à l'accueil",
     },
   },
   robot: {
@@ -466,7 +475,7 @@ export const fr: Dictionary = {
     problem: "Le problème",
     built: "Ce que j'ai construit",
     results: "Le résultat",
-    similarTitle: "Un projet similaire ?",
+    similarTitle: "Un projet similaire ?",
     similarText: "Dites-moi ce que vous voulez construire. Je vous réponds sur WhatsApp avec une première idée et une fourchette de prix.",
     similarCta: "Discuter sur WhatsApp",
     similarMessage: "Bonjour Abdellah, j'ai lu l'étude de cas {title} et j'ai un projet similaire.",

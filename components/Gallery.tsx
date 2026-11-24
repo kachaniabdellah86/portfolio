@@ -906,6 +906,35 @@ function Native() {
   );
 }
 
+/** The five experiments as a plain grid in the indigo system (DESIGN.md), used on /lab. */
+export function LabExperiments() {
+  const slides = useSlides();
+  const { dict } = useLocale();
+  return (
+    <ol className="k-exps">
+      {slides.map((slide) => (
+        <li key={slide.index} className="k-exp">
+          <div className="k-exp__top g-mono">
+            <span>
+              {dict.lab.fragment} {slide.index}
+            </span>
+            <span>{slide.gesture}</span>
+          </div>
+          <div className="k-exp__stage">
+            {slide.index === "01" && <TypeStudiesLab />}
+            {slide.index === "02" && <SignalFieldLab />}
+            {slide.index === "03" && <SpringPhysicsLab />}
+            {slide.index === "04" && <DesignTokensLab />}
+            {slide.index === "05" && <GestureSliderLab />}
+          </div>
+          <h3>{slide.title}</h3>
+          <p>{slide.tag}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export default function Gallery({ numeral }: { numeral: string }) {
   const reduce = useReducedMotionPreference();
   const [desktop, setDesktop] = useState(false);

@@ -43,14 +43,19 @@ export type Sample = {
 };
 type Geo = { x: number; y: number; pose: string; side?: number; behind?: boolean; peek?: number };
 type Leg = { s0: number; s1: number; at: (f: number) => Geo };
-export type Route = { legs: Leg[]; says: { s: number; say: string; id: number }[]; marks: { s: number; point?: Element | null; idle?: string }[] };
+export type Route = { legs: Leg[]; says: { s: number; until: number; say: string; id: number }[]; marks: { s: number; point?: Element | null; idle?: string }[] };
 
 const clamp = (v: number, a: number, b: number) => Math.min(Math.max(v, a), b);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export type Band = { top: number; bottom: number; aim: number }; // feet y limits on screen
 
-export function buildRoute(points: Waypoint[], ledges: Ledge[], word: Word | null, o: { vh: number; robotW: number; maxScroll: number; band: Band }): Route {
+export function buildRoute(
+  points: Waypoint[],
+  ledges: Ledge[],
+  word: Word | null,
+  o: { vh: number; robotW: number; maxScroll: number; band: Band },
+): Route {
   const { vh, robotW, maxScroll, band } = o;
   const route: Route = { legs: [], says: [], marks: [] };
   if (!points.length && !word) return route;
@@ -232,10 +237,17 @@ export function buildRoute(points: Waypoint[], ledges: Ledge[], word: Word | nul
     const s0 = prev;
     const s1 = times[i];
     route.legs.push({ s0, s1, at: r.at });
-    if (r.wp?.say) route.says.push({ s: s0, say: r.wp.say, id: ++sayId });
+    if (r.wp?.say) route.says.push({ s: s0, until: Infinity, say: r.wp.say, id: ++sayId, leg: i } as Route["says"][number]);
     if (r.wp && (r.wp.point || r.wp.idle)) route.marks.push({ s: s1, point: r.wp.point, idle: r.wp.idle });
     prev = s1;
   });
+  // A line belongs to its spot: it ends once the guide has walked on past the next stop, so a
+  // section never shows the previous section's line.
+  for (const say of route.says as (Route["says"][number] & { leg?: number })[]) {
+    // the leg that reaches the next stop (any waypoint), then a short margin
+    const j = raw.findIndex((r, k) => k > (say.leg ?? 0) && r.wp);
+    say.until = j >= 0 ? route.legs[j].s1 + o.vh * 0.1 : Infinity;
+  }
   return route;
 }
 
@@ -256,7 +268,7 @@ export function sampleRoute(route: Route, scroll: number, vh: number): Sample | 
   // The section's line: the last one passed.
   let say = "";
   let sayId = 0;
-  for (const s of route.says) if (s.s <= scroll + vh * 0.02) ({ say, id: sayId } = s);
+  for (const s of route.says) if (s.s <= scroll + vh * 0.02 && scroll <= s.until) ({ say, id: sayId } = s);
   // What to point at / how to pose if the visitor stops right here.
   let point: Element | null = null;
   let idle = "";

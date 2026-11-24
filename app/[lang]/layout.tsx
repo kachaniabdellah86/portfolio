@@ -12,6 +12,8 @@ import Robot from "@/components/kachani/Robot";
 import "../globals.css";
 import "../agadir.css";
 
+// Zodiak, Satoshi, Instrument Serif and Clash only appear inside the lab demos, so none of
+// them is preloaded: the indigo pages need Tanker and General Sans first.
 const zodiak = localFont({
   src: [
     {
@@ -22,6 +24,7 @@ const zodiak = localFont({
   ],
   variable: "--font-display",
   display: "swap",
+  preload: false,
 });
 
 const satoshi = localFont({
@@ -34,6 +37,7 @@ const satoshi = localFont({
   ],
   variable: "--font-sans",
   display: "swap",
+  preload: false,
 });
 
 const instrumentSerif = localFont({
@@ -51,6 +55,7 @@ const instrumentSerif = localFont({
   ],
   variable: "--font-serif",
   display: "swap",
+  preload: false,
 });
 
 // Spec-sheet details: prices, steps, labels. Never above the fold, so no preload.
@@ -71,6 +76,7 @@ const clash = localFont({
   ],
   variable: "--font-clash",
   display: "swap",
+  preload: false,
 });
 
 const general = localFont({
@@ -98,7 +104,9 @@ const tifinagh = Noto_Sans_Tifinagh({
 });
 
 // Before first paint: hidden-until-revealed styles only apply when JS runs and motion is allowed.
-const flags = `document.documentElement.classList.add('js');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion')`;
+// The loader plays once per visit: a second page load in the same tab (a language switch, a
+// reload) skips it, so nobody watches the counter twice.
+const flags = `var h=document.documentElement;h.classList.add('js');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)h.classList.add('motion');try{if(sessionStorage.getItem('k-seen'))h.classList.add('no-loader')}catch(e){}`;
 
 export const dynamicParams = false;
 

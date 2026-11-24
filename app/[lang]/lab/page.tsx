@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import SmoothScroll from "@/components/SmoothScroll";
-import GrainOverlay from "@/components/GrainOverlay";
-import WorkSection from "@/components/WorkSection";
-import Gallery from "@/components/Gallery";
-import Footer from "@/components/Footer";
+import Header from "@/components/agadir/Header";
+import { LabExperiments } from "@/components/Gallery";
+import { Showcase } from "@/components/WorkSection";
+import SmallFooter from "@/components/kachani/SmallFooter";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { hasLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { getProjects } from "@/lib/projects";
+import { whatsappUrl } from "@/lib/site";
 
-// Self-initiated concepts and interaction experiments: craft for the curious,
-// kept off the homepage so client work and offers come first there.
+// Self-initiated concepts and interaction experiments, in the same indigo system as the home
+// page (DESIGN.md): client work and offers stay first on the home page, craft lives here.
 export async function generateMetadata({ params }: PageProps<"/[lang]/lab">): Promise<Metadata> {
   const { lang } = await params;
   if (!hasLocale(lang)) return {};
@@ -30,47 +31,70 @@ export default async function LabPage({ params }: PageProps<"/[lang]/lab">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = getDictionary(lang);
+  const t = dict.labPage;
   const concepts = getProjects(lang).filter((project) => !project.slug);
-  const otherLang = lang === "fr" ? "en" : "fr";
 
   return (
-    <SmoothScroll>
-      <GrainOverlay />
+    <div className="ag" data-grounds>
+      <Header />
 
-      <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--bg)]">
-        <header className="flex items-center justify-between px-6 pt-8 sm:px-12">
-          <nav aria-label={dict.caseStudy.breadcrumbLabel}>
-            <ol className="label-caps flex min-h-10 items-center gap-x-2 text-white/70">
-              <li>
-                <a href={`/${lang}`} className="transition-colors hover:text-white">
-                  <span aria-hidden="true">← </span>
-                  {dict.caseStudy.breadcrumbHome}
-                </a>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li aria-current="page" className="text-white">
-                {dict.labPage.breadcrumb}
-              </li>
-            </ol>
+      <main id="main" tabIndex={-1}>
+        <section className="k-page g-wrap" data-ground="field" aria-labelledby="lab-title">
+          <nav aria-label={dict.caseStudy.breadcrumbLabel} className="g-case__crumbs">
+            <a href={`/${lang}`} className="g-draw">{dict.caseStudy.breadcrumbHome}</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{t.breadcrumb}</span>
           </nav>
-          <a
-            href={`/${otherLang}/lab`}
-            hrefLang={otherLang}
-            lang={otherLang}
-            aria-label={dict.nav.switchLabel}
-            className="label-caps rounded-full border border-white/20 px-3 py-2 text-white transition-colors hover:border-white/60"
-          >
-            {otherLang.toUpperCase()}
-          </a>
-        </header>
+          <h1 id="lab-title" className="k-page__title" data-split="lines" data-intro>{t.title}</h1>
+          <p className="k-page__lead" data-split="lines" data-intro data-delay="0.15">{t.intro}</p>
+        </section>
 
-        <WorkSection projects={concepts} numeral="01" copy={dict.labPage} asPageTitle />
-        <Gallery numeral="02" />
+        <section className="k-concepts g-wrap" data-ground="night" aria-labelledby="concepts-title">
+          <div className="k-head">
+            <h2 id="concepts-title" className="g-title" data-split="lines">{t.label}</h2>
+            <p>{t.conceptsNote}</p>
+          </div>
+          {concepts.map((p) => (
+            <article key={p.id} className="k-concept g-grid">
+              <div className="k-concept__label">
+                <h3>{p.title}</h3>
+                <p className="g-mono">
+                  {p.year} · {p.status}
+                </p>
+              </div>
+              <div className="k-concept__stage" style={{ background: p.brand.background, color: p.brand.ink }}>
+                <Showcase project={p} />
+              </div>
+              <div className="k-concept__body">
+                <p className="k-concept__lead">{p.subtitle}</p>
+                <p>{p.details.built}</p>
+                <p className="g-mono">{p.details.stack.join(" · ")}</p>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section className="k-lab-exps g-wrap" data-ground="night" aria-labelledby="exps-title">
+          <div className="k-head">
+            <h2 id="exps-title" className="g-title" data-split="lines">{dict.lab.label}</h2>
+            <p>{dict.lab.intro}</p>
+          </div>
+          <LabExperiments />
+        </section>
       </main>
 
-      <div className="bg-[var(--bg)]">
-        <Footer />
-      </div>
-    </SmoothScroll>
+      <footer className="k-close g-wrap" data-ground="field">
+        <div>
+          <h2 className="g-title" data-split="lines">{t.closeTitle}</h2>
+          <p>{t.closeText}</p>
+          <a href={whatsappUrl(t.closeMessage)} target="_blank" rel="noopener noreferrer" className="g-btn" data-fill data-track="whatsapp_click" data-track-label="lab-close">
+            <span className="g-btn__fill" aria-hidden="true" />
+            <WhatsAppIcon />
+            {t.closeCta}
+          </a>
+        </div>
+        <SmallFooter lang={lang} />
+      </footer>
+    </div>
   );
 }

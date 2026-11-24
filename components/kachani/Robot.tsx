@@ -458,6 +458,61 @@ export default function Robot() {
         timelines.forEach((list, n) => points.push(...timelineOf(list, n)));
         anchors.forEach((a, n) => points.push(...sceneOf(a, n)));
         const ledges = pageLedges();
+        // Rule 4: never on text. Where its body would cover a line of text (a label above a
+        // title, the line before a row), it does not stand: surfaces shrink to their clear part
+        // and stops slide to the nearest clear spot. The line it stands on (below its feet) and
+        // the wordmark it weaves behind do not count.
+        const bodyH = robotH * 0.76;
+        const half = robotH * 0.3 + 4;
+        const lines: { l: number; r: number; t: number; b: number }[] = [];
+        for (const el of texts) {
+          if (!el.getClientRects().length) continue;
+          textRange.selectNodeContents(el);
+          for (const q of textRange.getClientRects()) if (q.width > 2 && q.height > 2) lines.push({ l: q.left, r: q.right, t: q.top + scrollY, b: q.bottom + scrollY });
+        }
+        const freeOn = (l: Ledge): [number, number][] => {
+          const blocks = lines
+            .filter((q) => (q.t + q.b) / 2 < l.y - 2 && q.b > l.y - bodyH && q.r > l.left - half && q.l < l.right + half)
+            .map((q) => [q.l - half, q.r + half] as [number, number])
+            .sort((a, b) => a[0] - b[0]);
+          const out: [number, number][] = [];
+          let from = l.left;
+          for (const [a, b] of blocks) {
+            if (a > from) out.push([from, Math.min(a, l.right)]);
+            from = Math.max(from, b);
+            if (from >= l.right) break;
+          }
+          if (from < l.right) out.push([from, l.right]);
+          return out.filter(([a, b]) => b - a >= 4);
+        };
+        for (let i = ledges.length - 1; i >= 0; i--) {
+          const l = ledges[i];
+          if (!l.thin) continue; // screens and photos keep their walls for climbing
+          const fr = freeOn(l);
+          if (!fr.length || fr.every(([a, b]) => b - a < robotH * 0.5)) {
+            ledges.splice(i, 1);
+            continue;
+          }
+          const widest = fr.reduce((a, b) => (b[1] - b[0] > a[1] - a[0] ? b : a));
+          if (widest[0] > l.left || widest[1] < l.right) ledges[i] = { ...l, left: widest[0], right: widest[1] };
+        }
+        for (const p of points) {
+          // Timeline stops keep their spacing: sliding them could stack them on one spot, and
+          // then it would stand still while the steps light up (rule 2 wins).
+          if (p.ledge.id.startsWith("tl")) continue;
+          const fr = freeOn(p.ledge);
+          if (!fr.length || fr.some(([a, b]) => p.x >= a && p.x <= b)) continue;
+          let best = p.x;
+          let d = Infinity;
+          for (const [a, b] of fr) {
+            const x = clamp(p.x, a, b);
+            if (Math.abs(x - p.x) < d) {
+              d = Math.abs(x - p.x);
+              best = x;
+            }
+          }
+          p.x = best;
+        }
         points.forEach((p, i) => ((p as Waypoint & { i?: number }).i = i));
         points.sort((p, q) => p.ledge.y - q.ledge.y || ((p as Waypoint & { i: number }).i - (q as Waypoint & { i: number }).i));
         if (!w) {
@@ -605,6 +660,7 @@ export default function Robot() {
       type Box = { x: number; y: number; w: number; h: number };
       const overlap = (a: Box, b: Box) =>
         Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+      // Returns false when every place would still cover text: then it says nothing.
       const placeBubble = () => {
         const bw = bubble.offsetWidth;
         const bh = bubble.offsetHeight;
@@ -645,13 +701,16 @@ export default function Robot() {
         const robot = { x: ox + cw * 0.27, y: oy + ch * 0.11, w: cw * 0.46, h: ch * 0.77 };
         let best = cands[0];
         let bestScore = Infinity;
+        let bestText = 0;
         cands.forEach((c, i) => {
           const box = { x: c.x, y: c.y, w: bw, h: bh };
-          let score = i * 300 + overlap(box, robot) * 3;
-          for (const l of lines) score += overlap(box, l);
+          let onText = 0;
+          for (const l of lines) onText += overlap(box, l);
+          const score = i * 300 + overlap(box, robot) * 3 + onText;
           if (score < bestScore) {
             bestScore = score;
             best = c;
+            bestText = onText;
           }
         });
         const bx = best.x - ox;
@@ -661,6 +720,7 @@ export default function Robot() {
         bubble.style.setProperty("--ty", `${Math.round(Math.min(Math.max(headY - by - 7, 10), bh - 24))}px`);
         bubble.style.setProperty("--tx", `${Math.round(Math.min(Math.max(cw / 2 - bx - 7, 12), bw - 26))}px`);
         bubble.dataset.tail = ({ right: "left", left: "right", above: "down", below: "up" } as Record<string, string>)[best.at];
+        return bestText < bw * bh * 0.04;
       };
 
       const tick = (time: number) => {
@@ -725,12 +785,13 @@ export default function Robot() {
         }
         if (line !== shown) {
           shown = line;
+          let clear = true;
           if (line) {
             bubble.textContent = line;
-            placeBubble();
+            clear = placeBubble();
           }
-          bubble.classList.toggle("is-on", Boolean(line));
-        } else if (line && !moving && frame % 30 === 0) placeBubble();
+          bubble.classList.toggle("is-on", Boolean(line) && clear);
+        } else if (line && !moving && frame % 30 === 0) bubble.classList.toggle("is-on", placeBubble());
         const wantLow = screen.y > innerHeight - 190;
         if (wantLow !== low) {
           low = wantLow;

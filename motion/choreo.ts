@@ -31,7 +31,7 @@ export function setupChoreo() {
       gsap.fromTo(
         steps.querySelectorAll(".k-step"),
         { opacity: 0.18, y: 36 },
-        { opacity: 1, y: 0, stagger: 0.35, ease: "none", scrollTrigger: { trigger: steps, start: "top 85%", end: "bottom 60%", scrub: 0.5 } },
+        { opacity: 1, y: 0, stagger: 0.35, ease: "none", scrollTrigger: { trigger: steps, start: "top 88%", end: "bottom 78%", scrub: 0.5 } },
       );
     }
 

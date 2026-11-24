@@ -12,8 +12,9 @@ export const setLoaderExit = (fn: (root: HTMLElement) => gsap.core.Timeline) => 
   exit = fn;
 };
 
-const MIN = 1.1;
-const MAX = 2.6;
+// Short on purpose: people arriving from a link should see the page, not a countdown.
+const MIN = 0.5;
+const MAX = 1.6;
 
 function criticalAssets(): Promise<unknown>[] {
   const imgs = [...document.querySelectorAll<HTMLImageElement>("img[data-critical]")];
@@ -23,6 +24,7 @@ function criticalAssets(): Promise<unknown>[] {
 export async function runLoader(): Promise<void> {
   const root = document.getElementById("loader");
   if (!root || root.hidden) return;
+  if (document.documentElement.classList.contains("no-loader")) return finish(root);
   if (prefersReducedMotion()) {
     await Promise.race([Promise.all(criticalAssets()), wait(MAX)]);
     await gsap.to(root, { autoAlpha: 0, duration: 0.3 });
@@ -71,6 +73,9 @@ export async function runLoader(): Promise<void> {
 function finish(root: HTMLElement) {
   root.hidden = true;
   document.documentElement.classList.add("is-loaded");
+  try {
+    sessionStorage.setItem("k-seen", "1");
+  } catch {}
 }
 
 const wait = (s: number) => new Promise((r) => setTimeout(r, s * 1000));

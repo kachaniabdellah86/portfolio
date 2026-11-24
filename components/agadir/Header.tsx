@@ -30,6 +30,8 @@ export default function Header() {
       const up = y < last - 2;
       if (down && y > 120) header.classList.add("is-hidden");
       else if (up || y <= 120) header.classList.remove("is-hidden");
+      // Once the page has moved, the bar gets the page colour so it never sits on content.
+      header.classList.toggle("is-solid", y > 40);
       last = y;
     });
   }, []);

@@ -956,7 +956,7 @@ function AuraPayShowcase({ brand }: { brand: Brand }) {
 
 /* ── Project band ────────────────────────────────────────────────────── */
 
-function Showcase({ project }: { project: Project }) {
+export function Showcase({ project }: { project: Project }) {
   switch (project.id) {
     case "kachanios":
       return <KachaniosShowcase brand={project.brand} />;

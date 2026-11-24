@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import GrainOverlay from "@/components/GrainOverlay";
-import Footer from "@/components/Footer";
-import Process from "@/components/Process";
-import Rich from "@/components/Rich";
+import Header from "@/components/agadir/Header";
+import SmallFooter from "@/components/kachani/SmallFooter";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
-import { Reveal } from "@/components/Marquee";
 import { hasLocale } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { whatsappUrl } from "@/lib/site";
 
 // The page cold emails to studios and agencies point to: white-label, terms, proof.
+// Same indigo system as the home page (DESIGN.md).
 export async function generateMetadata({ params }: PageProps<"/[lang]/studios">): Promise<Metadata> {
   const { lang } = await params;
   if (!hasLocale(lang)) return {};
@@ -27,151 +25,103 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/studios">)
   };
 }
 
-const SIGNAL = "linear-gradient(90deg, #5b8fff, #9d7bff 55%, #ffb36b)";
+// Display titles in the dictionary carry *emphasis* marks for the old serif design; the
+// poster face sets them plain.
+const plain = (s: string) => s.replace(/[~*]/g, "").replace(/\n/g, " ");
 
 export default async function StudiosPage({ params }: PageProps<"/[lang]/studios">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = getDictionary(lang);
   const t = dict.studios;
-  const otherLang = lang === "fr" ? "en" : "fr";
 
   return (
-    <>
-      <GrainOverlay />
+    <div className="ag" data-grounds>
+      <Header />
 
-      <main id="main" tabIndex={-1} className="relative min-h-screen bg-[var(--bg)]">
-        <header className="flex items-center justify-between px-6 pt-8 sm:px-12">
-          <nav aria-label={dict.caseStudy.breadcrumbLabel}>
-            <ol className="label-caps flex min-h-10 items-center gap-x-2 text-white/70">
-              <li>
-                <a href={`/${lang}`} className="transition-colors hover:text-white">
-                  <span aria-hidden="true">← </span>
-                  {dict.caseStudy.breadcrumbHome}
-                </a>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li aria-current="page" className="text-white">
-                {t.breadcrumb}
-              </li>
-            </ol>
+      <main id="main" tabIndex={-1}>
+        <section className="k-page g-wrap" data-ground="field" aria-labelledby="studios-title">
+          <nav aria-label={dict.caseStudy.breadcrumbLabel} className="g-case__crumbs">
+            <a href={`/${lang}`} className="g-draw">{dict.caseStudy.breadcrumbHome}</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{t.breadcrumb}</span>
           </nav>
-          <a
-            href={`/${otherLang}/studios`}
-            hrefLang={otherLang}
-            lang={otherLang}
-            aria-label={dict.nav.switchLabel}
-            className="label-caps rounded-full border border-white/20 px-3 py-2 text-white transition-colors hover:border-white/60"
-          >
-            {otherLang.toUpperCase()}
-          </a>
-        </header>
-
-        {/* Hero */}
-        <section className="relative px-6 pb-20 pt-16 sm:px-12 sm:pb-28 sm:pt-28">
-          <p className="label-caps accent">{t.eyebrow}</p>
-          <h1 className="display mt-6 max-w-5xl text-[clamp(2.9rem,8vw,7.5rem)] leading-[0.95] tracking-[-0.025em]">
-            <Rich text={t.heading} emClassName="serif accent text-[1.06em] italic" />
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/75">{t.intro}</p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <a
-              href={whatsappUrl(t.ctaMessage)}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-track="whatsapp_click"
-              data-track-label="studios-hero"
-              className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[var(--accent-strong)] px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
-            >
+          <p className="k-page__eyebrow g-mono">{t.eyebrow}</p>
+          <h1 id="studios-title" className="k-page__title k-page__title--long" data-split="lines" data-intro>{t.title}</h1>
+          <p className="k-page__lead" data-split="lines" data-intro data-delay="0.15">{t.intro}</p>
+          <div className="k-hero__cta" data-reveal="fade" data-intro data-delay="0.3">
+            <a href={whatsappUrl(t.ctaMessage)} target="_blank" rel="noopener noreferrer" className="g-btn" data-fill data-track="whatsapp_click" data-track-label="studios-hero" data-robot-react={dict.robot.hoverCta}>
+              <span className="g-btn__fill" aria-hidden="true" />
               <WhatsAppIcon />
               {t.ctaPrimary}
             </a>
-            <a
-              href={`/${lang}#work`}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white/85 transition-colors hover:border-white/60 hover:text-white"
-            >
-              {t.ctaSecondary} <span aria-hidden="true">↓</span>
+            <a href={`/${lang}#work`} className="g-btn g-btn--ghost" data-fill>
+              <span className="g-btn__fill" aria-hidden="true" />
+              {t.ctaSecondary} <span className="g-arrow" aria-hidden="true">↓</span>
             </a>
           </div>
-          <span aria-hidden="true" className="absolute inset-x-6 bottom-0 h-px opacity-60 sm:inset-x-12" style={{ background: SIGNAL }} />
         </section>
 
-        {/* What you can hand me: a spec ladder, one row per kind of job. */}
-        <section className="px-6 py-24 sm:px-12 sm:py-32">
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-7">
-              <Reveal>
-                <p className="label-caps accent">{t.handLabel}</p>
-              </Reveal>
-              <Reveal delay={0.08}>
-                <h2 className="display mt-5 text-[clamp(2.4rem,6vw,5.6rem)] leading-[1.0]">
-                  <Rich text={t.handHeading} emClassName="serif accent text-[1.06em] italic" />
-                </h2>
-              </Reveal>
-            </div>
+        <section className="k-offers g-wrap" data-ground="night" aria-labelledby="hand-title">
+          <div className="k-head">
+            <h2 id="hand-title" className="g-title" data-split="lines">{plain(t.handHeading)}</h2>
+            <p>{t.handLabel}</p>
           </div>
-          <ol className="mt-14 border-b border-[var(--hairline)] sm:mt-20">
-            {t.hand.map((item, i) => (
-              <li key={item.title}>
-                <Reveal delay={i * 0.04}>
-                  <div className="group relative grid gap-3 border-t border-[var(--hairline)] py-8 sm:py-10 lg:grid-cols-12 lg:items-baseline lg:gap-8">
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 transition-transform duration-700 ease-out group-hover:scale-x-100"
-                      style={{ background: SIGNAL }}
-                    />
-                    <span aria-hidden="true" className="font-mono text-sm text-white/45 lg:col-span-1">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <h3 className="display text-2xl tracking-tight sm:text-3xl lg:col-span-5">{item.title}</h3>
-                    <p className="max-w-xl text-base leading-relaxed text-white/70 lg:col-span-6">{item.text}</p>
-                  </div>
-                </Reveal>
+          <ul className="k-rows k-rows--plain">
+            {t.hand.map((item) => (
+              <li key={item.title} className="k-row">
+                <h3 className="k-row__name">{item.title}</h3>
+                <p className="k-row__pitch">{item.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="k-process g-wrap" data-ground="field" aria-labelledby="studio-process-title">
+          <div className="k-head">
+            <h2 id="studio-process-title" className="g-title" data-split="lines">{plain(t.process.heading)}</h2>
+            <p>{t.process.intro}</p>
+          </div>
+          <ol className="k-steps">
+            {t.process.steps.map((step, i) => (
+              <li key={step.title} className="k-step">
+                <span className="k-step__n num" aria-hidden="true">{i + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+                <span className="k-step__time g-meta">{step.time}</span>
               </li>
             ))}
           </ol>
         </section>
 
-        <Process t={t.process} />
-
-        {/* Terms, set like the clauses of a short contract. */}
-        <section className="px-6 py-24 sm:px-12 sm:py-32">
-          <Reveal>
-            <p className="label-caps accent">{t.termsLabel}</p>
-          </Reveal>
-          <dl className="mt-10 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
-            {t.terms.map((term, i) => (
-              <div key={term.k} className="bg-[var(--bg)] p-7 sm:p-8">
-                <dt className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-white/55">
-                  §{i + 1} · {term.k}
-                </dt>
-                <dd className="mt-3 text-base leading-relaxed text-white/85">{term.v}</dd>
+        <section className="k-terms g-wrap" data-ground="night" aria-labelledby="terms-title">
+          <div className="k-head">
+            <h2 id="terms-title" className="g-title" data-split="lines">{t.termsLabel}</h2>
+          </div>
+          <dl className="k-facts k-facts--terms">
+            {t.terms.map((term) => (
+              <div key={term.k}>
+                <dt>{term.k}</dt>
+                <dd>{term.v}</dd>
               </div>
             ))}
           </dl>
         </section>
 
-        {/* Proof */}
-        <section className="px-6 pb-24 sm:px-12 sm:pb-32">
-          <Reveal>
-            <p className="label-caps accent">{t.proofLabel}</p>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="display mt-5 text-[clamp(2.4rem,6vw,5.6rem)] leading-[1.0]">
-              <Rich text={t.proofHeading} emClassName="serif accent text-[1.06em] italic" />
-            </h2>
-          </Reveal>
-          <ul className="mt-14 grid gap-6 lg:grid-cols-3">
+        <section className="k-proof g-wrap" data-ground="night" aria-labelledby="proof-title">
+          <div className="k-head">
+            <h2 id="proof-title" className="g-title" data-split="lines">{plain(t.proofHeading)}</h2>
+            <p>{t.proofLabel}</p>
+          </div>
+          <ul className="k-proof__list">
             {t.proof.map((item) => (
               <li key={item.title}>
-                <a
-                  href={item.href}
-                  className="group flex h-full flex-col rounded-3xl border border-white/10 p-7 transition-colors hover:border-[var(--accent)] sm:p-8"
-                >
-                  <h3 className="display text-2xl tracking-tight">{item.title}</h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-white/70">{item.text}</p>
-                  <span className="label-caps accent mt-6">
-                    {t.open} <span aria-hidden="true">→</span>
+                <a href={item.href} className="k-lab">
+                  <strong>{item.title}</strong>
+                  <p>{item.text}</p>
+                  <span className="g-btn g-btn--ghost" data-fill>
+                    <span className="g-btn__fill" aria-hidden="true" />
+                    {t.open} <span className="g-arrow" aria-hidden="true">→</span>
                   </span>
                 </a>
               </li>
@@ -180,9 +130,18 @@ export default async function StudiosPage({ params }: PageProps<"/[lang]/studios
         </section>
       </main>
 
-      <div className="bg-[var(--bg)]">
-        <Footer />
-      </div>
-    </>
+      <footer className="k-close g-wrap" data-ground="field">
+        <div>
+          <h2 className="g-title" data-split="lines">{t.closeTitle}</h2>
+          <p>{t.closeText}</p>
+          <a href={whatsappUrl(t.ctaMessage)} target="_blank" rel="noopener noreferrer" className="g-btn" data-fill data-track="whatsapp_click" data-track-label="studios-close">
+            <span className="g-btn__fill" aria-hidden="true" />
+            <WhatsAppIcon />
+            {t.ctaPrimary}
+          </a>
+        </div>
+        <SmallFooter lang={lang} />
+      </footer>
+    </div>
   );
 }

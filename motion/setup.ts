@@ -20,8 +20,8 @@ export function setupMotion() {
   setLoaderExit((root) =>
     gsap
       .timeline()
-      .to(root.querySelectorAll("[data-loader-out], [data-loader-bar]"), { yPercent: -110, autoAlpha: 0, duration: 0.6, ease: ease.inOut, stagger: 0.05 })
-      .to(root, { clipPath: "inset(0% 0% 100% 0%)", duration: 0.9, ease: ease.inOut }, "-=0.3"),
+      .to(root.querySelectorAll("[data-loader-out], [data-loader-bar]"), { yPercent: -110, autoAlpha: 0, duration: 0.4, ease: ease.inOut, stagger: 0.04 })
+      .to(root, { clipPath: "inset(0% 0% 100% 0%)", duration: 0.65, ease: ease.inOut }, "-=0.2"),
   );
 
   // Page change: the indigo panel wipes up over the page, then lifts off the next one.

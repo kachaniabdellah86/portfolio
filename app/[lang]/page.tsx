@@ -6,6 +6,7 @@ import Clock from "@/components/agadir/Clock";
 import Brief from "@/components/agadir/Brief";
 import HeatWord from "@/components/kachani/HeatWord";
 import BendScreens from "@/components/kachani/BendScreens";
+import SmallFooter from "@/components/kachani/SmallFooter";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { fill, hasLocale } from "@/lib/i18n";
 import { bookingMonth, getDictionary } from "@/lib/dictionaries";
@@ -249,19 +250,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           <span className="k-anchor k-anchor--finale" data-robot-anchor="perch" data-robot-ground="glyph-last" data-robot-say={dict.robot.finale} aria-hidden="true" />
           <Brief />
         </div>
-        <div className="g-small">
+        <SmallFooter lang={lang}>
           <span className="k-anchor k-anchor--small" data-robot-anchor="wave" data-robot-thin data-robot-say={dict.robot.footer} aria-hidden="true" />
-          <p>
-            © {new Date().getFullYear()} {t.finale.small}
-          </p>
-          <nav aria-label="Footer">
-            <a href={`/${lang}/lab`}>{t.hero.labTitle}</a>
-            <a href={`/${lang}/studios`}>{lang === "fr" ? "Agences" : "Studios"}</a>
-            <a href="https://www.linkedin.com/in/abdellah-kachani-8284a5251" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="https://github.com/kachaniabdellah86" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href={`/${lang === "fr" ? "en" : "fr"}`} hrefLang={lang === "fr" ? "en" : "fr"}>{lang === "fr" ? "English" : "Français"}</a>
-          </nav>
-        </div>
+        </SmallFooter>
       </footer>
     </div>
   );

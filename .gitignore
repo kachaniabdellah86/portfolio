@@ -48,3 +48,6 @@ session-*.md
 
 # QA screenshots (awwwards skill)
 .shots/
+
+# jury review evidence
+.jury/

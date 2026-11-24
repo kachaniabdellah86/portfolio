@@ -304,6 +304,12 @@ export const en = {
     edge: "Lab, Concepts",
     heading: "Ideas, ~built~\nto be *touched.*",
     intro: "Self-initiated concepts where I push interfaces further than a brief usually allows. Each one is a working prototype.",
+    title: "Lab",
+    conceptsNote: "Concepts, not client work: each is a working prototype you can use right here.",
+    closeTitle: "Got an idea like these?",
+    closeText: "Interfaces that move, react and explain themselves are what I like building most. Tell me about yours.",
+    closeCta: "Talk about an idea",
+    closeMessage: "Hi Abdellah, I saw your lab and I have an idea for an interactive build.",
   },
   studios: {
     metaTitle: "White-label creative developer for studios, Abdellah Kachani",
@@ -321,7 +327,7 @@ export const en = {
     handHeading: "Hand it over,\nget it *shipped.*",
     hand: [
       { title: "WebGL & Three.js scenes", text: "Hero scenes, product viewers and particle systems with a performance budget for phones." },
-      { title: "Scroll-driven storytelling", text: "Pinned chapters, camera paths and choreographed motion, like the journey on my own site." },
+      { title: "Scroll-driven storytelling", text: "Pinned chapters, camera paths and choreographed motion, like the way this site moves." },
       { title: "Figma to production Next.js", text: "Marketing sites built pixel-close from your designs, fast on mobile, SEO and analytics in place." },
       { title: "Interactive product demos", text: "Clickable prototypes and live UI demos for pitches, launches and case studies." },
       { title: "Multilingual and RTL builds", text: "French, English and Arabic with real right-to-left layouts, already shipped in production." },
@@ -351,9 +357,12 @@ export const en = {
     proof: [
       { title: "Yalla China", text: "Trilingual FR/EN/AR platform with RTL, applications and an admin area. Lighthouse 96 on mobile.", href: "/en/work/yalla-china" },
       { title: "FICAM Festival Platform", text: "Festival companion app: registration, QR session validation, levels and live rewards.", href: "/en/work/ficam" },
-      { title: "This portfolio", text: "A scroll-driven WebGL journey that stays smooth on phones, a sample of the creative builds I deliver.", href: "/en" },
+      { title: "This portfolio", text: "WebGL heat type, film-style page transitions and a guide that walks the page, smooth on phones.", href: "/en" },
     ],
     open: "Open",
+    title: "The developer behind your brand",
+    closeTitle: "Have a project for me?",
+    closeText: "Send the brief or the designs. You get a fixed quote or a day rate within 24 hours.",
   },
   home: {
     metaTitle: "Abdellah Kachani, web developer in Agadir | Websites that sell",
@@ -387,7 +396,7 @@ export const en = {
     },
     register: {
       title: "Offers",
-      note: "A fixed quote before anything starts. Payment 50% upfront, 50% on launch. Invoices in € or US$, by bank transfer, PayPal or Payoneer.",
+      note: "Prices for international clients. A fixed quote before anything starts. Payment 50% upfront, 50% on launch. Invoices in € or US$, by bank transfer, PayPal or Payoneer.",
       from: "from",
       ask: "Ask about this",
       studios: "Studios and agencies: how white-label works",
@@ -420,9 +429,9 @@ export const en = {
       small: "Abdellah Kachani, web developer in Agadir, Morocco.",
     },
     notFound: {
-      title: "This cell was never built",
-      text: "The page you're looking for isn't in the wall. It may have moved, or the address has a typo.",
-      back: "Back to the wall",
+      title: "Nothing here",
+      text: "This page doesn't exist. It may have moved, or the address has a typo.",
+      back: "Back to the home page",
     },
   },
   robot: {
@@ -460,7 +469,7 @@ export const en = {
     problem: "The problem",
     built: "What I built",
     results: "The result",
-    similarTitle: "A similar project?",
+    similarTitle: "A similar project?",
     similarText: "Tell me what you're building. I'll reply on WhatsApp with a first idea and a price range.",
     similarCta: "Talk on WhatsApp",
     similarMessage: "Hi Abdellah, I read the {title} case study and I have a similar project.",
